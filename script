@@ -1,0 +1,810 @@
+-- onrusha GUI Library
+-- Исправленная версия
+
+local Players = game:GetService("Players")
+local UserInputService = game:GetService("UserInputService")
+local TweenService = game:GetService("TweenService")
+local CoreGui = game:GetService("CoreGui")
+local HttpService = game:GetService("HttpService")
+
+local Library = {}
+Library.__index = Library
+Library.Theme = {
+    Default = {
+        TextColor = Color3.fromRGB(240, 240, 240),
+        Background = Color3.fromRGB(40, 45, 61),
+        Topbar = Color3.fromRGB(45, 51, 69),
+        Element = Color3.fromRGB(51, 59, 82),
+        ElementHover = Color3.fromRGB(60, 70, 95),
+        Stroke = Color3.fromRGB(19, 25, 41),
+        Accent = Color3.fromRGB(202, 108, 255),
+        ToggleOn = Color3.fromRGB(78, 71, 112),
+        ToggleOff = Color3.fromRGB(112, 112, 112),
+        SliderFill = Color3.fromRGB(158, 163, 255),
+        Input = Color3.fromRGB(40, 45, 61),
+    },
+    Dark = {
+        TextColor = Color3.fromRGB(230, 230, 230),
+        Background = Color3.fromRGB(20, 20, 25),
+        Topbar = Color3.fromRGB(25, 25, 30),
+        Element = Color3.fromRGB(35, 35, 45),
+        ElementHover = Color3.fromRGB(45, 45, 60),
+        Stroke = Color3.fromRGB(15, 15, 20),
+        Accent = Color3.fromRGB(100, 150, 255),
+        ToggleOn = Color3.fromRGB(60, 100, 180),
+        ToggleOff = Color3.fromRGB(90, 90, 90),
+        SliderFill = Color3.fromRGB(100, 150, 255),
+        Input = Color3.fromRGB(30, 30, 40),
+    },
+}
+Library.ActiveTheme = Library.Theme.Default
+
+local function safeCall(callback, ...)
+    if typeof(callback) ~= "function" then return end
+    task.spawn(function(...)
+        local ok, err = pcall(callback, ...)
+        if not ok then warn("[onrushagui] " .. tostring(err)) end
+    end, ...)
+end
+
+local function tween(instance, properties, time)
+    return TweenService:Create(instance, TweenInfo.new(time or 0.15, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), properties):Play()
+end
+
+local function makeCorner(parent, radius)
+    local c = Instance.new("UICorner")
+    c.CornerRadius = UDim.new(0, radius or 15)
+    c.Parent = parent
+    return c
+end
+
+local function makeStroke(parent, color, thickness)
+    local s = Instance.new("UIStroke")
+    s.Color = color or Library.ActiveTheme.Stroke
+    s.Thickness = thickness or 1.7
+    s.Parent = parent
+    return s
+end
+
+-- Создание главного окна
+local function createMainGui()
+    local gui = Instance.new("ScreenGui")
+    gui.Name = "onrushanewgui"
+    gui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+    gui.ResetOnSpawn = false
+
+    if syn and syn.protect_gui then
+        syn.protect_gui(gui)
+        gui.Parent = CoreGui
+    elseif gethui then
+        gui.Parent = gethui()
+    else
+        gui.Parent = CoreGui
+    end
+    return gui
+end
+
+local G2L = {}
+G2L["1"] = createMainGui()
+
+G2L["2"] = Instance.new("Frame", G2L["1"])
+G2L["2"].Name = "gui"
+G2L["2"].BorderSizePixel = 0
+G2L["2"].BackgroundColor3 = Library.ActiveTheme.Background
+G2L["2"].AnchorPoint = Vector2.new(0.5, 0.5)
+G2L["2"].Size = UDim2.new(0, 507, 0, 500)
+G2L["2"].Position = UDim2.new(0.5, 0, 0.5, 0)
+makeCorner(G2L["2"], 15)
+makeStroke(G2L["2"], Color3.fromRGB(255, 255, 255), 1.26)
+
+G2L["5"] = Instance.new("Frame", G2L["2"])
+G2L["5"].Name = "bottonframe"
+G2L["5"].BorderSizePixel = 0
+G2L["5"].BackgroundColor3 = Library.ActiveTheme.Topbar
+G2L["5"].AnchorPoint = Vector2.new(0.5, 0.5)
+G2L["5"].ClipsDescendants = true
+G2L["5"].Size = UDim2.new(0, 507, 0, 61)
+G2L["5"].Position = UDim2.new(0.5, 0, 0.05927, 0)
+makeCorner(G2L["5"], 15)
+
+G2L["b"] = Instance.new("TextLabel", G2L["5"])
+G2L["b"].TextWrapped = true
+G2L["b"].BorderSizePixel = 0
+G2L["b"].TextScaled = true
+G2L["b"].BackgroundTransparency = 1
+G2L["b"].FontFace = Font.new("rbxassetid://12187365364", Enum.FontWeight.Bold)
+G2L["b"].TextColor3 = Color3.fromRGB(127, 127, 127)
+G2L["b"].Size = UDim2.new(0, 89, 0, 18)
+G2L["b"].Text = "Murder Mystery 2"
+G2L["b"].Position = UDim2.new(0.17, 0, 0.7, 0)
+
+G2L["c"] = Instance.new("TextButton", G2L["5"])
+G2L["c"].Name = "x"
+G2L["c"].BorderSizePixel = 0
+G2L["c"].TextScaled = true
+G2L["c"].TextColor3 = Color3.fromRGB(255, 255, 255)
+G2L["c"].BackgroundTransparency = 1
+G2L["c"].FontFace = Font.new("rbxassetid://12187365364", Enum.FontWeight.Bold)
+G2L["c"].Size = UDim2.new(0, 18, 0, 28)
+G2L["c"].Text = "x"
+G2L["c"].Position = UDim2.new(0.94, 0, 0.25, 0)
+
+G2L["f"] = Instance.new("TextButton", G2L["5"])
+G2L["f"].Name = "minimize"
+G2L["f"].BorderSizePixel = 0
+G2L["f"].TextScaled = true
+G2L["f"].TextColor3 = Color3.fromRGB(255, 255, 255)
+G2L["f"].BackgroundTransparency = 1
+G2L["f"].FontFace = Font.new("rbxassetid://12187365364", Enum.FontWeight.Bold)
+G2L["f"].Size = UDim2.new(0, 18, 0, 28)
+G2L["f"].Text = "-"
+G2L["f"].Position = UDim2.new(0.88, 0, 0.27, 0)
+
+G2L["13"] = Instance.new("Frame", G2L["2"])
+G2L["13"].Name = "tabs"
+G2L["13"].BorderSizePixel = 0
+G2L["13"].BackgroundTransparency = 1
+G2L["13"].Size = UDim2.new(0, 479, 0, 32)
+G2L["13"].Position = UDim2.new(0.027, 0, 0.16, 0)
+
+local tabLayout = Instance.new("UIListLayout", G2L["13"])
+tabLayout.Padding = UDim.new(0.03, 0)
+tabLayout.FillDirection = Enum.FillDirection.Horizontal
+tabLayout.SortOrder = Enum.SortOrder.LayoutOrder
+
+G2L["25"] = Instance.new("ScrollingFrame", G2L["2"])
+G2L["25"].Name = "functions"
+G2L["25"].Active = true
+G2L["25"].BorderSizePixel = 0
+G2L["25"].CanvasSize = UDim2.new(0, 0, 0, 0)
+G2L["25"].BackgroundTransparency = 1
+G2L["25"].AnchorPoint = Vector2.new(0.5, 0.5)
+G2L["25"].AutomaticCanvasSize = Enum.AutomaticSize.Y
+G2L["25"].Size = UDim2.new(0, 507, 0, 361)
+G2L["25"].ScrollBarThickness = 0
+G2L["25"].Position = UDim2.new(0.5, 0, 0.638, 0)
+
+G2L["26"] = Instance.new("Frame", G2L["25"])
+G2L["26"].Name = "content"
+G2L["26"].BackgroundTransparency = 1
+G2L["26"].BorderSizePixel = 0
+G2L["26"].Size = UDim2.new(1, 0, 0, 0)
+G2L["26"].AutomaticSize = Enum.AutomaticSize.Y
+
+local contentLayout = Instance.new("UIListLayout", G2L["26"])
+contentLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
+contentLayout.Padding = UDim.new(0.04, 0)
+contentLayout.SortOrder = Enum.SortOrder.LayoutOrder
+
+-- Draggable
+local function makeDraggable(frame, handle)
+    local dragging, dragStart, startPos
+    handle.InputBegan:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+            dragging = true
+            dragStart = input.Position
+            startPos = frame.Position
+        end
+    end)
+    UserInputService.InputChanged:Connect(function(input)
+        if dragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
+            local delta = input.Position - dragStart
+            frame.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+        end
+    end)
+    UserInputService.InputEnded:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+            dragging = false
+        end
+    end)
+end
+makeDraggable(G2L["2"], G2L["5"])
+
+-- Item class
+local Item = {}
+Item.__index = Item
+
+function Item:AddCode(callback)
+    if callback ~= nil and typeof(callback) ~= "function" then
+        error("AddCode expects a function", 2)
+    end
+    self.Callback = callback
+    if self.Value ~= nil and callback then
+        safeCall(callback, self.Value)
+    end
+    return self
+end
+
+function Item:SetCallback(callback) return self:AddCode(callback) end
+function Item:OnChanged(callback) return self:AddCode(callback) end
+function Item:GetValue() return self.Value end
+function Item:Get() return self:GetValue() end
+
+function Item:SetValue(value, silent)
+    if self.Type == "Toggle" then
+        self:_set(value == true, silent)
+    elseif self.Type == "Slider" then
+        self:_set(value, silent)
+    elseif self.Type == "Textbox" then
+        self:_set(value, silent)
+    elseif self.Type == "Dropdown" then
+        self:_set(value, silent)
+    end
+    return self
+end
+function Item:Set(value) return self:SetValue(value) end
+
+function Item:SetText(text)
+    if self.Title then self.Title.Text = tostring(text) end
+    return self
+end
+function Item:SetName(text) return self:SetText(text) end
+
+function Item:SetVisible(value)
+    if self.Card then self.Card.Visible = value == true end
+    return self
+end
+function Item:Show() return self:SetVisible(true) end
+function Item:Hide() return self:SetVisible(false) end
+
+function Item:Destroy()
+    if self.Card then self.Card:Destroy() end
+    if self.Tab and self.Tab.Items then
+        for i = #self.Tab.Items, 1, -1 do
+            if self.Tab.Items[i] == self then
+                table.remove(self.Tab.Items, i)
+                break
+            end
+        end
+    end
+end
+
+function Item:Enable() return self:SetValue(true) end
+function Item:Disable() return self:SetValue(false) end
+
+-- Toggle
+local Toggle = setmetatable({}, Item)
+Toggle.__index = Toggle
+
+function Toggle:_set(value, silent)
+    value = value == true
+    self.Value = value
+    if self.Button then
+        local target = value and UDim2.new(1, -23, 0.5, -10) or UDim2.new(0.58333, -23, 0.5, -10)
+        local color = value and Library.ActiveTheme.ToggleOn or Library.ActiveTheme.ToggleOff
+        tween(self.Button, {BackgroundColor3 = color}, 0.12)
+        tween(self.Knob, {Position = target}, 0.12)
+    end
+    if not silent then safeCall(self.Callback, value) end
+end
+
+-- Slider
+local Slider = setmetatable({}, Item)
+Slider.__index = Slider
+
+function Slider:_set(value, silent)
+    value = math.clamp(tonumber(value) or self.Min, self.Min, self.Max)
+    if self.Integer then value = math.floor(value + 0.5) end
+    self.Value = value
+    if self.ValueText then self.ValueText.Text = tostring(value) end
+    if self.Fill and self.Bar then
+        local percent = math.clamp((value - self.Min) / math.max(self.Max - self.Min, 0.001), 0, 1)
+        tween(self.Fill, {Size = UDim2.new(percent, 0, 1, 0)}, 0.1)
+    end
+    if not silent then safeCall(self.Callback, value) end
+end
+
+function Slider:_fromX(x)
+    if not self.Bar then return end
+    local left = self.Bar.AbsolutePosition.X
+    local width = math.max(self.Bar.AbsoluteSize.X, 1)
+    local offset = math.clamp(x - left, 0, width)
+    local value = self.Min + (self.Max - self.Min) * (offset / width)
+    self:_set(value, false)
+end
+
+-- Button
+local Button = setmetatable({}, Item)
+Button.__index = Button
+
+-- Textbox
+local Textbox = setmetatable({}, Item)
+Textbox.__index = Textbox
+
+function Textbox:_set(value, silent)
+    self.Value = tostring(value or "")
+    if self.Box then self.Box.Text = self.Value end
+    if not silent then safeCall(self.Callback, self.Value) end
+end
+
+-- Dropdown
+local Dropdown = setmetatable({}, Item)
+Dropdown.__index = Dropdown
+
+function Dropdown:_set(value, silent)
+    if type(value) == "table" then
+        self.Value = value[1] or ""
+    else
+        self.Value = value or ""
+    end
+    if self.Current then self.Current.Text = tostring(self.Value) end
+    if not silent then safeCall(self.Callback, value) end
+end
+
+function Dropdown:Refresh(values)
+    self.Values = values or {}
+    self.Index = 1
+    self:_set(self.Values[1] or "", true)
+end
+
+function Dropdown:Next()
+    if #self.Values == 0 then return end
+    self.Index = self.Index % #self.Values + 1
+    self:_set(self.Values[self.Index], false)
+end
+
+function Dropdown:Previous()
+    if #self.Values == 0 then return end
+    self.Index = (self.Index - 2) % #self.Values + 1
+    self:_set(self.Values[self.Index], false)
+end
+
+-- Layout helpers
+local function makeCard(parent, name)
+    local card = Instance.new("Frame")
+    card.Name = name or "Function"
+    card.BackgroundColor3 = Library.ActiveTheme.Element
+    card.BackgroundTransparency = 0.15
+    card.BorderSizePixel = 0
+    card.Size = UDim2.new(0, 479, 0, 59)
+    card.Parent = parent
+    makeCorner(card, 15)
+    makeStroke(card, Library.ActiveTheme.Stroke)
+    return card
+end
+
+local function makeTitle(card, text)
+    local label = Instance.new("TextLabel")
+    label.Name = "function name"
+    label.BackgroundTransparency = 1
+    label.BorderSizePixel = 0
+    label.AnchorPoint = Vector2.new(0.5, 0.5)
+    label.Position = UDim2.new(0.2, 0, 0.5, 0)
+    label.Size = UDim2.new(0, 250, 0, 23)
+    label.FontFace = Font.new("rbxassetid://12187365364", Enum.FontWeight.Bold)
+    label.TextColor3 = Library.ActiveTheme.Accent
+    label.TextSize = 14
+    label.TextScaled = true
+    label.TextWrapped = true
+    label.Text = text or "Function"
+    label.Parent = card
+    return label
+end
+
+-- New item factory
+function Library:_newItem(tab, kind, options)
+    options = options or {}
+    local parent = tab.Content
+
+    if kind == "Toggle" then
+        local card = makeCard(parent, options.Name or "Toggle")
+        local title = makeTitle(card, options.Name or "Toggle")
+
+        local button = Instance.new("TextButton")
+        button.AutoButtonColor = false
+        button.BorderSizePixel = 0
+        button.BackgroundColor3 = Library.ActiveTheme.ToggleOff
+        button.Size = UDim2.new(0, 48, 0, 26)
+        button.Position = UDim2.new(1, -65, 0.5, -13)
+        button.Text = ""
+        button.Parent = card
+        makeCorner(button, 100)
+
+        local knob = Instance.new("Frame")
+        knob.BorderSizePixel = 0
+        knob.BackgroundColor3 = Color3.fromRGB(230, 227, 249)
+        knob.Size = UDim2.new(0, 20, 0, 20)
+        knob.Position = UDim2.new(0.58333, -23, 0.5, -10)
+        knob.Parent = button
+        makeCorner(knob, 100)
+
+        local item = setmetatable({
+            Type = "Toggle", Card = card, Title = title,
+            Button = button, Knob = knob,
+            Value = options.Default == true,
+        }, Toggle)
+
+        button.MouseButton1Click:Connect(function()
+            item:_set(not item.Value, false)
+        end)
+
+        item:_set(item.Value, true)
+        return item
+    end
+
+    if kind == "Slider" then
+        local card = makeCard(parent, options.Name or "Slider")
+        local title = makeTitle(card, options.Name or "Slider")
+        local min = tonumber(options.Min) or 0
+        local max = tonumber(options.Max) or 100
+        local default = tonumber(options.Default) or min
+
+        local bar = Instance.new("Frame")
+        bar.Name = "bar"
+        bar.BackgroundColor3 = Color3.fromRGB(52, 50, 81)
+        bar.BorderSizePixel = 0
+        bar.AnchorPoint = Vector2.new(0.5, 0.5)
+        bar.Size = UDim2.new(0, 199, 0, 25)
+        bar.Position = UDim2.new(0.63, 0, 0.504, 0)
+        bar.Active = true
+        bar.Parent = card
+        makeCorner(bar, 12)
+        makeStroke(bar)
+
+        local fill = Instance.new("Frame")
+        fill.BorderSizePixel = 0
+        fill.BackgroundColor3 = Library.ActiveTheme.SliderFill
+        fill.Size = UDim2.new(0, 0, 1, 0)
+        fill.Parent = bar
+        makeCorner(fill, 12)
+
+        local valueText = Instance.new("TextLabel")
+        valueText.BackgroundTransparency = 1
+        valueText.Size = UDim2.new(1, 0, 1, 0)
+        valueText.TextColor3 = Color3.fromRGB(183, 183, 183)
+        valueText.FontFace = Font.new("rbxasset://fonts/families/SourceSansPro.json", Enum.FontWeight.Bold)
+        valueText.TextScaled = true
+        valueText.Text = tostring(default)
+        valueText.Parent = bar
+
+        local item = setmetatable({
+            Type = "Slider", Card = card, Title = title,
+            Bar = bar, Fill = fill, ValueText = valueText,
+            Min = min, Max = max,
+            Integer = options.Integer ~= false,
+            Value = default,
+        }, Slider)
+
+        local dragging = false
+        bar.InputBegan:Connect(function(input)
+            if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+                dragging = true
+                item:_fromX(input.Position.X)
+            end
+        end)
+
+        UserInputService.InputChanged:Connect(function(input)
+            if dragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
+                item:_fromX(input.Position.X)
+            end
+        end)
+
+        UserInputService.InputEnded:Connect(function(input)
+            if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+                dragging = false
+            end
+        end)
+
+        task.defer(function() item:_set(default, true) end)
+        return item
+    end
+
+    if kind == "Button" then
+        local card = makeCard(parent, options.Name or "Button")
+        local title = makeTitle(card, options.Name or "Button")
+
+        local button = Instance.new("TextButton")
+        button.AutoButtonColor = false
+        button.BackgroundColor3 = Library.ActiveTheme.ToggleOn
+        button.BackgroundTransparency = 0.15
+        button.BorderSizePixel = 0
+        button.Position = UDim2.new(1, -145, 0.5, -15)
+        button.Size = UDim2.new(0, 125, 0, 30)
+        button.FontFace = Font.new("rbxassetid://12187365364", Enum.FontWeight.Bold)
+        button.TextColor3 = Color3.fromRGB(255, 255, 255)
+        button.TextSize = 14
+        button.Text = options.ButtonText or "CLICK"
+        button.Parent = card
+        makeCorner(button, 10)
+
+        local item = setmetatable({Type = "Button", Card = card, Title = title, Button = button}, Button)
+        button.MouseButton1Click:Connect(function()
+            safeCall(item.Callback, item)
+        end)
+        return item
+    end
+
+    if kind == "Textbox" then
+        local card = makeCard(parent, options.Name or "Textbox")
+        local title = makeTitle(card, options.Name or "Textbox")
+
+        local box = Instance.new("TextBox")
+        box.BackgroundColor3 = Library.ActiveTheme.Input
+        box.BackgroundTransparency = 0.1
+        box.BorderSizePixel = 0
+        box.Position = UDim2.new(1, -190, 0.5, -15)
+        box.Size = UDim2.new(0, 170, 0, 30)
+        box.FontFace = Font.new("rbxassetid://12187365364", Enum.FontWeight.Regular)
+        box.TextColor3 = Color3.fromRGB(255, 255, 255)
+        box.PlaceholderColor3 = Color3.fromRGB(160, 160, 160)
+        box.TextSize = 14
+        box.ClearTextOnFocus = false
+        box.PlaceholderText = options.Placeholder or ""
+        box.Text = tostring(options.Default or "")
+        box.Parent = card
+        makeCorner(box, 10)
+
+        local item = setmetatable({Type = "Textbox", Card = card, Title = title, Box = box, Value = box.Text}, Textbox)
+        box.FocusLost:Connect(function() item:_set(box.Text, false) end)
+        return item
+    end
+
+    if kind == "Dropdown" then
+        local card = makeCard(parent, options.Name or "Dropdown")
+        local title = makeTitle(card, options.Name or "Dropdown")
+
+        local current = Instance.new("TextButton")
+        current.AutoButtonColor = false
+        current.BackgroundColor3 = Library.ActiveTheme.ToggleOn
+        current.BackgroundTransparency = 0.15
+        current.BorderSizePixel = 0
+        current.Position = UDim2.new(1, -180, 0.5, -15)
+        current.Size = UDim2.new(0, 160, 0, 30)
+        current.FontFace = Font.new("rbxassetid://12187365364", Enum.FontWeight.Bold)
+        current.TextColor3 = Color3.fromRGB(255, 255, 255)
+        current.TextSize = 14
+        current.Parent = card
+        makeCorner(current, 10)
+
+        local values = options.Values or {}
+        local item = setmetatable({
+            Type = "Dropdown", Card = card, Title = title,
+            Current = current, Values = values,
+            Index = 1, Value = values[1] or "",
+        }, Dropdown)
+
+        current.MouseButton1Click:Connect(function() item:Next() end)
+        item:_set(options.Default or item.Value, true)
+        return item
+    end
+
+    if kind == "Label" then
+        local card = makeCard(parent, options.Text or "Label")
+        card.Size = UDim2.new(0, 479, 0, 42)
+        local title = makeTitle(card, options.Text or "")
+        title.Position = UDim2.new(0.064, 0, 0.5, -12)
+        title.Size = UDim2.new(0, 430, 0, 24)
+        title.TextColor3 = Color3.fromRGB(255, 255, 255)
+        return setmetatable({Type = "Label", Card = card, Title = title, Value = options.Text or ""}, Item)
+    end
+
+    if kind == "Section" then
+        local card = Instance.new("Frame")
+        card.Name = options.Text or "Section"
+        card.BackgroundTransparency = 1
+        card.BorderSizePixel = 0
+        card.Size = UDim2.new(0, 479, 0, 32)
+        card.Parent = parent
+
+        local title = Instance.new("TextLabel")
+        title.BackgroundTransparency = 1
+        title.Size = UDim2.new(1, -20, 1, 0)
+        title.Position = UDim2.new(0, 10, 0, 0)
+        title.FontFace = Font.new("rbxassetid://12187365364", Enum.FontWeight.Bold)
+        title.TextColor3 = Library.ActiveTheme.Accent
+        title.TextSize = 16
+        title.TextXAlignment = Enum.TextXAlignment.Left
+        title.Text = options.Text or "Section"
+        title.Parent = card
+
+        return setmetatable({Type = "Section", Card = card, Title = title, Value = options.Text or ""}, Item)
+    end
+
+    return nil
+end
+
+-- Tab methods
+function Library:_makeTab(name, button, content)
+    local tab = {
+        Name = name, Button = button, Content = content,
+        Items = {}, Window = self,
+    }
+
+    function tab:AddToggle(itemName, default, callback)
+        local item = self.Window:_newItem(self, "Toggle", {Name = itemName, Default = default})
+        if callback then item:AddCode(callback) end
+        table.insert(self.Items, item)
+        return item
+    end
+
+    function tab:AddSlider(itemName, min, max, default, callback)
+        local item = self.Window:_newItem(self, "Slider", {Name = itemName, Min = min, Max = max, Default = default})
+        if callback then item:AddCode(callback) end
+        table.insert(self.Items, item)
+        return item
+    end
+
+    function tab:AddButton(itemName, callback)
+        local item = self.Window:_newItem(self, "Button", {Name = itemName})
+        if callback then item:AddCode(callback) end
+        table.insert(self.Items, item)
+        return item
+    end
+
+    function tab:AddTextbox(itemName, default, callback)
+        local item = self.Window:_newItem(self, "Textbox", {Name = itemName, Default = default})
+        if callback then item:AddCode(callback) end
+        table.insert(self.Items, item)
+        return item
+    end
+
+    function tab:AddDropdown(itemName, values, default, callback)
+        local item = self.Window:_newItem(self, "Dropdown", {Name = itemName, Values = values, Default = default})
+        if callback then item:AddCode(callback) end
+        table.insert(self.Items, item)
+        return item
+    end
+
+    function tab:AddLabel(text)
+        local item = self.Window:_newItem(self, "Label", {Text = text})
+        table.insert(self.Items, item)
+        return item
+    end
+
+    function tab:AddSection(text)
+        local item = self.Window:_newItem(self, "Section", {Text = text})
+        table.insert(self.Items, item)
+        return item
+    end
+
+    function tab:Clear()
+        for _, item in ipairs(self.Items) do
+            if item.Card then item.Card:Destroy() end
+        end
+        table.clear(self.Items)
+    end
+
+    return tab
+end
+
+function Library:_selectTab(tab)
+    self.ActiveTab = tab
+    for _, t in pairs(self.Tabs) do
+        local selected = t == tab
+        if t.Scrolling then t.Scrolling.Visible = selected end
+        if t.Button then
+            if selected then
+                t.Button.BackgroundColor3 = Color3.fromRGB(208, 167, 255)
+                t.Button.TextColor3 = Color3.fromRGB(232, 147, 255)
+            else
+                t.Button.BackgroundColor3 = Color3.fromRGB(99, 99, 99)
+                t.Button.TextColor3 = Color3.fromRGB(190, 190, 190)
+            end
+        end
+    end
+end
+
+function Library:CreateTab(name)
+    name = tostring(name or ("Tab" .. tostring(#self.Tabs + 1)))
+    if self.Tabs[name] then return self.Tabs[name] end
+
+    local button = Instance.new("TextButton")
+    button.Name = name
+    button.Text = name
+    button.TextWrapped = true
+    button.TextSize = 14
+    button.TextColor3 = Color3.fromRGB(190, 190, 190)
+    button.BackgroundColor3 = Color3.fromRGB(99, 99, 99)
+    button.BackgroundTransparency = 0.65
+    button.FontFace = Font.new("rbxassetid://12187365364", Enum.FontWeight.Normal)
+    button.Size = UDim2.new(0, 83, 0, 32)
+    button.Parent = G2L["13"]
+    makeCorner(button, 8)
+    makeStroke(button, Color3.fromRGB(128, 128, 128), 1)
+
+    local scrolling = Instance.new("ScrollingFrame")
+    scrolling.Name = "functions_" .. name
+    scrolling.Active = true
+    scrolling.BackgroundTransparency = 1
+    scrolling.BorderSizePixel = 0
+    scrolling.Position = UDim2.new(0.5, 0, 0.638, 0)
+    scrolling.AnchorPoint = Vector2.new(0.5, 0.5)
+    scrolling.Size = UDim2.new(0, 507, 0, 361)
+    scrolling.ScrollBarThickness = 0
+    scrolling.AutomaticCanvasSize = Enum.AutomaticSize.Y
+    scrolling.Visible = false
+    scrolling.Parent = G2L["2"]
+
+    local content = Instance.new("Frame")
+    content.Name = "content"
+    content.BackgroundTransparency = 1
+    content.BorderSizePixel = 0
+    content.Size = UDim2.new(1, 0, 0, 0)
+    content.AutomaticSize = Enum.AutomaticSize.Y
+    content.Parent = scrolling
+
+    local layout = Instance.new("UIListLayout", content)
+    layout.HorizontalAlignment = Enum.HorizontalAlignment.Center
+    layout.Padding = UDim.new(0.04, 0)
+    layout.SortOrder = Enum.SortOrder.LayoutOrder
+
+    local tab = self:_makeTab(name, button, content)
+    tab.Scrolling = scrolling
+    self.Tabs[name] = tab
+
+    button.MouseButton1Click:Connect(function() self:_selectTab(tab) end)
+    return tab
+end
+
+function Library:GetTab(name) return self.Tabs[name] end
+function Library:SelectTab(name)
+    local tab = self.Tabs[name]
+    if tab then self:_selectTab(tab) end
+end
+
+function Library:Open()
+    G2L["2"].Visible = true
+end
+
+function Library:Close()
+    G2L["2"].Visible = false
+end
+
+function Library:Toggle()
+    G2L["2"].Visible = not G2L["2"].Visible
+end
+
+function Library:Destroy()
+    if G2L["1"] then G2L["1"]:Destroy() end
+end
+
+function Library:SetTitle(text)
+    G2L["b"].Text = tostring(text)
+end
+Library.SetGameName = Library.SetTitle
+
+function Library:SetTheme(themeName)
+    if type(themeName) == "string" and Library.Theme[themeName] then
+        Library.ActiveTheme = Library.Theme[themeName]
+    elseif type(themeName) == "table" then
+        Library.ActiveTheme = themeName
+    end
+
+    local t = Library.ActiveTheme
+    G2L["2"].BackgroundColor3 = t.Background
+    G2L["5"].BackgroundColor3 = t.Topbar
+
+    for _, tab in pairs(self.Tabs) do
+        for _, item in ipairs(tab.Items) do
+            if item.Card then
+                item.Card.BackgroundColor3 = t.Element
+            end
+        end
+    end
+end
+
+function Library.create(options)
+    options = options or {}
+    local window = setmetatable({
+        Gui = G2L["1"],
+        Frame = G2L["2"],
+        Tabs = {},
+        Items = {},
+    }, Library)
+
+    if options.Name then G2L["1"].Name = options.Name end
+    if options.Title then G2L["b"].Text = options.Title end
+    if options.Theme then window:SetTheme(options.Theme) end
+
+    G2L["c"].MouseButton1Click:Connect(function() window:Destroy() end)
+    G2L["f"].MouseButton1Click:Connect(function() window:Close() end)
+
+    -- Создаём дефолтные вкладки
+    local mainTab = window:CreateTab("Main")
+    local playerTab = window:CreateTab("Player")
+    window:_selectTab(mainTab)
+
+    return window
+end
+
+return Library
