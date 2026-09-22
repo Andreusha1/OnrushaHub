@@ -871,7 +871,7 @@ local function makeContainer(parent)
 	scrolling.BackgroundTransparency = 1
 	scrolling.BorderSizePixel = 0
 	scrolling.Position = UDim2.new(0.5, 0, 0.638, 0)
-	scrolling.AnchorPoint = Vector2.new(0.5, 0.5)
+	scrolling.AnchorPoint = Vector2.new(0, 0.5)
 	scrolling.Size = UDim2.new(0, 507, 0, 361)
 	scrolling.ScrollBarThickness = 0
 	scrolling.AutomaticCanvasSize = Enum.AutomaticSize.Y
@@ -909,7 +909,7 @@ local function makeTitle(card, text)
 	label.Name = "function name"
 	label.BackgroundTransparency = 1
 	label.BorderSizePixel = 0
-	label.AnchorPoint = Vector2.new(0.5, 0.5)
+	label.AnchorPoint = Vector2.new(0, 0.5)
 	label.Position = UDim2.new(0.2, 0, 0.5, 0)
 	label.Size = UDim2.new(0, 250, 0, 23)
 	label.FontFace = Font.new("rbxassetid://12187365364", Enum.FontWeight.Bold, Enum.FontStyle.Normal)
@@ -1199,7 +1199,7 @@ function Library:_newItem(tab, kind, options)
 		bar.Name = "scroll bar"
 		bar.BackgroundColor3 = Color3.fromRGB(52, 50, 81)
 		bar.BorderSizePixel = 0
-		bar.AnchorPoint = Vector2.new(0.5, 0.5)
+		bar.AnchorPoint = Vector2.new(0, 0.5)
 		bar.Size = UDim2.new(0, 199, 0, 25)
 		bar.Position = UDim2.new(0.63, 0, 0.504, 0)
 		bar.Active = true
