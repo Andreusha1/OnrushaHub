@@ -11,7 +11,7 @@
 local G2L = {};
 
 -- StarterGui.onrushanewgui
-G2L["1"] = Instance.new("ScreenGui",game:GetService("CoreGui"):WaitForChild("RobloxGui"));
+G2L["1"] = Instance.new("ScreenGui", game:GetService("Players").LocalPlayer:WaitForChild("PlayerGui"));
 G2L["1"]["Name"] = [[onrushanewgui]];
 G2L["1"]["ZIndexBehavior"] = Enum.ZIndexBehavior.Sibling;
 
@@ -867,32 +867,17 @@ end
 local function makeContainer(parent)
 	local scrolling = Instance.new("ScrollingFrame")
 	scrolling.Name = "functions"
+	scrolling.CanvasSize = UDim2.new(0,0,0,0)
 	scrolling.Active = true
-	scrolling.BorderSizePixel = 0
-	scrolling.CanvasSize = UDim2.new(0, 0, 0, 0)
-	scrolling.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
 	scrolling.BackgroundTransparency = 1
-	scrolling.AnchorPoint = Vector2.new(0.5, 0.5)
-	scrolling.AutomaticCanvasSize = Enum.AutomaticSize.Y
-	scrolling.Size = UDim2.new(0, 507, 0, 361)
+	scrolling.BorderSizePixel = 0
 	scrolling.Position = UDim2.new(0.5, 0, 0.638, 0)
-	scrolling.ScrollBarImageColor3 = Color3.fromRGB(0, 0, 0)
+	scrolling.AnchorPoint = Vector2.new(0.5, 0.5)
+	scrolling.Size = UDim2.new(0, 507, 0, 361)
 	scrolling.ScrollBarThickness = 0
+	scrolling.AutomaticCanvasSize = Enum.AutomaticSize.Y
 	scrolling.ScrollingDirection = Enum.ScrollingDirection.Y
 	scrolling.Parent = parent
-
-	local content = Instance.new("Frame")
-	content.Name = "auto canves size"
-	content.BackgroundTransparency = 1
-	content.BorderSizePixel = 0
-	content.Size = UDim2.new(1, 0, 0, 0)
-	content.AutomaticSize = Enum.AutomaticSize.Y
-	content.Parent = scrolling
-
-	setupList(content)
-
-	return scrolling, content
-end
 
 	local content = Instance.new("Frame")
 	content.Name = "auto canves size"
@@ -1785,7 +1770,7 @@ function Library.create(options)
 			end
 		end)
 	end
-	
+
 	connect(G2L["c"].MouseButton1Click, function()
 		window:Destroy()
 	end)
@@ -2107,8 +2092,8 @@ function Library:_installTabMethods(tab)
 	return tab
 end
 
+-- Patch tab creation so every tab has the same API, without adding UI.
 local oldMakeTab = Library._makeTab
-
 function Library:_makeTab(name, button, content)
 	local tab = oldMakeTab(self, name, button, content)
 	tab.Window = self
@@ -2116,6 +2101,8 @@ function Library:_makeTab(name, button, content)
 	return tab
 end
 
+-- Make item APIs consistent and safe.
+local oldAddCode = Item.AddCode
 function Item:AddCode(callback)
 	if callback ~= nil and typeof(callback) ~= "function" then
 		error("AddCode expects a function", 2)
@@ -2139,6 +2126,7 @@ function Item:SetVisible(value)
 	end
 	return self
 end
+
 
 function Library:IsOpen()
 	return not self.Destroyed and G2L["2"] and G2L["2"].Visible == true
@@ -2182,11 +2170,7 @@ function Library:EachItem(callback)
 end
 
 function Library:Add(tab, kind, options, callback)
-	local target = self:_getTab(tab)
-	if not target then
-		return nil
-	end
-	return self:_add(target, kind, options or {}, callback)
+	return self:_add(self:_getTab(tab), kind, options or {}, callback)
 end
 
 function Item:SetCallback(callback)
@@ -2214,12 +2198,9 @@ function Item:SetName(text)
 end
 
 function Item:SetDescription(text)
-	if not self.Card then
-		return self
-	end
-	local description = self.Card:FindFirstChild("function description")
+	local description = self.Card and self.Card:FindFirstChild("function description")
 	if not description then
-		description = makeDescription(self.Card, tostring(text or ""))
+		description = makeDescription(self.Card, text)
 	else
 		description.Text = tostring(text or "")
 	end
@@ -2247,18 +2228,15 @@ function Item:Reset()
 	elseif self.Type == "Textbox" then
 		self:SetValue(self.Default or "")
 	elseif self.Type == "Dropdown" then
-		self:SetValue(self.Default or self.Values[1] or "")
+		self:SetValue(self.Default or self.Options[1])
 	elseif self.Type == "Keybind" then
-		self.Value = self.Default
-		if self.Button then
-			self.Button.Text = tostring(self.Default or "None")
-		end
+		self:SetValue(self.Default)
 	end
 	return self
 end
 
 function Item:Destroy()
-	if self.Card and self.Card.Parent then
+	if self.Card then
 		self.Card:Destroy()
 	end
 	if self.Tab and self.Tab.Items then
@@ -2297,123 +2275,37 @@ function Item:Fire(value)
 end
 
 function Library:RemoveTab(name)
-	name = tostring(name or "")
 	local tab = self.Tabs[name]
 	if not tab then
 		return self
 	end
-
-	local wasActive = self.ActiveTab == tab
-
-	if tab.Items then
-		for i = #tab.Items, 1, -1 do
-			local item = tab.Items[i]
-			if item.Card and item.Card.Parent then
-				item.Card:Destroy()
-			end
-			tab.Items[i] = nil
-		end
-	end
-
-	if tab.Scrolling and tab.Scrolling.Parent then
-		tab.Scrolling:Destroy()
-	end
-
-	if tab.Button and tab.Button.Parent then
-		tab.Button:Destroy()
-	end
-
-	self.Tabs[name] = nil
-
-	if wasActive then
-		local fallback = nil
-
-		for _, otherTab in pairs(self.Tabs) do
-			fallback = otherTab
-			break
-		end
-
-		if fallback then
-			self:_selectTab(fallback)
-		else
-			self.ActiveTab = nil
-		end
-	end
-
-	return self
-end
-
-function Library:HasTab(name)
-	return self.Tabs[tostring(name or "")] ~= nil
-end
-
-function Library:RenameTab(oldName, newName)
-	oldName = tostring(oldName or "")
-	newName = tostring(newName or "")
-
-	if oldName == "" or newName == "" then
-		return self
-	end
-
-	local tab = self.Tabs[oldName]
-	if not tab or self.Tabs[newName] then
-		return self
-	end
-
-	self.Tabs[oldName] = nil
-	self.Tabs[newName] = tab
-
-	tab.Name = newName
-
-	if tab.Button then
-		tab.Button.Name = "function type/" .. newName
-		tab.Button.Text = newName
-	end
-
-	return self
-end
-
-function Library:HideTab(name)
-	local tab = self.Tabs[tostring(name or "")]
-	if not tab then
-		return self
-	end
-
-	if tab.Button then
-		tab.Button.Visible = false
-	end
-
 	if self.ActiveTab == tab then
-		local fallback = nil
-
-		for _, otherTab in pairs(self.Tabs) do
-			if otherTab ~= tab and otherTab.Button and otherTab.Button.Visible then
+		local fallback
+		for tabName, otherTab in pairs(self.Tabs) do
+			if tabName ~= name then
 				fallback = otherTab
 				break
 			end
 		end
-
 		if fallback then
 			self:_selectTab(fallback)
 		else
-			tab.Scrolling.Visible = false
 			self.ActiveTab = nil
 		end
 	end
-
-	return self
-end
-
-function Library:ShowTab(name)
-	local tab = self.Tabs[tostring(name or "")]
-	if not tab then
-		return self
+	for _, item in ipairs(tab.Items) do
+		if item.Card and item.Card.Parent then
+			item.Card:Destroy()
+		end
 	end
-
-	if tab.Button then
-		tab.Button.Visible = true
+	table.clear(tab.Items)
+	if tab.Scrolling and tab.Scrolling.Parent then
+		tab.Scrolling:Destroy()
 	end
-
+	if tab.Button and tab.Button.Parent then
+		tab.Button:Destroy()
+	end
+	self.Tabs[name] = nil
 	return self
 end
 
