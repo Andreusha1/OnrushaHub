@@ -906,11 +906,12 @@ end
 
 local function makeTitle(card, text)
 	local label = Instance.new("TextLabel")
+	label.TextXAlignment = Enum.TextXAlignment.Left
 	label.Name = "function name"
 	label.BackgroundTransparency = 1
 	label.BorderSizePixel = 0
 	label.AnchorPoint = Vector2.new(0, 0.5)
-	label.Position = UDim2.new(0.2, 0, 0.5, 0)
+	label.Position = UDim2.new(0.05, 0, 0.5, 0)
 	label.Size = UDim2.new(0, 250, 0, 23)
 	label.FontFace = Font.new("rbxassetid://12187365364", Enum.FontWeight.Bold, Enum.FontStyle.Normal)
 	label.TextColor3 = Color3.fromRGB(202, 108, 255)
