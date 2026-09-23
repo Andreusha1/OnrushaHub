@@ -2273,5 +2273,39 @@ function Item:Fire(value)
 	return self
 end
 
+function Library:RemoveTab(name)
+	local tab = self.Tabs[name]
+	if not tab then
+		return self
+	end
+	if self.ActiveTab == tab then
+		local fallback
+		for tabName, otherTab in pairs(self.Tabs) do
+			if tabName ~= name then
+				fallback = otherTab
+				break
+			end
+		end
+		if fallback then
+			self:_selectTab(fallback)
+		else
+			self.ActiveTab = nil
+		end
+	end
+	for _, item in ipairs(tab.Items) do
+		if item.Card and item.Card.Parent then
+			item.Card:Destroy()
+		end
+	end
+	table.clear(tab.Items)
+	if tab.Scrolling and tab.Scrolling.Parent then
+		tab.Scrolling:Destroy()
+	end
+	if tab.Button and tab.Button.Parent then
+		tab.Button:Destroy()
+	end
+	self.Tabs[name] = nil
+	return self
+end
 
 return Library
