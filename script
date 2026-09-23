@@ -2107,8 +2107,8 @@ function Library:_installTabMethods(tab)
 	return tab
 end
 
--- Patch tab creation so every tab has the same API, without adding UI.
 local oldMakeTab = Library._makeTab
+
 function Library:_makeTab(name, button, content)
 	local tab = oldMakeTab(self, name, button, content)
 	tab.Window = self
@@ -2116,8 +2116,6 @@ function Library:_makeTab(name, button, content)
 	return tab
 end
 
--- Make item APIs consistent and safe.
-local oldAddCode = Item.AddCode
 function Item:AddCode(callback)
 	if callback ~= nil and typeof(callback) ~= "function" then
 		error("AddCode expects a function", 2)
@@ -2141,7 +2139,6 @@ function Item:SetVisible(value)
 	end
 	return self
 end
-
 
 function Library:IsOpen()
 	return not self.Destroyed and G2L["2"] and G2L["2"].Visible == true
@@ -2185,7 +2182,11 @@ function Library:EachItem(callback)
 end
 
 function Library:Add(tab, kind, options, callback)
-	return self:_add(self:_getTab(tab), kind, options or {}, callback)
+	local target = self:_getTab(tab)
+	if not target then
+		return nil
+	end
+	return self:_add(target, kind, options or {}, callback)
 end
 
 function Item:SetCallback(callback)
@@ -2213,9 +2214,12 @@ function Item:SetName(text)
 end
 
 function Item:SetDescription(text)
-	local description = self.Card and self.Card:FindFirstChild("function description")
+	if not self.Card then
+		return self
+	end
+	local description = self.Card:FindFirstChild("function description")
 	if not description then
-		description = makeDescription(self.Card, text)
+		description = makeDescription(self.Card, tostring(text or ""))
 	else
 		description.Text = tostring(text or "")
 	end
@@ -2243,15 +2247,18 @@ function Item:Reset()
 	elseif self.Type == "Textbox" then
 		self:SetValue(self.Default or "")
 	elseif self.Type == "Dropdown" then
-		self:SetValue(self.Default or self.Options[1])
+		self:SetValue(self.Default or self.Values[1] or "")
 	elseif self.Type == "Keybind" then
-		self:SetValue(self.Default)
+		self.Value = self.Default
+		if self.Button then
+			self.Button.Text = tostring(self.Default or "None")
+		end
 	end
 	return self
 end
 
 function Item:Destroy()
-	if self.Card then
+	if self.Card and self.Card.Parent then
 		self.Card:Destroy()
 	end
 	if self.Tab and self.Tab.Items then
@@ -2290,37 +2297,123 @@ function Item:Fire(value)
 end
 
 function Library:RemoveTab(name)
+	name = tostring(name or "")
 	local tab = self.Tabs[name]
 	if not tab then
 		return self
 	end
-	if self.ActiveTab == tab then
-		local fallback
-		for tabName, otherTab in pairs(self.Tabs) do
-			if tabName ~= name then
-				fallback = otherTab
-				break
+
+	local wasActive = self.ActiveTab == tab
+
+	if tab.Items then
+		for i = #tab.Items, 1, -1 do
+			local item = tab.Items[i]
+			if item.Card and item.Card.Parent then
+				item.Card:Destroy()
 			end
+			tab.Items[i] = nil
 		end
+	end
+
+	if tab.Scrolling and tab.Scrolling.Parent then
+		tab.Scrolling:Destroy()
+	end
+
+	if tab.Button and tab.Button.Parent then
+		tab.Button:Destroy()
+	end
+
+	self.Tabs[name] = nil
+
+	if wasActive then
+		local fallback = nil
+
+		for _, otherTab in pairs(self.Tabs) do
+			fallback = otherTab
+			break
+		end
+
 		if fallback then
 			self:_selectTab(fallback)
 		else
 			self.ActiveTab = nil
 		end
 	end
-	for _, item in ipairs(tab.Items) do
-		if item.Card and item.Card.Parent then
-			item.Card:Destroy()
+
+	return self
+end
+
+function Library:HasTab(name)
+	return self.Tabs[tostring(name or "")] ~= nil
+end
+
+function Library:RenameTab(oldName, newName)
+	oldName = tostring(oldName or "")
+	newName = tostring(newName or "")
+
+	if oldName == "" or newName == "" then
+		return self
+	end
+
+	local tab = self.Tabs[oldName]
+	if not tab or self.Tabs[newName] then
+		return self
+	end
+
+	self.Tabs[oldName] = nil
+	self.Tabs[newName] = tab
+
+	tab.Name = newName
+
+	if tab.Button then
+		tab.Button.Name = "function type/" .. newName
+		tab.Button.Text = newName
+	end
+
+	return self
+end
+
+function Library:HideTab(name)
+	local tab = self.Tabs[tostring(name or "")]
+	if not tab then
+		return self
+	end
+
+	if tab.Button then
+		tab.Button.Visible = false
+	end
+
+	if self.ActiveTab == tab then
+		local fallback = nil
+
+		for _, otherTab in pairs(self.Tabs) do
+			if otherTab ~= tab and otherTab.Button and otherTab.Button.Visible then
+				fallback = otherTab
+				break
+			end
+		end
+
+		if fallback then
+			self:_selectTab(fallback)
+		else
+			tab.Scrolling.Visible = false
+			self.ActiveTab = nil
 		end
 	end
-	table.clear(tab.Items)
-	if tab.Scrolling and tab.Scrolling.Parent then
-		tab.Scrolling:Destroy()
+
+	return self
+end
+
+function Library:ShowTab(name)
+	local tab = self.Tabs[tostring(name or "")]
+	if not tab then
+		return self
 	end
-	if tab.Button and tab.Button.Parent then
-		tab.Button:Destroy()
+
+	if tab.Button then
+		tab.Button.Visible = true
 	end
-	self.Tabs[name] = nil
+
 	return self
 end
 
