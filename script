@@ -7,7 +7,6 @@
  Y888P  ~Y8888P' Y888888P      888888D      Y88888P ~Y8888P' YP   YP  CONVERTER 
 ]=]
 
-print("upd 1.3")
 -- Instances: 83 | Scripts: 0 | Modules: 0 | Tags: 0
 local G2L = {};
 
@@ -852,7 +851,7 @@ local function makeStroke(parent, color, thickness)
 	return s
 end
 
-local function setupList(container)
+local function setupList(container, scrolling)
 	local layout = container:FindFirstChildOfClass("UIListLayout")
 	if not layout then
 		layout = Instance.new("UIListLayout")
@@ -861,7 +860,13 @@ local function setupList(container)
 		layout.SortOrder = Enum.SortOrder.LayoutOrder
 		layout.Parent = container
 	end
-	container.AutomaticSize = Enum.AutomaticSize.Y
+	local function update()
+		local height = layout.AbsoluteContentSize.Y
+		container.Size = UDim2.new(1, 0, 0, height)
+		scrolling.CanvasSize = UDim2.new(0, 0, 0, height + 20)
+	end
+	layout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(update)
+	task.defer(update)
 	return layout
 end
 
@@ -874,23 +879,19 @@ local function makeContainer(parent)
 	scrolling.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
 	scrolling.BackgroundTransparency = 1
 	scrolling.AnchorPoint = Vector2.new(0.5, 0.5)
-	scrolling.AutomaticCanvasSize = Enum.AutomaticSize.Y
 	scrolling.Size = UDim2.new(0, 507, 0, 361)
 	scrolling.Position = UDim2.new(0.5, 0, 0.638, 0)
 	scrolling.ScrollBarImageColor3 = Color3.fromRGB(0, 0, 0)
 	scrolling.ScrollBarThickness = 0
 	scrolling.ScrollingDirection = Enum.ScrollingDirection.Y
 	scrolling.Parent = parent
-
 	local content = Instance.new("Frame")
 	content.Name = "auto canves size"
 	content.BackgroundTransparency = 1
 	content.BorderSizePixel = 0
 	content.Size = UDim2.new(1, 0, 0, 0)
-	content.AutomaticSize = Enum.AutomaticSize.Y
 	content.Parent = scrolling
-
-	setupList(content)
+	setupList(content, scrolling)
 	return scrolling, content
 end
 
