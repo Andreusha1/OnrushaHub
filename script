@@ -868,15 +868,31 @@ local function makeContainer(parent)
 	local scrolling = Instance.new("ScrollingFrame")
 	scrolling.Name = "functions"
 	scrolling.Active = true
-	scrolling.BackgroundTransparency = 1
 	scrolling.BorderSizePixel = 0
-	scrolling.Position = UDim2.new(0.5, 0, 0.638, 0)
+	scrolling.CanvasSize = UDim2.new(0, 0, 0, 0)
+	scrolling.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+	scrolling.BackgroundTransparency = 1
 	scrolling.AnchorPoint = Vector2.new(0.5, 0.5)
-	scrolling.Size = UDim2.new(0, 507, 0, 361)
-	scrolling.ScrollBarThickness = 0
 	scrolling.AutomaticCanvasSize = Enum.AutomaticSize.Y
+	scrolling.Size = UDim2.new(0, 507, 0, 361)
+	scrolling.Position = UDim2.new(0.5, 0, 0.638, 0)
+	scrolling.ScrollBarImageColor3 = Color3.fromRGB(0, 0, 0)
+	scrolling.ScrollBarThickness = 0
 	scrolling.ScrollingDirection = Enum.ScrollingDirection.Y
 	scrolling.Parent = parent
+
+	local content = Instance.new("Frame")
+	content.Name = "auto canves size"
+	content.BackgroundTransparency = 1
+	content.BorderSizePixel = 0
+	content.Size = UDim2.new(1, 0, 0, 0)
+	content.AutomaticSize = Enum.AutomaticSize.Y
+	content.Parent = scrolling
+
+	setupList(content)
+
+	return scrolling, content
+end
 
 	local content = Instance.new("Frame")
 	content.Name = "auto canves size"
