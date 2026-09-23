@@ -893,6 +893,7 @@ end
 local function makeCard(parent, name)
 	local card = Instance.new("Frame")
 	card.Name = name or "Function"
+	card.ZIndex = 3
 	card.BackgroundColor3 = Color3.fromRGB(51, 59, 82)
 	card.BackgroundTransparency = 0.15
 	card.BorderSizePixel = 0
