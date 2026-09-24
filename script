@@ -21,7 +21,7 @@ G2L["2"] = Instance.new("Frame", G2L["1"]);
 G2L["2"]["BorderSizePixel"] = 0;
 G2L["2"]["BackgroundColor3"] = Color3.fromRGB(40, 45, 61);
 G2L["2"]["AnchorPoint"] = Vector2.new(0.5, 0.5);
-G2L["2"]["Size"] = UDim2.new(0, 507, 0, 500);
+G2L["2"]["Size"] = UDim2.new(0.4, 0, 0.5, 0);
 G2L["2"]["Position"] = UDim2.new(0.5, 0, 0.5, 0);
 G2L["2"]["BorderColor3"] = Color3.fromRGB(0, 0, 0);
 G2L["2"]["Name"] = [[gui]];
@@ -45,7 +45,7 @@ G2L["5"]["BorderSizePixel"] = 0;
 G2L["5"]["BackgroundColor3"] = Color3.fromRGB(45, 51, 69);
 G2L["5"]["AnchorPoint"] = Vector2.new(0.5, 0.5);
 G2L["5"]["ClipsDescendants"] = true;
-G2L["5"]["Size"] = UDim2.new(0, 507, 0, 61);
+G2L["5"]["Size"] = UDim2.new(1, 0, 0.122, 0);
 G2L["5"]["Position"] = UDim2.new(0.5, 0, 0.05927, 0);
 G2L["5"]["BorderColor3"] = Color3.fromRGB(0, 0, 0);
 G2L["5"]["Name"] = [[bottonframe]];
@@ -70,7 +70,7 @@ G2L["8"]["BorderSizePixel"] = 0;
 G2L["8"]["BackgroundColor3"] = Color3.fromRGB(255, 255, 255);
 G2L["8"]["AnchorPoint"] = Vector2.new(0.5, 0.5);
 G2L["8"]["ClipsDescendants"] = true;
-G2L["8"]["Size"] = UDim2.new(0, 2, 0, 49);
+G2L["8"]["Size"] = UDim2.new(0.003945, 0, 0.803279, 0);
 G2L["8"]["Position"] = UDim2.new(0.14567, 0, 0.48992, 0);
 G2L["8"]["BorderColor3"] = Color3.fromRGB(0, 0, 0);
 G2L["8"]["Name"] = [[di]];
@@ -87,7 +87,7 @@ G2L["a"] = Instance.new("ImageLabel", G2L["5"]);
 G2L["a"]["BorderSizePixel"] = 0;
 G2L["a"]["BackgroundColor3"] = Color3.fromRGB(255, 255, 255);
 G2L["a"]["Image"] = [[rbxassetid://127785895138048]];
-G2L["a"]["Size"] = UDim2.new(0, 207, 0, 81);
+G2L["a"]["Size"] = UDim2.new(0.408284, 0, 1.327869, 0);
 G2L["a"]["BorderColor3"] = Color3.fromRGB(0, 0, 0);
 G2L["a"]["BackgroundTransparency"] = 1;
 G2L["a"]["Name"] = [[onrusha hub]];
@@ -104,7 +104,7 @@ G2L["b"]["BackgroundColor3"] = Color3.fromRGB(255, 255, 255);
 G2L["b"]["FontFace"] = Font.new([[rbxassetid://12187365364]], Enum.FontWeight.Bold, Enum.FontStyle.Normal);
 G2L["b"]["TextColor3"] = Color3.fromRGB(127, 127, 127);
 G2L["b"]["BackgroundTransparency"] = 1;
-G2L["b"]["Size"] = UDim2.new(0, 89, 0, 18);
+G2L["b"]["Size"] = UDim2.new(0.175542, 0, 0.295082, 0);
 G2L["b"]["BorderColor3"] = Color3.fromRGB(0, 0, 0);
 G2L["b"]["Text"] = [[Murder Mystery 2]];
 G2L["b"]["Position"] = UDim2.new(0.16963, 0, 0.69427, 0);
@@ -120,7 +120,7 @@ G2L["c"]["TextColor3"] = Color3.fromRGB(255, 255, 255);
 G2L["c"]["BackgroundColor3"] = Color3.fromRGB(255, 255, 255);
 G2L["c"]["FontFace"] = Font.new([[rbxassetid://12187365364]], Enum.FontWeight.Bold, Enum.FontStyle.Normal);
 G2L["c"]["BackgroundTransparency"] = 1;
-G2L["c"]["Size"] = UDim2.new(0, 18, 0, 28);
+G2L["c"]["Size"] = UDim2.new(0.035503, 0, 0.459016, 0);
 G2L["c"]["BorderColor3"] = Color3.fromRGB(0, 0, 0);
 G2L["c"]["Text"] = [[x]];
 G2L["c"]["Name"] = [[x]];
@@ -134,7 +134,7 @@ G2L["d"]["BorderSizePixel"] = 0;
 G2L["d"]["BackgroundColor3"] = Color3.fromRGB(255, 255, 255);
 G2L["d"]["AnchorPoint"] = Vector2.new(0.5, 0.5);
 G2L["d"]["ClipsDescendants"] = true;
-G2L["d"]["Size"] = UDim2.new(0, 1, 0, 33);
+G2L["d"]["Size"] = UDim2.new(0.001972, 0, 0.540984, 0);
 G2L["d"]["Position"] = UDim2.new(0.92825, 0, 0.51204, 0);
 G2L["d"]["BorderColor3"] = Color3.fromRGB(0, 0, 0);
 G2L["d"]["Name"] = [[di]];
@@ -156,7 +156,7 @@ G2L["f"]["TextColor3"] = Color3.fromRGB(255, 255, 255);
 G2L["f"]["BackgroundColor3"] = Color3.fromRGB(255, 255, 255);
 G2L["f"]["FontFace"] = Font.new([[rbxassetid://12187365364]], Enum.FontWeight.Bold, Enum.FontStyle.Normal);
 G2L["f"]["BackgroundTransparency"] = 1;
-G2L["f"]["Size"] = UDim2.new(0, 18, 0, 28);
+G2L["f"]["Size"] = UDim2.new(0.035503, 0, 0.459016, 0);
 G2L["f"]["BorderColor3"] = Color3.fromRGB(0, 0, 0);
 G2L["f"]["Text"] = [[-]];
 G2L["f"]["Name"] = [[-]];
@@ -168,7 +168,7 @@ G2L["10"] = Instance.new("ImageLabel", G2L["5"]);
 G2L["10"]["BorderSizePixel"] = 0;
 G2L["10"]["BackgroundColor3"] = Color3.fromRGB(255, 255, 255);
 G2L["10"]["Image"] = [[rbxassetid://103485648533724]];
-G2L["10"]["Size"] = UDim2.new(0, 125, 0, 131);
+G2L["10"]["Size"] = UDim2.new(0.246548, 0, 2.147541, 0);
 G2L["10"]["BorderColor3"] = Color3.fromRGB(0, 0, 0);
 G2L["10"]["BackgroundTransparency"] = 1;
 G2L["10"]["Name"] = [[star]];
@@ -182,7 +182,7 @@ G2L["11"]["BorderSizePixel"] = 0;
 G2L["11"]["BackgroundColor3"] = Color3.fromRGB(255, 255, 255);
 G2L["11"]["AnchorPoint"] = Vector2.new(0.5, 0.5);
 G2L["11"]["ClipsDescendants"] = true;
-G2L["11"]["Size"] = UDim2.new(0, -432, 0, -2);
+G2L["11"]["Size"] = UDim2.new(-0.852071, 0, -0.004, 0);
 G2L["11"]["Position"] = UDim2.new(0.49606, 0, 0.25882, 0);
 G2L["11"]["BorderColor3"] = Color3.fromRGB(0, 0, 0);
 G2L["11"]["Name"] = [[di]];
@@ -197,7 +197,7 @@ G2L["12"]["Transparency"] = NumberSequence.new{NumberSequenceKeypoint.new(0.000,
 G2L["13"] = Instance.new("Frame", G2L["2"]);
 G2L["13"]["BorderSizePixel"] = 0;
 G2L["13"]["BackgroundColor3"] = Color3.fromRGB(255, 255, 255);
-G2L["13"]["Size"] = UDim2.new(0, 479, 0, 32);
+G2L["13"]["Size"] = UDim2.new(0.944773, 0, 0.064, 0);
 G2L["13"]["Position"] = UDim2.new(0.02761, 0, 0.15904, 0);
 G2L["13"]["BorderColor3"] = Color3.fromRGB(0, 0, 0);
 G2L["13"]["Name"] = [[choose function type]];
@@ -214,7 +214,7 @@ G2L["14"]["BackgroundColor3"] = Color3.fromRGB(208, 167, 255);
 G2L["14"]["FontFace"] = Font.new([[rbxassetid://12187365364]], Enum.FontWeight.Bold, Enum.FontStyle.Normal);
 G2L["14"]["AnchorPoint"] = Vector2.new(0.5, 0.5);
 G2L["14"]["BackgroundTransparency"] = 0.65;
-G2L["14"]["Size"] = UDim2.new(0, 83, 0, 32);
+G2L["14"]["Size"] = UDim2.new(0.173278, 0, 0.064, 0);
 G2L["14"]["BorderColor3"] = Color3.fromRGB(0, 0, 0);
 G2L["14"]["Text"] = [[Main]];
 G2L["14"]["Name"] = [[function type/Main/on]];
@@ -293,7 +293,7 @@ G2L["1c"]["BackgroundColor3"] = Color3.fromRGB(99, 99, 99);
 G2L["1c"]["FontFace"] = Font.new([[rbxassetid://12187365364]], Enum.FontWeight.Bold, Enum.FontStyle.Normal);
 G2L["1c"]["AnchorPoint"] = Vector2.new(0.5, 0.5);
 G2L["1c"]["BackgroundTransparency"] = 0.65;
-G2L["1c"]["Size"] = UDim2.new(0, 83, 0, 32);
+G2L["1c"]["Size"] = UDim2.new(0.173278, 0, 0.064, 0);
 G2L["1c"]["BorderColor3"] = Color3.fromRGB(0, 0, 0);
 G2L["1c"]["Text"] = [[Player]];
 G2L["1c"]["Name"] = [[function type/Player/off]];
@@ -354,7 +354,7 @@ G2L["23"] = Instance.new("ImageLabel", G2L["1c"]);
 G2L["23"]["BorderSizePixel"] = 0;
 G2L["23"]["BackgroundColor3"] = Color3.fromRGB(255, 255, 255);
 G2L["23"]["Image"] = [[rbxassetid://93880185455232]];
-G2L["23"]["Size"] = UDim2.new(0, 20, 0, 20);
+G2L["23"]["Size"] = UDim2.new(0.241263, 0, 0.327869, 0);
 G2L["23"]["Visible"] = false;
 G2L["23"]["BorderColor3"] = Color3.fromRGB(0, 0, 0);
 G2L["23"]["BackgroundTransparency"] = 1;
@@ -378,7 +378,7 @@ G2L["25"]["Name"] = [[functions]];
 G2L["25"]["BackgroundColor3"] = Color3.fromRGB(255, 255, 255);
 G2L["25"]["AnchorPoint"] = Vector2.new(0.5, 0.5);
 G2L["25"]["AutomaticCanvasSize"] = Enum.AutomaticSize.Y;
-G2L["25"]["Size"] = UDim2.new(0, 507, 0, 361);
+G2L["25"]["Size"] = UDim2.new(1, 0, 0.722, 0);
 G2L["25"]["ScrollBarImageColor3"] = Color3.fromRGB(0, 0, 0);
 G2L["25"]["Position"] = UDim2.new(0.5, 0, 0.638, 0);
 G2L["25"]["BorderColor3"] = Color3.fromRGB(0, 0, 0);
@@ -402,7 +402,7 @@ G2L["27"]["BorderSizePixel"] = 0;
 G2L["27"]["BackgroundColor3"] = Color3.fromRGB(51, 59, 82);
 G2L["27"]["AnchorPoint"] = Vector2.new(0.5, 0.5);
 G2L["27"]["ClipsDescendants"] = true;
-G2L["27"]["Size"] = UDim2.new(0, 479, 0, 59);
+G2L["27"]["Size"] = UDim2.new(0.944773, 0, 0.118, 0);
 G2L["27"]["Position"] = UDim2.new(0.4996, 0, 0.10008, 0);
 G2L["27"]["BorderColor3"] = Color3.fromRGB(0, 0, 0);
 G2L["27"]["Name"] = [[default function name "name"/off current on]];
@@ -430,7 +430,7 @@ G2L["2a"]["BackgroundColor3"] = Color3.fromRGB(255, 255, 255);
 G2L["2a"]["FontFace"] = Font.new([[rbxassetid://12187365364]], Enum.FontWeight.Bold, Enum.FontStyle.Normal);
 G2L["2a"]["TextColor3"] = Color3.fromRGB(202, 108, 255);
 G2L["2a"]["BackgroundTransparency"] = 1;
-G2L["2a"]["Size"] = UDim2.new(0, 140, 0, 23);
+G2L["2a"]["Size"] = UDim2.new(0.292276, 0, 0.389831, 0);
 G2L["2a"]["BorderColor3"] = Color3.fromRGB(0, 0, 0);
 G2L["2a"]["Text"] = [[Function Name]];
 G2L["2a"]["Name"] = [[function name]];
@@ -447,7 +447,7 @@ G2L["2b"]["BackgroundColor3"] = Color3.fromRGB(255, 255, 255);
 G2L["2b"]["FontFace"] = Font.new([[rbxassetid://12187365364]], Enum.FontWeight.Bold, Enum.FontStyle.Normal);
 G2L["2b"]["TextColor3"] = Color3.fromRGB(255, 255, 255);
 G2L["2b"]["BackgroundTransparency"] = 1;
-G2L["2b"]["Size"] = UDim2.new(0, 150, 0, 19);
+G2L["2b"]["Size"] = UDim2.new(0.313152, 0, 0.322034, 0);
 G2L["2b"]["BorderColor3"] = Color3.fromRGB(0, 0, 0);
 G2L["2b"]["Text"] = [[Function description]];
 G2L["2b"]["Name"] = [[function description]];
@@ -459,7 +459,7 @@ G2L["2c"] = Instance.new("TextButton", G2L["27"]);
 G2L["2c"]["BorderSizePixel"] = 0;
 G2L["2c"]["AutoButtonColor"] = false;
 G2L["2c"]["BackgroundColor3"] = Color3.fromRGB(78, 71, 112);
-G2L["2c"]["Size"] = UDim2.new(0, 48, 0, 26);
+G2L["2c"]["Size"] = UDim2.new(0.100209, 0, 0.440678, 0);
 G2L["2c"]["Text"] = [[]];
 G2L["2c"]["Name"] = [[button on/off(current on)]];
 G2L["2c"]["Position"] = UDim2.new(1, -65, 0.5, -13);
@@ -474,7 +474,7 @@ G2L["2d"]["CornerRadius"] = UDim.new(1, 0);
 G2L["2e"] = Instance.new("Frame", G2L["2c"]);
 G2L["2e"]["BorderSizePixel"] = 0;
 G2L["2e"]["BackgroundColor3"] = Color3.fromRGB(230, 227, 249);
-G2L["2e"]["Size"] = UDim2.new(0, 20, 0, 20);
+G2L["2e"]["Size"] = UDim2.new(0.416667, 0, 0.769231, 0);
 G2L["2e"]["Position"] = UDim2.new(1, -23, 0.5, -10);
 
 
@@ -495,7 +495,7 @@ G2L["31"]["BorderSizePixel"] = 0;
 G2L["31"]["BackgroundColor3"] = Color3.fromRGB(51, 59, 82);
 G2L["31"]["AnchorPoint"] = Vector2.new(0.5, 0.5);
 G2L["31"]["ClipsDescendants"] = true;
-G2L["31"]["Size"] = UDim2.new(0, 479, 0, 59);
+G2L["31"]["Size"] = UDim2.new(0.944773, 0, 0.118, 0);
 G2L["31"]["Position"] = UDim2.new(0.4996, 0, 0.10008, 0);
 G2L["31"]["BorderColor3"] = Color3.fromRGB(0, 0, 0);
 G2L["31"]["Name"] = [[default function name "name"/ current off]];
@@ -512,7 +512,7 @@ G2L["32"]["BackgroundColor3"] = Color3.fromRGB(255, 255, 255);
 G2L["32"]["FontFace"] = Font.new([[rbxassetid://12187365364]], Enum.FontWeight.Bold, Enum.FontStyle.Normal);
 G2L["32"]["TextColor3"] = Color3.fromRGB(255, 255, 255);
 G2L["32"]["BackgroundTransparency"] = 1;
-G2L["32"]["Size"] = UDim2.new(0, 150, 0, 19);
+G2L["32"]["Size"] = UDim2.new(0.313152, 0, 0.322034, 0);
 G2L["32"]["BorderColor3"] = Color3.fromRGB(0, 0, 0);
 G2L["32"]["Text"] = [[Function description]];
 G2L["32"]["Name"] = [[function description]];
@@ -540,7 +540,7 @@ G2L["35"]["BackgroundColor3"] = Color3.fromRGB(255, 255, 255);
 G2L["35"]["FontFace"] = Font.new([[rbxassetid://12187365364]], Enum.FontWeight.Bold, Enum.FontStyle.Normal);
 G2L["35"]["TextColor3"] = Color3.fromRGB(202, 108, 255);
 G2L["35"]["BackgroundTransparency"] = 1;
-G2L["35"]["Size"] = UDim2.new(0, 140, 0, 23);
+G2L["35"]["Size"] = UDim2.new(0.292276, 0, 0.389831, 0);
 G2L["35"]["BorderColor3"] = Color3.fromRGB(0, 0, 0);
 G2L["35"]["Text"] = [[Function Name]];
 G2L["35"]["Name"] = [[function name]];
@@ -552,7 +552,7 @@ G2L["36"] = Instance.new("TextButton", G2L["31"]);
 G2L["36"]["BorderSizePixel"] = 0;
 G2L["36"]["AutoButtonColor"] = false;
 G2L["36"]["BackgroundColor3"] = Color3.fromRGB(112, 112, 112);
-G2L["36"]["Size"] = UDim2.new(0, 48, 0, 26);
+G2L["36"]["Size"] = UDim2.new(0.100209, 0, 0.440678, 0);
 G2L["36"]["Text"] = [[]];
 G2L["36"]["Name"] = [[button on/off(current off)]];
 G2L["36"]["Position"] = UDim2.new(1, -65, 0.5, -13);
@@ -573,7 +573,7 @@ G2L["38"]["Color"] = Color3.fromRGB(147, 139, 191);
 G2L["39"] = Instance.new("Frame", G2L["36"]);
 G2L["39"]["BorderSizePixel"] = 0;
 G2L["39"]["BackgroundColor3"] = Color3.fromRGB(230, 227, 249);
-G2L["39"]["Size"] = UDim2.new(0, 20, 0, 20);
+G2L["39"]["Size"] = UDim2.new(0.416667, 0, 0.769231, 0);
 G2L["39"]["Position"] = UDim2.new(0.58333, -23, 0.5, -10);
 
 
@@ -595,7 +595,7 @@ G2L["3c"]["BorderSizePixel"] = 0;
 G2L["3c"]["BackgroundColor3"] = Color3.fromRGB(51, 59, 82);
 G2L["3c"]["AnchorPoint"] = Vector2.new(0.5, 0.5);
 G2L["3c"]["ClipsDescendants"] = true;
-G2L["3c"]["Size"] = UDim2.new(0, 479, 0, 59);
+G2L["3c"]["Size"] = UDim2.new(0.944773, 0, 0.118, 0);
 G2L["3c"]["Position"] = UDim2.new(0.4996, 0, 0.10008, 0);
 G2L["3c"]["BorderColor3"] = Color3.fromRGB(0, 0, 0);
 G2L["3c"]["Name"] = [[scroling function name "name"/off current on]];
@@ -623,7 +623,7 @@ G2L["3f"]["BackgroundColor3"] = Color3.fromRGB(255, 255, 255);
 G2L["3f"]["FontFace"] = Font.new([[rbxassetid://12187365364]], Enum.FontWeight.Bold, Enum.FontStyle.Normal);
 G2L["3f"]["TextColor3"] = Color3.fromRGB(202, 108, 255);
 G2L["3f"]["BackgroundTransparency"] = 1;
-G2L["3f"]["Size"] = UDim2.new(0, 140, 0, 23);
+G2L["3f"]["Size"] = UDim2.new(0.292276, 0, 0.389831, 0);
 G2L["3f"]["BorderColor3"] = Color3.fromRGB(0, 0, 0);
 G2L["3f"]["Text"] = [[Function Name]];
 G2L["3f"]["Name"] = [[function name]];
@@ -640,7 +640,7 @@ G2L["40"]["BackgroundColor3"] = Color3.fromRGB(255, 255, 255);
 G2L["40"]["FontFace"] = Font.new([[rbxassetid://12187365364]], Enum.FontWeight.Bold, Enum.FontStyle.Normal);
 G2L["40"]["TextColor3"] = Color3.fromRGB(255, 255, 255);
 G2L["40"]["BackgroundTransparency"] = 1;
-G2L["40"]["Size"] = UDim2.new(0, 150, 0, 19);
+G2L["40"]["Size"] = UDim2.new(0.313152, 0, 0.322034, 0);
 G2L["40"]["BorderColor3"] = Color3.fromRGB(0, 0, 0);
 G2L["40"]["Text"] = [[Function description]];
 G2L["40"]["Name"] = [[function description]];
@@ -652,7 +652,7 @@ G2L["41"] = Instance.new("TextButton", G2L["3c"]);
 G2L["41"]["BorderSizePixel"] = 0;
 G2L["41"]["AutoButtonColor"] = false;
 G2L["41"]["BackgroundColor3"] = Color3.fromRGB(78, 71, 112);
-G2L["41"]["Size"] = UDim2.new(0, 48, 0, 26);
+G2L["41"]["Size"] = UDim2.new(0.100209, 0, 0.440678, 0);
 G2L["41"]["Text"] = [[]];
 G2L["41"]["Name"] = [[button on/off(current on)]];
 G2L["41"]["Position"] = UDim2.new(1, -65, 0.5, -13);
@@ -667,7 +667,7 @@ G2L["42"]["CornerRadius"] = UDim.new(1, 0);
 G2L["43"] = Instance.new("Frame", G2L["41"]);
 G2L["43"]["BorderSizePixel"] = 0;
 G2L["43"]["BackgroundColor3"] = Color3.fromRGB(230, 227, 249);
-G2L["43"]["Size"] = UDim2.new(0, 20, 0, 20);
+G2L["43"]["Size"] = UDim2.new(0.416667, 0, 0.769231, 0);
 G2L["43"]["Position"] = UDim2.new(1, -23, 0.5, -10);
 
 
@@ -687,7 +687,7 @@ G2L["46"] = Instance.new("CanvasGroup", G2L["3c"]);
 G2L["46"]["BorderSizePixel"] = 0;
 G2L["46"]["BackgroundColor3"] = Color3.fromRGB(52, 50, 81);
 G2L["46"]["AnchorPoint"] = Vector2.new(0.5, 0.5);
-G2L["46"]["Size"] = UDim2.new(0, 199, 0, 25);
+G2L["46"]["Size"] = UDim2.new(0.414405, 0, 0.423729, 0);
 G2L["46"]["Position"] = UDim2.new(0.63, 0, 0.504, 0);
 G2L["46"]["BorderColor3"] = Color3.fromRGB(0, 0, 0);
 G2L["46"]["Name"] = [[scroll bar]];
@@ -707,7 +707,7 @@ G2L["48"] = Instance.new("UICorner", G2L["46"]);
 G2L["49"] = Instance.new("Frame", G2L["46"]);
 G2L["49"]["BorderSizePixel"] = 0;
 G2L["49"]["BackgroundColor3"] = Color3.fromRGB(158, 163, 255);
-G2L["49"]["Size"] = UDim2.new(0, 12, 0, 25);
+G2L["49"]["Size"] = UDim2.new(0.060126, 0, 1, 0);
 G2L["49"]["BorderColor3"] = Color3.fromRGB(0, 0, 0);
 G2L["49"]["Name"] = [[fill]];
 
@@ -741,7 +741,7 @@ G2L["4c"]["TextColor3"] = Color3.fromRGB(0, 0, 0);
 G2L["4c"]["BackgroundColor3"] = Color3.fromRGB(255, 255, 255);
 G2L["4c"]["FontFace"] = Font.new([[rbxasset://fonts/families/SourceSansPro.json]], Enum.FontWeight.Regular, Enum.FontStyle.Normal);
 G2L["4c"]["BackgroundTransparency"] = 0.5;
-G2L["4c"]["Size"] = UDim2.new(0, 268, 0, 5);
+G2L["4c"]["Size"] = UDim2.new(0.5283, 0, 0.01, 0);
 G2L["4c"]["BorderColor3"] = Color3.fromRGB(0, 0, 0);
 G2L["4c"]["Text"] = [[]];
 G2L["4c"]["Name"] = [[hold to drug ui]];
@@ -1134,6 +1134,10 @@ function Dropdown:Previous()
 	return self
 end
 
+```
+```
+
+
 local function addButtonBehavior(button)
 	button.AutoButtonColor = false
 	button.MouseEnter:Connect(function()
@@ -1160,8 +1164,8 @@ function Library:_newItem(tab, kind, options)
 		button.AutoButtonColor = false
 		button.BorderSizePixel = 0
 		button.BackgroundColor3 = Color3.fromRGB(112, 112, 112)
-		button.Size = UDim2.new(0, 48, 0, 26)
-		button.Position = UDim2.new(1, -65, 0.5, -13)
+		button.Size = UDim2.new(0.100209, 0, 0.440678, 0)
+		button.Position = UDim2.new(0.864301, 0, 0.279661, 0)
 		button.Text = ""
 		button.Parent = card
 		makeCorner(button, 100)
@@ -1170,8 +1174,8 @@ function Library:_newItem(tab, kind, options)
 		knob.Name = "Frame"
 		knob.BorderSizePixel = 0
 		knob.BackgroundColor3 = Color3.fromRGB(230, 227, 249)
-		knob.Size = UDim2.new(0, 20, 0, 20)
-		knob.Position = UDim2.new(0.58333, -23, 0.5, -10)
+		knob.Size = UDim2.new(0.416667, 0, 0.769231, 0)
+		knob.Position = UDim2.new(0.104167, 0, 0.115385, 0)
 		knob.Parent = button
 		makeCorner(knob, 100)
 
@@ -1208,7 +1212,7 @@ function Library:_newItem(tab, kind, options)
 		bar.BackgroundColor3 = Color3.fromRGB(52, 50, 81)
 		bar.BorderSizePixel = 0
 		bar.AnchorPoint = Vector2.new(0, 0.5)
-		bar.Size = UDim2.new(0, 199, 0, 25)
+		bar.Size = UDim2.new(0.414405, 0, 0.423729, 0)
 		bar.Position = UDim2.new(0.63, 0, 0.504, 0)
 		bar.Active = true
 		bar.Parent = card
@@ -1282,8 +1286,8 @@ function Library:_newItem(tab, kind, options)
 		button.BackgroundColor3 = Color3.fromRGB(78, 71, 112)
 		button.BackgroundTransparency = 0.15
 		button.BorderSizePixel = 0
-		button.Position = UDim2.new(1, -145, 0.5, -15)
-		button.Size = UDim2.new(0, 125, 0, 30)
+		button.Position = UDim2.new(0.697286, 0, 0.245763, 0)
+		button.Size = UDim2.new(0.261023, 0, 0.508475, 0)
 		button.FontFace = Font.new("rbxassetid://12187365364", Enum.FontWeight.Bold, Enum.FontStyle.Normal)
 		button.TextColor3 = Color3.fromRGB(255, 255, 255)
 		button.TextSize = 14
@@ -1307,8 +1311,8 @@ function Library:_newItem(tab, kind, options)
 		box.BackgroundColor3 = Color3.fromRGB(40, 45, 61)
 		box.BackgroundTransparency = 0.1
 		box.BorderSizePixel = 0
-		box.Position = UDim2.new(1, -190, 0.5, -15)
-		box.Size = UDim2.new(0, 170, 0, 30)
+		box.Position = UDim2.new(0.60334, 0, 0.245763, 0)
+		box.Size = UDim2.new(0.354906, 0, 0.508475, 0)
 		box.FontFace = Font.new("rbxassetid://12187365364", Enum.FontWeight.Regular, Enum.FontStyle.Normal)
 		box.TextColor3 = Color3.fromRGB(255, 255, 255)
 		box.PlaceholderColor3 = Color3.fromRGB(160, 160, 160)
@@ -1335,8 +1339,8 @@ function Library:_newItem(tab, kind, options)
 		current.BackgroundColor3 = Color3.fromRGB(78, 71, 112)
 		current.BackgroundTransparency = 0.15
 		current.BorderSizePixel = 0
-		current.Position = UDim2.new(1, -180, 0.5, -15)
-		current.Size = UDim2.new(0, 160, 0, 30)
+		current.Position = UDim2.new(0.624217, 0, 0.245763, 0)
+		current.Size = UDim2.new(0.333891, 0, 0.508475, 0)
 		current.FontFace = Font.new("rbxassetid://12187365364", Enum.FontWeight.Bold, Enum.FontStyle.Normal)
 		current.TextColor3 = Color3.fromRGB(255, 255, 255)
 		current.TextSize = 14
@@ -1364,10 +1368,10 @@ function Library:_newItem(tab, kind, options)
 
 	if kind == "Label" then
 		local card = makeCard(parent, options.Text or "Label")
-		card.Size = UDim2.new(0, 479, 0, 42)
+		card.Size = UDim2.new(0.944773, 0, 0.084, 0)
 		local title = makeTitle(card, options.Text or "")
-		title.Position = UDim2.new(0.06422, 0, 0.5, -12)
-		title.Size = UDim2.new(0, 430, 0, 24)
+		title.Position = UDim2.new(0.06422, 0, 0.29661, 0)
+		title.Size = UDim2.new(0.897704, 0, 0.40678, 0)
 		title.TextColor3 = Color3.fromRGB(255, 255, 255)
 		return setmetatable({Type = "Label", Card = card, Title = title, Value = options.Text or ""}, Item)
 	end
@@ -1377,13 +1381,13 @@ function Library:_newItem(tab, kind, options)
 		card.Name = options.Text or "Section"
 		card.BackgroundTransparency = 1
 		card.BorderSizePixel = 0
-		card.Size = UDim2.new(0, 479, 0, 32)
+		card.Size = UDim2.new(0.944773, 0, 0.064, 0)
 		card.Parent = parent
 
 		local title = Instance.new("TextLabel")
 		title.BackgroundTransparency = 1
-		title.Size = UDim2.new(1, -20, 1, 0)
-		title.Position = UDim2.new(0, 10, 0, 0)
+		title.Size = UDim2.new(0.958247, 0, 1, 0)
+		title.Position = UDim2.new(0.020877, 0, 0, 0)
 		title.FontFace = Font.new("rbxassetid://12187365364", Enum.FontWeight.Bold, Enum.FontStyle.Normal)
 		title.TextColor3 = Color3.fromRGB(202, 108, 255)
 		title.TextSize = 16
@@ -1401,8 +1405,8 @@ function Library:_newItem(tab, kind, options)
 		button.AutoButtonColor = false
 		button.BackgroundColor3 = Color3.fromRGB(78, 71, 112)
 		button.BorderSizePixel = 0
-		button.Position = UDim2.new(1, -145, 0.5, -15)
-		button.Size = UDim2.new(0, 125, 0, 30)
+		button.Position = UDim2.new(0.697286, 0, 0.245763, 0)
+		button.Size = UDim2.new(0.261023, 0, 0.508475, 0)
 		button.FontFace = Font.new("rbxassetid://12187365364", Enum.FontWeight.Bold, Enum.FontStyle.Normal)
 		button.TextColor3 = Color3.fromRGB(255, 255, 255)
 		button.TextSize = 14
@@ -1550,7 +1554,7 @@ function Library:CreateTab(name)
 	button.BackgroundColor3 = Color3.fromRGB(99, 99, 99)
 	button.BackgroundTransparency = 0.65
 	button.FontFace = Font.new("rbxassetid://12187365364", Enum.FontWeight.Normal, Enum.FontStyle.Normal)
-	button.Size = UDim2.new(0, 83, 0, 32)
+	button.Size = UDim2.new(0.173278, 0, 0.064, 0)
 	button.Parent = G2L["13"]
 	makeCorner(button, 8)
 	makeStroke(button, Color3.fromRGB(128, 128, 128), 1)
@@ -1765,11 +1769,12 @@ function Library.create(options)
 			if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
 				local delta = input.Position - dragStart
 
+				local parentSize = G2L["2"].Parent.AbsoluteSize
 				G2L["2"].Position = UDim2.new(
-					startPosition.X.Scale,
-					startPosition.X.Offset + delta.X,
-					startPosition.Y.Scale,
-					startPosition.Y.Offset + delta.Y
+					startPosition.X.Scale + delta.X / math.max(parentSize.X, 1),
+					0,
+					startPosition.Y.Scale + delta.Y / math.max(parentSize.Y, 1),
+					0
 				)
 			end
 		end)
@@ -1812,11 +1817,12 @@ function Library.create(options)
 					moved = true
 				end
 
+				local parentSize = G2L["4e"].Parent.AbsoluteSize
 				G2L["4e"].Position = UDim2.new(
-					startPosition.X.Scale,
-					startPosition.X.Offset + delta.X,
-					startPosition.Y.Scale,
-					startPosition.Y.Offset + delta.Y
+					startPosition.X.Scale + delta.X / math.max(parentSize.X, 1),
+					0,
+					startPosition.Y.Scale + delta.Y / math.max(parentSize.Y, 1),
+					0
 				)
 			end
 		end)
@@ -1875,7 +1881,7 @@ function Library:CreateTab(name)
 	button.BackgroundColor3 = Color3.fromRGB(99, 99, 99)
 	button.BackgroundTransparency = 0.65
 	button.FontFace = Font.new("rbxassetid://12187365364", Enum.FontWeight.Regular, Enum.FontStyle.Normal)
-	button.Size = UDim2.new(0, 83, 0, 32)
+	button.Size = UDim2.new(0.173278, 0, 0.064, 0)
 	button.Parent = G2L["13"]
 	makeCorner(button, 8)
 	makeStroke(button, Color3.fromRGB(128, 128, 128), 1)
