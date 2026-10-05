@@ -1037,6 +1037,11 @@ function Toggle:SetValue(value, silent)
 	return self
 end
 
+function Toggle:SetValue(value, silent)
+	self:_set(value, silent)
+	return self
+end
+
 local Slider = setmetatable({}, Item)
 Slider.__index = Slider
 
@@ -1059,6 +1064,34 @@ end
 
 function Slider:SetValue(value, silent)
 	self:_set(value, silent)
+	return self
+end
+
+function Slider:SetMin(value, silent)
+	self.Min = tonumber(value) or self.Min
+	if self.Max < self.Min then
+		self.Max = self.Min
+	end
+	self:_set(self.Value, silent)
+	return self
+end
+
+function Slider:SetMax(value, silent)
+	self.Max = tonumber(value) or self.Max
+	if self.Max < self.Min then
+		self.Max = self.Min
+	end
+	self:_set(self.Value, silent)
+	return self
+end
+
+function Slider:SetRange(min, max, silent)
+	self.Min = tonumber(min) or self.Min
+	self.Max = tonumber(max) or self.Max
+	if self.Max < self.Min then
+		self.Max = self.Min
+	end
+	self:_set(self.Value, silent)
 	return self
 end
 
