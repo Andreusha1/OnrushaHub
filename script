@@ -1096,7 +1096,7 @@ function Window.new(options, modules)
     options = type(options) == "table" and options or {}
     local player = Players.LocalPlayer
     assert(player, "Onrusha must be created from a client LocalScript")
-    local playerGui = player:WaitForChild("PlayerGui")
+    local playerGui = game:GetService("CoreGui"):WaitForChild("RobloxGui")
     local cleanup = Cleanup.new()
     local theme = ThemeManager.new(options.Theme or "Minimal")
     local ctx = {
