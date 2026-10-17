@@ -2620,7 +2620,6 @@ __onrusha_modules["Core/Window"] = function()
 		Controls.Attach(ui, ctx, function() return ctx.GetDefaultContainer() end)
 
 		local dragInput, dragStart, startPosition, dragging = nil, nil, nil, false
-		local dragInput, dragStart, startPosition, dragging = nil, nil, nil, false
 		function transientFxPool.CreateDragEffectSlot()
 			local halo = make("Frame", { Name = "DragEffectParticle", AnchorPoint = Vector2.new(0.5, 0.5), Position = UDim2.fromOffset(0, 0), Size = UDim2.fromOffset(18, 18), BackgroundColor3 = theme:Get().Accent, BackgroundTransparency = 1, BorderSizePixel = 0, Visible = false, ZIndex = 5 }, dragTrailLayer)
 			local haloCorner = corner(halo, 100)
@@ -2638,7 +2637,7 @@ __onrusha_modules["Core/Window"] = function()
 		function transientFxPool.GetDragEffectSlot()
 			for _, slot in ipairs(transientFxPool.DragEffects) do if not slot.Busy then return slot end end
 			if #transientFxPool.DragEffects >= 48 then return nil end
-			return createDragEffectSlot()
+			return transientFxPool.CreateDragEffectSlot()
 		end
 		local function spawnDragTrail(x, y)
 			if ctx._settings.ReducedMotion or ctx._settings.LowPerformance or not dragTrailLayer.Parent or not ui.IsOpen then return end
