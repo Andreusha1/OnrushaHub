@@ -1265,9 +1265,11 @@ local function attemptKeyUnlock()
 
     task.spawn(function()
 local callOK, valid, reason, expiresIn = pcall(validateKeyOnline, entered)
-        if ctx._destroyed then
-            return
-        end
+
+if callOK and valid == true then
+    finishKeyUnlock(entered, expiresIn)
+    return
+end
 
         if callOK and valid == true then
             finishKeyUnlock(entered, expiresIn)
