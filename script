@@ -916,6 +916,7 @@ __onrusha_modules["Core/KeyGate"] = function()
     return function(d)
 local options = d.options
 local ctx = d.ctx
+local screenGui = d.screenGui or ctx.ScreenGui
 local ui = d.ui
 local theme = d.theme
 local cleanup = d.cleanup
@@ -3316,6 +3317,7 @@ __onrusha_modules["Core/Window"] = function()
 		createKeyGate({
 			options = options,
 			ctx = ctx,
+            screenGui = screenGui,
 			ui = ui,
 			theme = theme,
 			cleanup = cleanup,
