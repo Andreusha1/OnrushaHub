@@ -3,6 +3,7 @@ Onrusha v1.8.0 — single-file bundle
 Built for environments that allow loading this source as a Luau chunk.
 The UI must run on the Roblox client because it uses Players.LocalPlayer.
 ]=]
+-- TEST
 local __onrusha_modules = {}
 local __onrusha_cache = {}
 local __onrusha_loading = {}
