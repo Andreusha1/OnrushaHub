@@ -2896,8 +2896,10 @@ __onrusha_modules["Core/Window"] = function()
 		ctx._keyGateEnabled = options.KeyGate ~= false and options.KeyGateEnabled ~= false and keyGateOptions.Enabled ~= false
 		ctx._keyUnlocked = not ctx._keyGateEnabled
 		ctx._keyGateInitialized = true
-		local requiredKey = tostring(keyGateOptions.Key or options.Key or "onrusha8841")
-		local discordUrl = tostring(keyGateOptions.DiscordUrl or options.DiscordUrl or "https://discord.gg/NWyfNUzTF")
+local keyGateHttpService = game:GetService("HttpService")
+local savedKey = tostring(keyGateOptions.Key or options.Key or "")
+local validateUrl = tostring(keyGateOptions.ValidateUrl or options.ValidateUrl or "https://web-production-90f6b.up.railway.app/validate")
+local discordUrl = tostring(keyGateOptions.DiscordUrl or options.DiscordUrl or "https://discord.gg/NWyfNUzTF")
 		ui.KeyGate = { Enabled = ctx._keyGateEnabled, IsUnlocked = function() return not ctx._keyGateEnabled or ctx._keyUnlocked == true end }
 
 		local keyOverlay = make("Frame", { Name = "KeyGateOverlay", Size = UDim2.fromScale(1, 1), BackgroundColor3 = Color3.fromRGB(4, 5, 8), BackgroundTransparency = 0.2, BorderSizePixel = 0, Visible = false, ZIndex = 90 }, screenGui)
@@ -2958,41 +2960,265 @@ __onrusha_modules["Core/Window"] = function()
 			end)
 			return ok
 		end
-		local unlockInProgress = false
-		local function attemptKeyUnlock()
-			if unlockInProgress or not ctx._keyGateEnabled or ctx._keyUnlocked then return end
-			local entered = tostring(keyInput.Text or ""):gsub("^%s*(.-)%s*$", "%1")
-			if entered == requiredKey then
-				unlockInProgress = true
-				ctx._keyUnlocked = true
-				keyStatus.Text = "Access granted"
-				keyStatus.TextColor3 = Color3.fromRGB(105, 225, 160)
-				keyStatusDot.BackgroundColor3 = Color3.fromRGB(105, 225, 160)
-				keyStatusStroke.Color = Color3.fromRGB(105, 225, 160)
-				keyStatusStroke.Transparency = 0.38
-				ctx.PlaySound("On")
-				tween(ctx, keyPanelScale, 0.2, { Scale = 0.9 })
-				tween(ctx, keyOverlay, 0.22, { BackgroundTransparency = 1 })
-				task.delay(0.23, function()
-					if ctx._destroyed then return end
-					keyOverlay.Visible = false
-					ui:SetOpen(options.Open ~= false)
-				end)
-			else
-				keyInput.Text = ""
-				keyStatus.Text = "Invalid key — try again"
-				keyStatus.TextColor3 = Color3.fromRGB(255, 105, 115)
-				keyStatusDot.BackgroundColor3 = Color3.fromRGB(255, 105, 115)
-				keyStatusStroke.Color = Color3.fromRGB(255, 105, 115)
-				keyStatusStroke.Transparency = 0.36
-				ctx.PlaySound("Off")
-				local originalPos = keyInputShell.Position
-				for _, offset in ipairs({ -5, 5, -3, 3, 0 }) do
-					tween(ctx, keyInputShell, 0.045, { Position = UDim2.new(originalPos.X.Scale, originalPos.X.Offset + offset, originalPos.Y.Scale, originalPos.Y.Offset) })
-					task.wait(0.045)
-				end
-			end
-		end
+local unlockInProgress = false
+
+local function getLicenseEnvironments()
+    local environments = {}
+
+    if type(getgenv) == "function" then
+        local ok, env = pcall(getgenv)
+        if ok and type(env) == "table" then
+            table.insert(environments, env)
+        end
+    end
+
+    if type(getfenv) == "function" then
+        local ok, env = pcall(getfenv, 0)
+        if ok and type(env) == "table" then
+            table.insert(environments, env)
+        end
+    end
+
+    table.insert(environments, _G)
+    return environments
+end
+
+local function getLicenseHWID()
+    for _, env in ipairs(getLicenseEnvironments()) do
+        local getter = env.gethwid or env.get_hwid or env.getHWID
+
+        if type(getter) == "function" then
+            local ok, value = pcall(getter)
+            if ok and value ~= nil and tostring(value) ~= "" then
+                return tostring(value)
+            end
+        end
+    end
+
+    local player = game:GetService("Players").LocalPlayer
+    if player then
+        return "uid_" .. tostring(player.UserId)
+    end
+
+    return "unknown_client"
+end
+
+local function getLicenseRequester()
+    for _, env in ipairs(getLicenseEnvironments()) do
+        if type(env.request) == "function" then
+            return env.request
+        end
+
+        if type(env.http_request) == "function" then
+            return env.http_request
+        end
+
+        if type(env.syn) == "table" and type(env.syn.request) == "function" then
+            return env.syn.request
+        end
+
+        if type(env.http) == "table" and type(env.http.request) == "function" then
+            return env.http.request
+        end
+    end
+
+    return nil
+end
+
+local function validateKeyOnline(key)
+    local requester = getLicenseRequester()
+
+    if not requester then
+        return false, "request_api_unavailable"
+    end
+
+    local encodeOK, body = pcall(function()
+        return keyGateHttpService:JSONEncode({
+            key = key,
+            hwid = getLicenseHWID()
+        })
+    end)
+
+    if not encodeOK then
+        return false, "bad_request"
+    end
+
+    local requestOK, response = pcall(requester, {
+        Url = validateUrl,
+        Method = "POST",
+        Headers = {
+            ["Content-Type"] = "application/json"
+        },
+        Body = body
+    })
+
+    if not requestOK or type(response) ~= "table" then
+        return false, "server_unavailable"
+    end
+
+    local responseBody = response.Body or response.body
+
+    if type(responseBody) ~= "string" then
+        return false, "bad_server_response"
+    end
+
+    local decodeOK, result = pcall(function()
+        return keyGateHttpService:JSONDecode(responseBody)
+    end)
+
+    if not decodeOK or type(result) ~= "table" then
+        return false, "bad_server_response"
+    end
+
+    if result.valid == true then
+        return true, "valid"
+    end
+
+    return false, tostring(result.reason or "invalid_key")
+end
+
+local function setLicenseStatus(message, success)
+    local color
+
+    if success == true then
+        color = Color3.fromRGB(105, 225, 160)
+    elseif success == false then
+        color = Color3.fromRGB(255, 105, 115)
+    else
+        color = theme:Get().Muted
+    end
+
+    keyStatus.Text = message
+    keyStatus.TextColor3 = color
+    keyStatusDot.BackgroundColor3 = color
+    keyStatusStroke.Color = color
+    keyStatusStroke.Transparency = success == nil and 0.6 or 0.36
+end
+
+local function saveLicenseKey(key)
+    for _, env in ipairs(getLicenseEnvironments()) do
+        if type(env.writefile) == "function" then
+            local ok = pcall(env.writefile, "onrusha_key.txt", key)
+            if ok then
+                return true
+            end
+        end
+    end
+
+    return false
+end
+
+local function finishKeyUnlock(key)
+    if ctx._destroyed then
+        return
+    end
+
+    ctx._keyUnlocked = true
+    unlockInProgress = false
+
+    saveLicenseKey(key)
+
+    setLicenseStatus("Access granted", true)
+    verifyButton.Text = "ACCESS GRANTED"
+    ctx.PlaySound("On")
+
+    tween(ctx, keyPanelScale, 0.2, {
+        Scale = 0.9
+    })
+
+    tween(ctx, keyOverlay, 0.22, {
+        BackgroundTransparency = 1
+    })
+
+    task.delay(0.23, function()
+        if ctx._destroyed then
+            return
+        end
+
+        keyOverlay.Visible = false
+        ui:SetOpen(options.Open ~= false)
+    end)
+end
+
+local function getLicenseErrorMessage(reason)
+    local messages = {
+        invalid_key = "Key not found on website",
+        hwid_mismatch = "Key is linked to another device",
+        already_used = "Key has already been used",
+        missing_params = "Missing key or device ID",
+        request_api_unavailable = "HTTP request API unavailable",
+        server_unavailable = "Could not contact license server",
+        bad_server_response = "Invalid response from server",
+        bad_request = "Could not create validation request"
+    }
+
+    return messages[reason] or ("License rejected: " .. tostring(reason))
+end
+
+local function attemptKeyUnlock()
+    if unlockInProgress or not ctx._keyGateEnabled or ctx._keyUnlocked then
+        return
+    end
+
+    local entered = tostring(keyInput.Text or ""):gsub("^%s*(.-)%s*$", "%1")
+
+    if entered == "" then
+        setLicenseStatus("Enter your access key", false)
+        return
+    end
+
+    unlockInProgress = true
+    verifyButton.Active = false
+    verifyButton.Text = "CHECKING..."
+    setLicenseStatus("Checking key with server...", nil)
+
+    task.spawn(function()
+        local callOK, valid, reason = pcall(validateKeyOnline, entered)
+
+        if ctx._destroyed then
+            return
+        end
+
+        if callOK and valid == true then
+            finishKeyUnlock(entered)
+            return
+        end
+
+        unlockInProgress = false
+        verifyButton.Active = true
+        verifyButton.Text = "UNLOCK ONRUSHA"
+        keyInput.Text = ""
+
+        if not callOK then
+            setLicenseStatus("Validation error — check Output", false)
+            warn("[Onrusha KeyGate] Validation error:", valid)
+        else
+            setLicenseStatus(getLicenseErrorMessage(reason), false)
+            warn("[Onrusha KeyGate] Rejected:", reason)
+        end
+
+        ctx.PlaySound("Off")
+
+        local originalPos = keyInputShell.Position
+
+        for _, offset in ipairs({-5, 5, -3, 3, 0}) do
+            if ctx._destroyed then
+                break
+            end
+
+            tween(ctx, keyInputShell, 0.045, {
+                Position = UDim2.new(
+                    originalPos.X.Scale,
+                    originalPos.X.Offset + offset,
+                    originalPos.Y.Scale,
+                    originalPos.Y.Offset
+                )
+            })
+
+            task.wait(0.045)
+        end
+    end)
+end
 		cleanup:Add(verifyButton.Activated:Connect(attemptKeyUnlock))
 		cleanup:Add(keyInput.Focused:Connect(function() tween(ctx, keyInputStroke, 0.14, { Color = theme:Get().Accent, Transparency = 0.05 }); tween(ctx, keyInputShell, 0.14, { BackgroundColor3 = theme:Get().Hover }) end))
 		cleanup:Add(keyInput.FocusLost:Connect(function(enterPressed) tween(ctx, keyInputStroke, 0.14, { Color = theme:Get().Border, Transparency = 0.2 }); tween(ctx, keyInputShell, 0.14, { BackgroundColor3 = theme:Get().Card }); if enterPressed then attemptKeyUnlock() end end))
