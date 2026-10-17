@@ -1077,8 +1077,11 @@ __onrusha_modules["Core/Window"] = function()
 			corner(frame, 8)
 			make("UIPadding", { PaddingTop = UDim.new(0, 10), PaddingBottom = UDim.new(0, 10), PaddingLeft = UDim.new(0, 9), PaddingRight = UDim.new(0, 9) }, frame)
 			make("UIListLayout", { SortOrder = Enum.SortOrder.LayoutOrder, Padding = UDim.new(0, 7) }, frame)
-			local header = make("Frame", { BackgroundTransparency = 1, Size = UDim2.new(1, 0, 0, 19), LayoutOrder = 0 }, frame)
-			local label = themedText(header, ctx.Theme, sectionName, 15, "Text", true); label.Size = UDim2.new(1, -22, 1, 0)
+			local header = make("Frame", { BackgroundTransparency = 1, Size = UDim2.new(1, 0, 0, 20), LayoutOrder = 0 }, frame)
+			local headerAccent = make("Frame", { Name = "SectionAccent", Position = UDim2.fromOffset(0, 4), Size = UDim2.fromOffset(3, 12), BorderSizePixel = 0 }, header); ctx.Theme:Bind(headerAccent, { BackgroundColor3 = "Accent" }); corner(headerAccent, 2)
+			local headerRule = make("Frame", { Name = "SectionHeaderRule", Position = UDim2.new(0, 0, 1, -1), Size = UDim2.new(1, 0, 0, 1), BorderSizePixel = 0, BackgroundTransparency = 0.22 }, header); ctx.Theme:Bind(headerRule, { BackgroundColor3 = "Border" })
+			local headerRuleGradient = make("UIGradient", { Rotation = 0 }, headerRule); ctx.Theme:Bind(headerRuleGradient, { Color = function(palette) return ColorSequence.new({ ColorSequenceKeypoint.new(0, palette.Accent), ColorSequenceKeypoint.new(0.28, palette.Border), ColorSequenceKeypoint.new(1, palette.Border) }) end, Transparency = function() return NumberSequence.new({ NumberSequenceKeypoint.new(0, 0.28), NumberSequenceKeypoint.new(0.32, 0.05), NumberSequenceKeypoint.new(1, 0.35) }) end })
+			local label = themedText(header, ctx.Theme, sectionName, 15, "Text", true); label.Position = UDim2.fromOffset(10, 0); label.Size = UDim2.new(1, -34, 1, 0)
 			local tiny = themedText(header, ctx.Theme, string.upper(side), 9, "Muted", true); tiny.AnchorPoint = Vector2.new(1, 0); tiny.Position = UDim2.new(1, 0, 0, 0); tiny.Size = UDim2.fromOffset(42, 18); tiny.TextXAlignment = Enum.TextXAlignment.Right
 			local content = make("Frame", { Name = "Controls", BackgroundTransparency = 1, Size = UDim2.new(1, 0, 0, 0), AutomaticSize = Enum.AutomaticSize.Y, LayoutOrder = 1 }, frame)
 			local layout = make("UIListLayout", { SortOrder = Enum.SortOrder.LayoutOrder, Padding = UDim.new(0, 6) }, content)
@@ -1413,8 +1416,8 @@ __onrusha_modules["Core/Window"] = function()
 		ctx.ScreenGui = screenGui; cleanup:Add(screenGui); cleanup:Add(function() theme:Destroy() end)
 		cleanup:Add(function() if ctx._blur then ctx._blur:Destroy(); ctx._blur = nil end end)
 		local dragTrailLayer = make("Frame", { Name = "DragLightTrail", BackgroundTransparency = 1, Size = UDim2.fromScale(1, 1), Position = UDim2.fromScale(0, 0), BorderSizePixel = 0, ClipsDescendants = false, Visible = false, ZIndex = 3 }, screenGui)
-		local shadow = make("ImageLabel", { Name = "UIShadow", AnchorPoint = Vector2.new(0.5, 0.5), Position = UDim2.fromScale(0.5, 0.5), Size = UDim2.fromScale(0.47 * ctx._scale, 0.50 * ctx._scale), BackgroundTransparency = 1, Image = "rbxassetid://1316045217", ImageColor3 = Color3.fromRGB(0, 0, 0), ImageTransparency = 1, ScaleType = Enum.ScaleType.Slice, SliceCenter = Rect.new(10, 10, 118, 118), BorderSizePixel = 0, ZIndex = 1 }, screenGui)
-		local window = make("Frame", { Name = "Window", AnchorPoint = Vector2.new(0.5, 0.5), Position = UDim2.fromScale(0.5, 0.5), Size = UDim2.fromScale(0.50, 0.56), BackgroundTransparency = ctx._backgroundTransparency, BorderSizePixel = 0, ClipsDescendants = true, Active = true, ZIndex = 1 }, screenGui)
+		local shadow = make("ImageLabel", { Name = "UIShadow", AnchorPoint = Vector2.new(0.5, 0.5), Position = UDim2.fromScale(0.5, 0.5), Size = UDim2.fromOffset(1036 * ctx._scale, 681 * ctx._scale), BackgroundTransparency = 1, Image = "rbxassetid://1316045217", ImageColor3 = Color3.fromRGB(0, 0, 0), ImageTransparency = 1, ScaleType = Enum.ScaleType.Slice, SliceCenter = Rect.new(10, 10, 118, 118), BorderSizePixel = 0, ZIndex = 1 }, screenGui)
+		local window = make("Frame", { Name = "Window", AnchorPoint = Vector2.new(0.5, 0.5), Position = UDim2.fromScale(0.5, 0.5), Size = UDim2.fromOffset(960, 605), BackgroundTransparency = ctx._backgroundTransparency, BorderSizePixel = 0, ClipsDescendants = true, Active = true, ZIndex = 1 }, screenGui)
 		local windowParticleLayer = make("Frame", { Name = "WindowEdgeParticles", BackgroundTransparency = 1, Position = UDim2.fromScale(0, 0), Size = UDim2.fromScale(1, 1), ClipsDescendants = false, Visible = false, ZIndex = 4 }, screenGui)
 		local effectLayer = make("Frame", { Name = "BackgroundEffects", BackgroundTransparency = 1, Position = UDim2.fromScale(0, 0), Size = UDim2.fromScale(1, 1), ClipsDescendants = true, ZIndex = 1 }, window)
 		ctx.Theme:Bind(window, { BackgroundColor3 = "Background" }); corner(window, 14)
@@ -1493,7 +1496,9 @@ __onrusha_modules["Core/Window"] = function()
 		local liveMonitorButtonStroke = make("UIStroke", { Thickness = 1, Transparency = 0.48 }, liveMonitorButton); ctx.Theme:Bind(liveMonitorButtonStroke, { Color = "Border" })
 		local collapse = make("TextButton", { Name = "HideMenu", Text = "-", Font = Enum.Font.GothamBold, TextSize = 20, Size = UDim2.fromOffset(25, 29), Position = UDim2.new(1, -57, 0, 7), BorderSizePixel = 0, BackgroundTransparency = 1, AutoButtonColor = false }, topbar); ctx.Theme:Bind(collapse, { TextColor3 = "SecondaryText" })
 		local close = make("TextButton", { Name = "Close", Text = "x", Font = Enum.Font.GothamBold, TextSize = 22, Size = UDim2.fromOffset(25, 29), Position = UDim2.new(1, -2, 0, 7), AnchorPoint = Vector2.new(1, 0), BorderSizePixel = 0, BackgroundTransparency = 1, AutoButtonColor = false }, topbar); ctx.Theme:Bind(close, { TextColor3 = "SecondaryText" })
-		local pageDivider = make("Frame", { Position = UDim2.new(0, 16, 0, 55), Size = UDim2.new(1, -32, 0, 1), BorderSizePixel = 0 }, main); ctx.Theme:Bind(pageDivider, { BackgroundColor3 = "Border" })
+		local pageDivider = make("Frame", { Name = "HeaderRule", Position = UDim2.new(0, 16, 0, 55), Size = UDim2.new(1, -32, 0, 1), BorderSizePixel = 0 }, main); ctx.Theme:Bind(pageDivider, { BackgroundColor3 = "Border" })
+		local pageDividerGradient = make("UIGradient", { Rotation = 0 }, pageDivider)
+		ctx.Theme:Bind(pageDividerGradient, { Color = function(palette) return ColorSequence.new({ ColorSequenceKeypoint.new(0, palette.Border), ColorSequenceKeypoint.new(0.22, palette.Accent), ColorSequenceKeypoint.new(0.48, palette.Border), ColorSequenceKeypoint.new(1, palette.Border) }) end, Transparency = function() return NumberSequence.new({ NumberSequenceKeypoint.new(0, 0.22), NumberSequenceKeypoint.new(0.22, 0.04), NumberSequenceKeypoint.new(0.52, 0.26), NumberSequenceKeypoint.new(1, 0.46) }) end })
 		local pageHost = make("Frame", { Name = "Pages", BackgroundTransparency = 1, Position = UDim2.new(0, 15, 0, 64), Size = UDim2.new(1, -30, 1, -76), ClipsDescendants = true }, main)
 		ctx.PageHost = pageHost
 
@@ -1519,9 +1524,9 @@ __onrusha_modules["Core/Window"] = function()
 							if label.Parent and (ctx._settings.CompactMode or ctx._compactMobile) then label.Visible = false; label.TextTransparency = 0 end
 						end)
 					else
-						label.Visible = false
-						label.TextTransparency = 0
-					end
+					label.Visible = false
+					label.TextTransparency = 0
+				end
 				end
 			end
 			local function setDecorationVisible(object, visible, restTransparency)
@@ -1548,10 +1553,10 @@ __onrusha_modules["Core/Window"] = function()
 							end
 						end)
 					else
-						object.Visible = false
-						object.BackgroundTransparency = restTransparency
+					object.Visible = false
+					object.BackgroundTransparency = restTransparency
 						if object:IsA("TextLabel") then object.TextTransparency = 0 end
-					end
+				end
 				end
 			end
 			local sidebarWidth = mobile and 58 or 76
@@ -1588,7 +1593,7 @@ __onrusha_modules["Core/Window"] = function()
 
 		local ui = {}
 		ctx.UI = ui
-		ui._ctx = ctx; ui.Theme = theme; ui.Version = "2.2.2"
+		ui._ctx = ctx; ui.Theme = theme; ui.Version = "2.3.0"
 		ui._settings = ctx._settings; ui._components = ctx._components; ui._tabs = ctx._tabs
 		local mobileOpenButton = make("TextButton", { Name = "MobileOpenButton", AnchorPoint = Vector2.new(1, 1), Position = UDim2.new(1, -16, 1, -104), Size = UDim2.fromOffset(46, 46), BackgroundTransparency = 0.04, BorderSizePixel = 0, AutoButtonColor = false, Text = "O", Font = Enum.Font.GothamBlack, TextSize = 21, Visible = false, ZIndex = 80, Selectable = true }, screenGui)
 		ctx.Theme:Bind(mobileOpenButton, { BackgroundColor3 = "Accent", TextColor3 = "Background" })
@@ -1841,7 +1846,7 @@ __onrusha_modules["Core/Window"] = function()
 				shadow.Visible = false
 				window.BackgroundTransparency = ctx._backgroundTransparency
 				window.Rotation = 0
-				local effectiveScale = ctx._scale
+				local effectiveScale = ctx._scale * (ctx._viewportScale or 1)
 				local destination = ctx._restPosition or UDim2.fromScale(0.5, 0.5)
 				local firstPresentation = not ctx._hasPresented
 				local fromPosition = UDim2.new(destination.X.Scale + (0.5 - destination.X.Scale) * 0.16, destination.X.Offset * 0.84, destination.Y.Scale + (0.5 - destination.Y.Scale) * 0.16, destination.Y.Offset * 0.84 + (firstPresentation and -12 or 0))
@@ -1853,9 +1858,9 @@ __onrusha_modules["Core/Window"] = function()
 					local scaleTween = TweenService:Create(uiScale, TweenInfo.new((firstPresentation and 0.42 or 0.32) / math.max(0.2, ctx._settings.AnimationSpeed or 1), Enum.EasingStyle.Quint, Enum.EasingDirection.Out), { Scale = effectiveScale })
 					local moveTween = TweenService:Create(window, TweenInfo.new((firstPresentation and 0.42 or 0.32) / math.max(0.2, ctx._settings.AnimationSpeed or 1), Enum.EasingStyle.Quint, Enum.EasingDirection.Out), { Position = destination, Rotation = 0 })
 					ctx._activeTweens[uiScale] = scaleTween; ctx._activeTweens[window] = moveTween
-					scaleTween.Completed:Connect(function() if ctx._activeTweens[uiScale] == scaleTween then ctx._activeTweens[uiScale] = nil end end)
+				scaleTween.Completed:Connect(function() if ctx._activeTweens[uiScale] == scaleTween then ctx._activeTweens[uiScale] = nil end end)
 					moveTween.Completed:Connect(function() if ctx._activeTweens[window] == moveTween then ctx._activeTweens[window] = nil end end)
-					scaleTween:Play(); moveTween:Play()
+				scaleTween:Play(); moveTween:Play()
 				else
 					uiScale.Scale = effectiveScale; window.Position = destination; window.Rotation = 0
 				end
@@ -1864,7 +1869,7 @@ __onrusha_modules["Core/Window"] = function()
 				if ctx._minimized then
 					ctx._minimized = false
 					pageHost.Visible = true; pageDivider.Visible = true
-					window.Size = ctx._windowRatio or UDim2.fromScale(0.50, 0.56)
+					window.Size = ctx._windowRatio or UDim2.fromOffset(960, 605)
 					collapse.Text = "-"
 				end
 			else
@@ -1883,11 +1888,11 @@ __onrusha_modules["Core/Window"] = function()
 				local current = window.Position
 				ctx._restPosition = current
 				local destination = UDim2.fromScale(0.5, 0.5)
-				local finalScale = math.max(0.001, ctx._scale * 0.004)
+				local finalScale = math.max(0.001, ctx._scale * (ctx._viewportScale or 1) * 0.004)
 				local function finishClose()
 					if ctx._destroyed or ui.IsOpen or ctx._transitionId ~= transitionId then return end
 					window.Visible = false
-					uiScale.Scale = ctx._scale
+					uiScale.Scale = ctx._scale * (ctx._viewportScale or 1)
 					window.Position = ctx._restPosition or UDim2.fromScale(0.5, 0.5)
 					window.Rotation = 0
 					updateMobileOpenButton()
@@ -1958,9 +1963,10 @@ __onrusha_modules["Core/Window"] = function()
 			local scale = first == ui and second or first
 			scale = math.clamp(tonumber(scale) or 1, 0.65, 1.02)
 			ctx._scale = scale
-			tween(ctx, uiScale, 0.24, { Scale = scale })
-			local normalRatio = ctx._windowRatio or UDim2.fromScale(0.50, 0.56)
-			tween(ctx, shadow, 0.24, { Size = UDim2.fromScale((normalRatio.X.Scale + 0.05) * scale, (normalRatio.Y.Scale + 0.07) * scale) })
+			local effectiveScale = scale * (ctx._viewportScale or 1)
+			tween(ctx, uiScale, 0.24, { Scale = effectiveScale })
+			local baseSize = ctx._windowBaseSize or Vector2.new(960, 605)
+			tween(ctx, shadow, 0.24, { Size = UDim2.fromOffset((baseSize.X + 76) * effectiveScale, (baseSize.Y + 76) * effectiveScale) })
 			return ui
 		end
 		function ui.SetPosition(first, second)
@@ -2813,20 +2819,35 @@ __onrusha_modules["Core/Window"] = function()
 			local mobile = UserInputService.TouchEnabled and viewport.X < 850
 			local compactMobile = mobile and viewport.X < 520
 			local sidebarRatio = compactMobile and 0.14 or mobile and 0.22 or 0.245
-			local sizeX, sizeY = mobile and 0.90 or 0.50, mobile and 0.74 or 0.56
-			local nextRatio = UDim2.fromScale(sizeX, sizeY)
+			local nextRatio
+			local baseSize
+			local viewportFitScale = 1
+			if mobile then
+				local sizeX, sizeY = 0.90, 0.74
+				nextRatio = UDim2.fromScale(sizeX, sizeY)
+				baseSize = Vector2.new(viewport.X * sizeX, viewport.Y * sizeY)
+				if viewport.Y < 470 then viewportFitScale = math.clamp((viewport.Y - 18) / math.max(1, viewport.Y * sizeY), 0.72, 1) end
+			else
+				baseSize = Vector2.new(960, 605)
+				nextRatio = UDim2.fromOffset(baseSize.X, baseSize.Y)
+				viewportFitScale = math.clamp(math.min((viewport.X - 64) / baseSize.X, (viewport.Y - 88) / baseSize.Y), 0.62, 1)
+			end
+			ctx._viewportScale = viewportFitScale
+			ctx._windowBaseSize = baseSize
+			local effectiveScale = ctx._scale * viewportFitScale
 			local canAnimateResize = ctx._windowRatio ~= nil and ui.IsOpen == true and not ctx._settings.ReducedMotion and ctx._settings.AnimationsEnabled
 			ctx._windowRatio = nextRatio
-			tween(ctx, uiScale, 0.2, { Scale = ctx._scale })
-			local nextShadowSize = UDim2.fromScale((sizeX + 0.05) * ctx._scale, (sizeY + 0.07) * ctx._scale)
+			tween(ctx, uiScale, 0.2, { Scale = effectiveScale })
+			local nextShadowSize = UDim2.fromOffset((baseSize.X + 76) * effectiveScale, (baseSize.Y + 76) * effectiveScale)
 			if canAnimateResize then tween(ctx, window, 0.22, { Size = nextRatio }); tween(ctx, shadow, 0.22, { Size = nextShadowSize }) else window.Size = nextRatio; shadow.Size = nextShadowSize end
 			ctx._mobile = mobile
 			ctx._compactMobile = compactMobile
 			if menuKeyControl then menuKeyControl:SetVisible(not mobile) end
 			if liveMonitorButton then liveMonitorButton.Visible = not mobile end
 			applyNavigationMode(animateLayout == true)
-			local layoutSidebarRatio = ctx._settings.CompactMode and ((mobile and 58 or 76) / math.max(1, viewport.X * sizeX)) or sidebarRatio
-			local oneColumn = mobile or (viewport.X * sizeX * (1 - layoutSidebarRatio) * ctx._scale - 30) < 520
+			local contentWidth = mobile and (viewport.X * 0.90) or baseSize.X
+			local layoutSidebarRatio = ctx._settings.CompactMode and ((mobile and 58 or 76) / math.max(1, contentWidth)) or sidebarRatio
+			local oneColumn = mobile or (contentWidth * (1 - layoutSidebarRatio) * effectiveScale - 30) < 520
 			if animateLayout and ctx._oneColumn ~= nil and not mobile then oneColumn = ctx._oneColumn end
 			ctx._oneColumn = oneColumn
 			if mobile then
@@ -4002,7 +4023,7 @@ __onrusha_modules["init"] = function()
 
 	local Onrusha = {
 		Name = "Onrusha",
-		Version = "2.2.2",
+		Version = "2.3.0",
 	}
 
 	function Onrusha.Create(first, second)
