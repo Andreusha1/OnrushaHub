@@ -3,7 +3,7 @@ Onrusha v1.8.0 — single-file bundle
 Built for environments that allow loading this source as a Luau chunk.
 The UI must run on the Roblox client because it uses Players.LocalPlayer.
 ]=]
--- TEST
+--TEXTtest
 local __onrusha_modules = {}
 local __onrusha_cache = {}
 local __onrusha_loading = {}
@@ -2897,9 +2897,11 @@ __onrusha_modules["Core/Window"] = function()
 		ctx._keyGateEnabled = options.KeyGate ~= false and options.KeyGateEnabled ~= false and keyGateOptions.Enabled ~= false
 		ctx._keyUnlocked = not ctx._keyGateEnabled
 		ctx._keyGateInitialized = true
-local keyGateHttpService = game:GetService("HttpService")
-local savedKey = tostring(keyGateOptions.Key or options.Key or "")
-local validateUrl = tostring(keyGateOptions.ValidateUrl or options.ValidateUrl or "https://web-production-90f6b.up.railway.app/validate")
+local keyGateConfig = {
+    HttpService = game:GetService("HttpService"),
+    SavedKey = tostring(keyGateOptions.Key or options.Key or ""),
+    ValidateUrl = tostring(keyGateOptions.ValidateUrl or options.ValidateUrl or "https://web-production-90f6b.up.railway.app/validate")
+}
 local discordUrl = tostring(keyGateOptions.DiscordUrl or options.DiscordUrl or "https://discord.gg/NWyfNUzTF")
 		ui.KeyGate = { Enabled = ctx._keyGateEnabled, IsUnlocked = function() return not ctx._keyGateEnabled or ctx._keyUnlocked == true end }
 
@@ -3034,7 +3036,7 @@ local function validateKeyOnline(key)
     end
 
     local encodeOK, body = pcall(function()
-        return keyGateHttpService:JSONEncode({
+        return keyGateConfig.HttpService:JSONEncode({
             key = key,
             hwid = getLicenseHWID()
         })
@@ -3045,7 +3047,7 @@ local function validateKeyOnline(key)
     end
 
     local requestOK, response = pcall(requester, {
-        Url = validateUrl,
+        Url = keyGateConfig.ValidateUrl,
         Method = "POST",
         Headers = {
             ["Content-Type"] = "application/json"
@@ -3064,7 +3066,7 @@ local function validateKeyOnline(key)
     end
 
     local decodeOK, result = pcall(function()
-        return keyGateHttpService:JSONDecode(responseBody)
+        return keyGateConfig.HttpService:JSONDecode(responseBody)
     end)
 
     if not decodeOK or type(result) ~= "table" then
