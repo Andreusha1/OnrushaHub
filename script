@@ -1106,9 +1106,9 @@ local function validateKeyOnline(key)
         return false, "bad_server_response"
     end
 
-    if result.valid == true then
-        return true, "valid"
-    end
+if result.valid == true then
+    return true, "valid", tonumber(result.expires_in) or 3600
+end
 
     return false, tostring(result.reason or "invalid_key")
 end
@@ -1157,14 +1157,13 @@ local function readLicenseKey()
     return ""
 end
 
-local function finishKeyUnlock(key)
+local function finishKeyUnlock(key, expiresIn)
     if ctx._destroyed then
         return
     end
 
     ctx._keyUnlocked = true
     unlockInProgress = false
-
     saveLicenseKey(key)
 
     setLicenseStatus("Access granted", true)
@@ -1186,6 +1185,48 @@ local function finishKeyUnlock(key)
 
         keyOverlay.Visible = false
         ui:SetOpen(options.Open ~= false)
+    end)
+
+    local secondsLeft = math.max(1, math.floor(tonumber(expiresIn) or 3600))
+
+    task.delay(secondsLeft, function()
+        if ctx._destroyed or not ctx._keyUnlocked then
+            return
+        end
+
+        ctx._keyUnlocked = false
+        unlockInProgress = false
+        keyGateConfig.SavedKey = ""
+
+        for _, env in ipairs(getLicenseEnvironments()) do
+            local deleteFile = env.delfile or env.deletefile
+
+            if type(deleteFile) == "function" then
+                pcall(deleteFile, "onrusha_key.txt")
+            end
+        end
+
+        keyInput.Text = ""
+        verifyButton.Active = true
+        verifyButton.Text = "UNLOCK ONRUSHA"
+
+        ui:SetOpen(false)
+
+        keyOverlay.Visible = true
+        keyOverlay.BackgroundTransparency = 1
+        keyPanelScale.Scale = math.max(0.6, (ctx._keyTargetScale or 1) * 0.84)
+
+        setLicenseStatus("Key expired — get a new key", false)
+
+        tween(ctx, keyOverlay, 0.22, {
+            BackgroundTransparency = 0.2
+        })
+
+        tween(ctx, keyPanelScale, 0.38, {
+            Scale = ctx._keyTargetScale or 1
+        })
+
+        ctx.PlaySound("Off")
     end)
 end
 
@@ -1222,14 +1263,13 @@ local function attemptKeyUnlock()
     setLicenseStatus("Checking key with server...", nil)
 
     task.spawn(function()
-        local callOK, valid, reason = pcall(validateKeyOnline, entered)
-
+local callOK, valid, reason, expiresIn = pcall(validateKeyOnline, entered)
         if ctx._destroyed then
             return
         end
 
         if callOK and valid == true then
-            finishKeyUnlock(entered)
+            finishKeyUnlock(entered, expiresIn)
             return
         end
 
