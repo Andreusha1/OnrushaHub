@@ -1235,6 +1235,7 @@ local function getLicenseErrorMessage(reason)
         invalid_key = "Key not found on website",
         hwid_mismatch = "Key is linked to another device",
         already_used = "Key has already been used",
+        expired = "Key expired — get a new key",
         missing_params = "Missing key or device ID",
         request_api_unavailable = "HTTP request API unavailable",
         server_unavailable = "Could not contact license server",
