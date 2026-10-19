@@ -935,7 +935,7 @@ local keyGateConfig = {
     SavedKey = tostring(keyGateOptions.Key or options.Key or ""),
     ValidateUrl = tostring(keyGateOptions.ValidateUrl or options.ValidateUrl or "https://web-production-90f6b.up.railway.app/validate")
 }
-local discordUrl = tostring(keyGateOptions.DiscordUrl or options.DiscordUrl or "https://discord.gg/NWyfNUzTF")
+local discordUrl = tostring(keyGateOptions.DiscordUrl or options.DiscordUrl or "https://discord.gg/dn85ZZ3y7c")
 ui.KeyGate = { Enabled = ctx._keyGateEnabled, IsUnlocked = function() return not ctx._keyGateEnabled or ctx._keyUnlocked == true end }
 
 local keyOverlay = make("Frame", { Name = "KeyGateOverlay", Size = UDim2.fromScale(1, 1), BackgroundColor3 = Color3.fromRGB(4, 5, 8), BackgroundTransparency = 0.2, BorderSizePixel = 0, Visible = false, ZIndex = 90 }, ctx.ScreenGui)
