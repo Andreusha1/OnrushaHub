@@ -913,465 +913,465 @@ end
 
 -- ===== INTERNAL MODULE: Core/KeyGate =====
 __onrusha_modules["Core/KeyGate"] = function()
-    return function(d)
-local options = d.options
-local ctx = d.ctx
-local screenGui = d.screenGui or ctx.ScreenGui
-local ui = d.ui
-local theme = d.theme
-local cleanup = d.cleanup
-local make = d.make
-local corner = d.corner
-local themedText = d.themedText
-local tween = d.tween
-local UserInputService = d.UserInputService
-local TweenService = d.TweenService
-local keyGateOptions = type(options.KeyGate) == "table" and options.KeyGate or {}
-ctx._keyGateEnabled = options.KeyGate ~= false and options.KeyGateEnabled ~= false and keyGateOptions.Enabled ~= false
-ctx._keyUnlocked = not ctx._keyGateEnabled
-ctx._keyGateInitialized = true
-local keyGateConfig = {
-    HttpService = game:GetService("HttpService"),
-    SavedKey = tostring(keyGateOptions.Key or options.Key or ""),
-    ValidateUrl = tostring(keyGateOptions.ValidateUrl or options.ValidateUrl or "https://web-production-90f6b.up.railway.app/validate")
-}
-local discordUrl = tostring(keyGateOptions.DiscordUrl or options.DiscordUrl or "https://discord.gg/dn85ZZ3y7c")
-ui.KeyGate = { Enabled = ctx._keyGateEnabled, IsUnlocked = function() return not ctx._keyGateEnabled or ctx._keyUnlocked == true end }
+	return function(d)
+		local options = d.options
+		local ctx = d.ctx
+		local screenGui = d.screenGui or ctx.ScreenGui
+		local ui = d.ui
+		local theme = d.theme
+		local cleanup = d.cleanup
+		local make = d.make
+		local corner = d.corner
+		local themedText = d.themedText
+		local tween = d.tween
+		local UserInputService = d.UserInputService
+		local TweenService = d.TweenService
+		local keyGateOptions = type(options.KeyGate) == "table" and options.KeyGate or {}
+		ctx._keyGateEnabled = options.KeyGate ~= false and options.KeyGateEnabled ~= false and keyGateOptions.Enabled ~= false
+		ctx._keyUnlocked = not ctx._keyGateEnabled
+		ctx._keyGateInitialized = true
+		local keyGateConfig = {
+			HttpService = game:GetService("HttpService"),
+			SavedKey = tostring(keyGateOptions.Key or options.Key or ""),
+			ValidateUrl = tostring(keyGateOptions.ValidateUrl or options.ValidateUrl or "https://web-production-90f6b.up.railway.app/validate")
+		}
+		local discordUrl = tostring(keyGateOptions.DiscordUrl or options.DiscordUrl or "https://discord.gg/dn85ZZ3y7c")
+		ui.KeyGate = { Enabled = ctx._keyGateEnabled, IsUnlocked = function() return not ctx._keyGateEnabled or ctx._keyUnlocked == true end }
 
-local keyOverlay = make("Frame", { Name = "KeyGateOverlay", Size = UDim2.fromScale(1, 1), BackgroundColor3 = Color3.fromRGB(4, 5, 8), BackgroundTransparency = 0.2, BorderSizePixel = 0, Visible = false, ZIndex = 90 }, ctx.ScreenGui)
-local function makeKeyRing(name, size, transparency)
-	local ring = make("Frame", { Name = name, AnchorPoint = Vector2.new(0.5, 0.5), Position = UDim2.fromScale(0.5, 0.5), Size = UDim2.fromOffset(size, size), BackgroundTransparency = 1, BorderSizePixel = 0, ZIndex = 90 }, keyOverlay)
-	corner(ring, size)
-	local ringStroke = make("UIStroke", { Thickness = 1, Transparency = transparency }, ring)
-	theme:Bind(ringStroke, { Color = "Accent" })
-	return ring
-end
-makeKeyRing("KeyAtmosphereRingOuter", 640, 0.975)
-makeKeyRing("KeyAtmosphereRingInner", 520, 0.96)
-local keyGlow = make("Frame", { Name = "KeyPanelGlow", AnchorPoint = Vector2.new(0.5, 0.5), Position = UDim2.fromScale(0.5, 0.5), Size = UDim2.fromOffset(544, 496), BackgroundTransparency = 1, BorderSizePixel = 0, ZIndex = 90 }, keyOverlay)
-corner(keyGlow, 22)
-local keyGlowStroke = make("UIStroke", { Thickness = 7, Transparency = 0.93 }, keyGlow); theme:Bind(keyGlowStroke, { Color = "Accent" })
-local keyPanel = make("Frame", { Name = "KeyGatePanel", AnchorPoint = Vector2.new(0.5, 0.5), Position = UDim2.fromScale(0.5, 0.5), Size = UDim2.new(0, 520, 0, 472), BackgroundTransparency = 0.015, BorderSizePixel = 0, ClipsDescendants = true, ZIndex = 91 }, keyOverlay)
-theme:Bind(keyPanel, { BackgroundColor3 = "Background" })
-corner(keyPanel, 15)
-make("UISizeConstraint", { MinSize = Vector2.new(280, 400), MaxSize = Vector2.new(560, 500) }, keyPanel)
-local keyPanelScale = make("UIScale", { Scale = 0.92 }, keyPanel)
-local keyBorder = make("UIStroke", { Thickness = 1.2, Transparency = 0.18 }, keyPanel); theme:Bind(keyBorder, { Color = "Border" })
-local keyGradient = make("UIGradient", { Rotation = 90 }, keyPanel); theme:Bind(keyGradient, { Color = function(palette) return ColorSequence.new(palette.Card, palette.Background) end })
-local topAccent = make("Frame", { Name = "TopAccent", Position = UDim2.fromOffset(0, 0), Size = UDim2.new(1, 0, 0, 3), BorderSizePixel = 0, ZIndex = 92 }, keyPanel); theme:Bind(topAccent, { BackgroundColor3 = "Accent" })
-make("UIGradient", { Rotation = 0, Transparency = NumberSequence.new({ NumberSequenceKeypoint.new(0, 0.2), NumberSequenceKeypoint.new(0.5, 0), NumberSequenceKeypoint.new(1, 0.2) }) }, topAccent)
-local mark = make("Frame", { AnchorPoint = Vector2.new(0.5, 0), Position = UDim2.new(0.5, 0, 0, 25), Size = UDim2.fromOffset(54, 54), BorderSizePixel = 0, ZIndex = 92 }, keyPanel); theme:Bind(mark, { BackgroundColor3 = "Card" }); corner(mark, 13)
-local markStroke = make("UIStroke", { Thickness = 1.1, Transparency = 0.2 }, mark); theme:Bind(markStroke, { Color = "Accent" })
-local markGradient = make("UIGradient", { Rotation = 35 }, mark); theme:Bind(markGradient, { Color = function(palette) return ColorSequence.new(palette.Accent, palette.Hover) end })
-local markLabel = make("TextLabel", { BackgroundTransparency = 1, Text = "O", Font = Enum.Font.GothamBlack, TextSize = 29, Size = UDim2.fromScale(1, 1), TextXAlignment = Enum.TextXAlignment.Center, TextYAlignment = Enum.TextYAlignment.Center, ZIndex = 93 }, mark); theme:Bind(markLabel, { TextColor3 = "Background" })
-local keyEyebrow = themedText(keyPanel, theme, "ONRUSHA  /  ACCESS", 12, "Accent", true); keyEyebrow.TextXAlignment = Enum.TextXAlignment.Center; keyEyebrow.Position = UDim2.new(0, 18, 0, 87); keyEyebrow.Size = UDim2.new(1, -36, 0, 16); keyEyebrow.ZIndex = 93
-local keyTitle = themedText(keyPanel, theme, "ONRUSHA", 25, "Text", true); keyTitle.TextXAlignment = Enum.TextXAlignment.Center; keyTitle.Position = UDim2.new(0, 18, 0, 105); keyTitle.Size = UDim2.new(1, -36, 0, 31); keyTitle.ZIndex = 93
-local keySubtitle = themedText(keyPanel, theme, "Enter your key to continue.", 16, "SecondaryText", false); keySubtitle.TextXAlignment = Enum.TextXAlignment.Center; keySubtitle.Position = UDim2.new(0, 18, 0, 139); keySubtitle.Size = UDim2.new(1, -36, 0, 22); keySubtitle.ZIndex = 93
-local keyStatusShell = make("Frame", { Name = "KeyStatusShell", AnchorPoint = Vector2.new(0.5, 0), Position = UDim2.new(0.5, 0, 0, 162), Size = UDim2.fromOffset(178, 25), BackgroundTransparency = 0.08, BorderSizePixel = 0, ZIndex = 92 }, keyPanel); theme:Bind(keyStatusShell, { BackgroundColor3 = "Card" }); corner(keyStatusShell, 12)
-local keyStatusStroke = make("UIStroke", { Thickness = 1, Transparency = 0.6 }, keyStatusShell); theme:Bind(keyStatusStroke, { Color = "Border" })
-local keyStatusDot = make("Frame", { Name = "KeyStatusDot", Position = UDim2.fromOffset(11, 10), Size = UDim2.fromOffset(5, 5), BackgroundColor3 = theme:Get().Muted, BorderSizePixel = 0, ZIndex = 94 }, keyStatusShell); corner(keyStatusDot, 10)
-local keyStatus = themedText(keyPanel, theme, "Waiting for key", 13, "SecondaryText", true); keyStatus.TextXAlignment = Enum.TextXAlignment.Center; keyStatus.Position = UDim2.new(0, 18, 0, 166); keyStatus.Size = UDim2.new(1, -36, 0, 18); keyStatus.ZIndex = 93
-local keyInputShell = make("Frame", { Position = UDim2.new(0, 28, 0, 197), Size = UDim2.new(1, -56, 0, 53), BorderSizePixel = 0, ZIndex = 92 }, keyPanel); theme:Bind(keyInputShell, { BackgroundColor3 = "Card" }); corner(keyInputShell, 12)
-local keyInputStroke = make("UIStroke", { Thickness = 1.2, Transparency = 0.2 }, keyInputShell); theme:Bind(keyInputStroke, { Color = "Border" })
-local keyInput = make("TextBox", { Name = "KeyInput", Position = UDim2.fromOffset(15, 0), Size = UDim2.new(1, -30, 1, 0), BackgroundTransparency = 1, BorderSizePixel = 0, Text = "", PlaceholderText = "Enter your access key", ClearTextOnFocus = false, TextTruncate = Enum.TextTruncate.AtEnd, Font = Enum.Font.GothamMedium, TextSize = 17, TextXAlignment = Enum.TextXAlignment.Center, TextYAlignment = Enum.TextYAlignment.Center, ZIndex = 93 }, keyInputShell); theme:Bind(keyInput, { TextColor3 = "Text", PlaceholderColor3 = "SecondaryText" })
-local verifyButton = make("TextButton", { Name = "VerifyKey", Position = UDim2.new(0, 28, 0, 264), Size = UDim2.new(1, -56, 0, 49), BackgroundTransparency = 0, BorderSizePixel = 0, AutoButtonColor = false, Text = "UNLOCK ONRUSHA", Font = Enum.Font.GothamBold, TextSize = 16, ZIndex = 92 }, keyPanel); theme:Bind(verifyButton, { BackgroundColor3 = "Accent", TextColor3 = "Background" }); corner(verifyButton, 12)
-local verifyGradient = make("UIGradient", { Rotation = 0 }, verifyButton); theme:Bind(verifyGradient, { Color = function(palette) return ColorSequence.new(palette.Accent, palette.Hover) end })
-local keyDivider = make("Frame", { Position = UDim2.new(0, 28, 0, 329), Size = UDim2.new(1, -56, 0, 1), BorderSizePixel = 0, ZIndex = 92 }, keyPanel); theme:Bind(keyDivider, { BackgroundColor3 = "Border" })
-local discordCaption = themedText(keyPanel, theme, "JOIN THE COMMUNITY FOR A KEY", 13, "SecondaryText", true); discordCaption.TextXAlignment = Enum.TextXAlignment.Center; discordCaption.Position = UDim2.new(0, 28, 0, 340); discordCaption.Size = UDim2.new(1, -56, 0, 16); discordCaption.ZIndex = 93
-local discordButton = make("TextButton", { Name = "DiscordButton", Position = UDim2.new(0, 28, 0, 361), Size = UDim2.new(1, -56, 0, 41), BackgroundTransparency = 0, BorderSizePixel = 0, AutoButtonColor = false, Text = "COPY DISCORD INVITE", Font = Enum.Font.GothamMedium, TextSize = 13, ZIndex = 92 }, keyPanel); theme:Bind(discordButton, { BackgroundColor3 = "Card", TextColor3 = "Text" }); corner(discordButton, 11)
-local discordStroke = make("UIStroke", { Thickness = 1.1, Transparency = 0.25 }, discordButton); theme:Bind(discordStroke, { Color = "Border" })
-local discordLink = make("TextBox", { Name = "DiscordLink", Position = UDim2.new(0, 28, 0, 405), Size = UDim2.new(1, -56, 0, 27), BackgroundTransparency = 0.24, BorderSizePixel = 0, Text = discordUrl, ClearTextOnFocus = false, TextEditable = true, TextTruncate = Enum.TextTruncate.AtEnd, Font = Enum.Font.Gotham, TextSize = 12, TextXAlignment = Enum.TextXAlignment.Center, TextYAlignment = Enum.TextYAlignment.Center, ZIndex = 93 }, keyPanel); theme:Bind(discordLink, { BackgroundColor3 = "Card", TextColor3 = "Text" }); corner(discordLink, 7); local discordLinkStroke = make("UIStroke", { Thickness = 1, Transparency = 0.58 }, discordLink); theme:Bind(discordLinkStroke, { Color = "Accent" })
-local keyFooter = themedText(keyPanel, theme, "ONRUSHA  /  CLIENT INTERFACE  /  v" .. ui.Version, 11, "Muted", true); keyFooter.TextXAlignment = Enum.TextXAlignment.Center; keyFooter.Position = UDim2.new(0, 28, 0, 437); keyFooter.Size = UDim2.new(1, -56, 0, 16); keyFooter.ZIndex = 93
-
-local function tryClipboard(value)
-	local ok = pcall(function()
-		local env = (type(getfenv) == "function") and getfenv(0) or _G
-		local clipboard = env and env.setclipboard
-		if type(clipboard) ~= "function" and env and type(env.getgenv) == "function" then
-			local globals = env.getgenv()
-			clipboard = globals and globals.setclipboard
+		local keyOverlay = make("Frame", { Name = "KeyGateOverlay", Size = UDim2.fromScale(1, 1), BackgroundColor3 = Color3.fromRGB(4, 5, 8), BackgroundTransparency = 0.2, BorderSizePixel = 0, Visible = false, ZIndex = 90 }, ctx.ScreenGui)
+		local function makeKeyRing(name, size, transparency)
+			local ring = make("Frame", { Name = name, AnchorPoint = Vector2.new(0.5, 0.5), Position = UDim2.fromScale(0.5, 0.5), Size = UDim2.fromOffset(size, size), BackgroundTransparency = 1, BorderSizePixel = 0, ZIndex = 90 }, keyOverlay)
+			corner(ring, size)
+			local ringStroke = make("UIStroke", { Thickness = 1, Transparency = transparency }, ring)
+			theme:Bind(ringStroke, { Color = "Accent" })
+			return ring
 		end
-		if type(clipboard) ~= "function" then error("Clipboard API unavailable") end
-		clipboard(value)
-	end)
-	return ok
-end
-local unlockInProgress = false
-
-local function getLicenseEnvironments()
-    local environments = {}
-
-    if type(getgenv) == "function" then
-        local ok, env = pcall(getgenv)
-        if ok and type(env) == "table" then
-            table.insert(environments, env)
-        end
-    end
-
-    if type(getfenv) == "function" then
-        local ok, env = pcall(getfenv, 0)
-        if ok and type(env) == "table" then
-            table.insert(environments, env)
-        end
-    end
-
-    table.insert(environments, _G)
-    return environments
-end
-
-local function getLicenseHWID()
-    for _, env in ipairs(getLicenseEnvironments()) do
-        local getter = env.gethwid or env.get_hwid or env.getHWID
-
-        if type(getter) == "function" then
-            local ok, value = pcall(getter)
-            if ok and value ~= nil and tostring(value) ~= "" then
-                return tostring(value)
-            end
-        end
-    end
-
-    local player = game:GetService("Players").LocalPlayer
-    if player then
-        return "uid_" .. tostring(player.UserId)
-    end
-
-    return "unknown_client"
-end
-
-local function getLicenseRequester()
-    for _, env in ipairs(getLicenseEnvironments()) do
-        if type(env.request) == "function" then
-            return env.request
-        end
-
-        if type(env.http_request) == "function" then
-            return env.http_request
-        end
-
-        if type(env.syn) == "table" and type(env.syn.request) == "function" then
-            return env.syn.request
-        end
-
-        if type(env.http) == "table" and type(env.http.request) == "function" then
-            return env.http.request
-        end
-    end
-
-    return nil
-end
-
-local function validateKeyOnline(key)
-    local requester = getLicenseRequester()
-
-    if not requester then
-        return false, "request_api_unavailable"
-    end
-
-    local encodeOK, body = pcall(function()
-        return keyGateConfig.HttpService:JSONEncode({
-            key = key,
-            hwid = getLicenseHWID()
-        })
-    end)
-
-    if not encodeOK then
-        return false, "bad_request"
-    end
-
-    local requestOK, response = pcall(requester, {
-        Url = keyGateConfig.ValidateUrl,
-        Method = "POST",
-        Headers = {
-            ["Content-Type"] = "application/json"
-        },
-        Body = body
-    })
-
-    if not requestOK or type(response) ~= "table" then
-        return false, "server_unavailable"
-    end
-
-    local responseBody = response.Body or response.body
-
-    if type(responseBody) ~= "string" then
-        return false, "bad_server_response"
-    end
-
-    local decodeOK, result = pcall(function()
-        return keyGateConfig.HttpService:JSONDecode(responseBody)
-    end)
-
-    if not decodeOK or type(result) ~= "table" then
-        return false, "bad_server_response"
-    end
-
-if result.valid == true then
-    return true, "valid", tonumber(result.expires_in) or 3600
-end
-
-    return false, tostring(result.reason or "invalid_key")
-end
-
-local function setLicenseStatus(message, success)
-    local color
-
-    if success == true then
-        color = Color3.fromRGB(105, 225, 160)
-    elseif success == false then
-        color = Color3.fromRGB(255, 105, 115)
-    else
-        color = theme:Get().Muted
-    end
-
-    keyStatus.Text = message
-    keyStatus.TextColor3 = color
-    keyStatusDot.BackgroundColor3 = color
-    keyStatusStroke.Color = color
-    keyStatusStroke.Transparency = success == nil and 0.6 or 0.36
-end
-
-local function saveLicenseKey(key)
-    for _, env in ipairs(getLicenseEnvironments()) do
-        if type(env.writefile) == "function" then
-            local ok = pcall(env.writefile, "onrusha_key.txt", key)
-            if ok then
-                return true
-            end
-        end
-    end
-
-    return false
-end
-
-local function readLicenseKey()
-    if keyGateConfig.SavedKey ~= "" then return keyGateConfig.SavedKey end
-    for _, env in ipairs(getLicenseEnvironments()) do
-        if type(env.readfile) == "function" then
-            local ok, value = pcall(env.readfile, "onrusha_key.txt")
-            if ok and type(value) == "string" and value:gsub("%s", "") ~= "" then
-                return value:gsub("^%s*(.-)%s*$", "%1")
-            end
-        end
-    end
-    return ""
-end
-
-local function finishKeyUnlock(key, expiresIn)
-    if ctx._destroyed then
-        return
-    end
-
-    ctx._keyUnlocked = true
-    unlockInProgress = false
-    saveLicenseKey(key)
-
-    setLicenseStatus("Access granted", true)
-    verifyButton.Text = "ACCESS GRANTED"
-    ctx.PlaySound("On")
-
-    tween(ctx, keyPanelScale, 0.2, {
-        Scale = 0.9
-    })
-
-    tween(ctx, keyOverlay, 0.22, {
-        BackgroundTransparency = 1
-    })
-
-    task.delay(0.23, function()
-        if ctx._destroyed then
-            return
-        end
-
-        keyOverlay.Visible = false
-        ui:SetOpen(options.Open ~= false)
-    end)
-
-    local secondsLeft = math.max(1, math.floor(tonumber(expiresIn) or 3600))
-
-    task.delay(secondsLeft, function()
-        if ctx._destroyed or not ctx._keyUnlocked then
-            return
-        end
-
-        ctx._keyUnlocked = false
-        unlockInProgress = false
-        keyGateConfig.SavedKey = ""
-
-        for _, env in ipairs(getLicenseEnvironments()) do
-            local deleteFile = env.delfile or env.deletefile
-
-            if type(deleteFile) == "function" then
-                pcall(deleteFile, "onrusha_key.txt")
-            end
-        end
-
-        keyInput.Text = ""
-        verifyButton.Active = true
-        verifyButton.Text = "UNLOCK ONRUSHA"
-
-        ui:SetOpen(false)
-
-        keyOverlay.Visible = true
-        keyOverlay.BackgroundTransparency = 1
-        keyPanelScale.Scale = math.max(0.6, (ctx._keyTargetScale or 1) * 0.84)
-
-        setLicenseStatus("Key expired — get a new key", false)
-
-        tween(ctx, keyOverlay, 0.22, {
-            BackgroundTransparency = 0.2
-        })
-
-        tween(ctx, keyPanelScale, 0.38, {
-            Scale = ctx._keyTargetScale or 1
-        })
-
-        ctx.PlaySound("Off")
-    end)
-end
-
-local function getLicenseErrorMessage(reason)
-    local messages = {
-        invalid_key = "Key not found on website",
-        hwid_mismatch = "Key is linked to another device",
-        already_used = "Key has already been used",
-        expired = "Key expired — get a new key",
-        missing_params = "Missing key or device ID",
-        request_api_unavailable = "HTTP request API unavailable",
-        server_unavailable = "Could not contact license server",
-        bad_server_response = "Invalid response from server",
-        bad_request = "Could not create validation request"
-    }
-
-    return messages[reason] or ("License rejected: " .. tostring(reason))
-end
-
-local function attemptKeyUnlock()
-    if unlockInProgress or not ctx._keyGateEnabled or ctx._keyUnlocked then
-        return
-    end
-
-    local entered = tostring(keyInput.Text or ""):gsub("^%s*(.-)%s*$", "%1")
-
-    if entered == "" then
-        setLicenseStatus("Enter your access key", false)
-        return
-    end
-
-    unlockInProgress = true
-    verifyButton.Active = false
-    verifyButton.Text = "CHECKING..."
-    setLicenseStatus("Checking key with server...", nil)
-
-    task.spawn(function()
-local callOK, valid, reason, expiresIn = pcall(validateKeyOnline, entered)
-
-if callOK and valid == true then
-    finishKeyUnlock(entered, expiresIn)
-    return
-end
-
-        if callOK and valid == true then
-            finishKeyUnlock(entered, expiresIn)
-            return
-        end
-
-        unlockInProgress = false
-        verifyButton.Active = true
-        verifyButton.Text = "UNLOCK ONRUSHA"
-        keyInput.Text = ""
-
-        if not callOK then
-            setLicenseStatus("Validation error — check Output", false)
-            warn("[Onrusha KeyGate] Validation error:", valid)
-        else
-            setLicenseStatus(getLicenseErrorMessage(reason), false)
-            warn("[Onrusha KeyGate] Rejected:", reason)
-        end
-
-        ctx.PlaySound("Off")
-
-        local originalPos = keyInputShell.Position
-
-        for _, offset in ipairs({-5, 5, -3, 3, 0}) do
-            if ctx._destroyed then
-                break
-            end
-
-            tween(ctx, keyInputShell, 0.045, {
-                Position = UDim2.new(
-                    originalPos.X.Scale,
-                    originalPos.X.Offset + offset,
-                    originalPos.Y.Scale,
-                    originalPos.Y.Offset
-                )
-            })
-
-            task.wait(0.045)
-        end
-    end)
-end
-local savedKey = readLicenseKey()
-if savedKey ~= "" then keyInput.Text = savedKey end
-cleanup:Add(verifyButton.Activated:Connect(attemptKeyUnlock))
-cleanup:Add(keyInput.Focused:Connect(function() tween(ctx, keyInputStroke, 0.14, { Color = theme:Get().Accent, Transparency = 0.05 }); tween(ctx, keyInputShell, 0.14, { BackgroundColor3 = theme:Get().Hover }) end))
-cleanup:Add(keyInput.FocusLost:Connect(function(enterPressed) tween(ctx, keyInputStroke, 0.14, { Color = theme:Get().Border, Transparency = 0.2 }); tween(ctx, keyInputShell, 0.14, { BackgroundColor3 = theme:Get().Card }); if enterPressed then attemptKeyUnlock() end end))
-cleanup:Add(verifyButton.MouseEnter:Connect(function() tween(ctx, verifyButton, 0.12, { BackgroundColor3 = theme:Get().Hover }); tween(ctx, keyBorder, 0.12, { Transparency = 0.05 }) end))
-cleanup:Add(verifyButton.MouseLeave:Connect(function() tween(ctx, verifyButton, 0.12, { BackgroundColor3 = theme:Get().Accent }); tween(ctx, keyBorder, 0.12, { Transparency = 0.18 }) end))
-cleanup:Add(discordButton.MouseEnter:Connect(function() tween(ctx, discordButton, 0.12, { BackgroundColor3 = theme:Get().Hover }); tween(ctx, discordStroke, 0.12, { Color = theme:Get().Accent, Transparency = 0.2 }) end))
-cleanup:Add(discordButton.MouseLeave:Connect(function() tween(ctx, discordButton, 0.12, { BackgroundColor3 = theme:Get().Card }); tween(ctx, discordStroke, 0.12, { Color = theme:Get().Border, Transparency = 0.25 }) end))
-cleanup:Add(discordButton.Activated:Connect(function()
-	if tryClipboard(discordUrl) then
-		keyStatus.Text = "Discord invite copied"
-		keyStatus.TextColor3 = Color3.fromRGB(105, 225, 160)
-	else
-		keyStatus.Text = "Link selected below — press Ctrl+C"
-		keyStatus.TextColor3 = theme:Get().SecondaryText
-		discordLink:CaptureFocus()
-		discordLink.SelectionStart = 1
-		discordLink.CursorPosition = #discordUrl + 1
+		makeKeyRing("KeyAtmosphereRingOuter", 640, 0.975)
+		makeKeyRing("KeyAtmosphereRingInner", 520, 0.96)
+		local keyGlow = make("Frame", { Name = "KeyPanelGlow", AnchorPoint = Vector2.new(0.5, 0.5), Position = UDim2.fromScale(0.5, 0.5), Size = UDim2.fromOffset(544, 496), BackgroundTransparency = 1, BorderSizePixel = 0, ZIndex = 90 }, keyOverlay)
+		corner(keyGlow, 22)
+		local keyGlowStroke = make("UIStroke", { Thickness = 7, Transparency = 0.93 }, keyGlow); theme:Bind(keyGlowStroke, { Color = "Accent" })
+		local keyPanel = make("Frame", { Name = "KeyGatePanel", AnchorPoint = Vector2.new(0.5, 0.5), Position = UDim2.fromScale(0.5, 0.5), Size = UDim2.new(0, 520, 0, 472), BackgroundTransparency = 0.015, BorderSizePixel = 0, ClipsDescendants = true, ZIndex = 91 }, keyOverlay)
+		theme:Bind(keyPanel, { BackgroundColor3 = "Background" })
+		corner(keyPanel, 15)
+		make("UISizeConstraint", { MinSize = Vector2.new(280, 400), MaxSize = Vector2.new(560, 500) }, keyPanel)
+		local keyPanelScale = make("UIScale", { Scale = 0.92 }, keyPanel)
+		local keyBorder = make("UIStroke", { Thickness = 1.2, Transparency = 0.18 }, keyPanel); theme:Bind(keyBorder, { Color = "Border" })
+		local keyGradient = make("UIGradient", { Rotation = 90 }, keyPanel); theme:Bind(keyGradient, { Color = function(palette) return ColorSequence.new(palette.Card, palette.Background) end })
+		local topAccent = make("Frame", { Name = "TopAccent", Position = UDim2.fromOffset(14, 0), Size = UDim2.new(1, -28, 0, 3), BorderSizePixel = 0, ZIndex = 92 }, keyPanel); theme:Bind(topAccent, { BackgroundColor3 = "Accent" }); corner(topAccent, 2)
+		make("UIGradient", { Rotation = 0, Transparency = NumberSequence.new({ NumberSequenceKeypoint.new(0, 0.2), NumberSequenceKeypoint.new(0.5, 0), NumberSequenceKeypoint.new(1, 0.2) }) }, topAccent)
+		local mark = make("Frame", { AnchorPoint = Vector2.new(0.5, 0), Position = UDim2.new(0.5, 0, 0, 25), Size = UDim2.fromOffset(54, 54), BorderSizePixel = 0, ZIndex = 92 }, keyPanel); theme:Bind(mark, { BackgroundColor3 = "Card" }); corner(mark, 13)
+		local markStroke = make("UIStroke", { Thickness = 1.1, Transparency = 0.2 }, mark); theme:Bind(markStroke, { Color = "Accent" })
+		local markGradient = make("UIGradient", { Rotation = 35 }, mark); theme:Bind(markGradient, { Color = function(palette) return ColorSequence.new(palette.Accent, palette.Hover) end })
+		local markLabel = make("TextLabel", { BackgroundTransparency = 1, Text = "O", Font = Enum.Font.GothamBlack, TextSize = 29, Size = UDim2.fromScale(1, 1), TextXAlignment = Enum.TextXAlignment.Center, TextYAlignment = Enum.TextYAlignment.Center, ZIndex = 93 }, mark); theme:Bind(markLabel, { TextColor3 = "Background" })
+		local keyEyebrow = themedText(keyPanel, theme, "ONRUSHA  /  ACCESS", 12, "Accent", true); keyEyebrow.TextXAlignment = Enum.TextXAlignment.Center; keyEyebrow.Position = UDim2.new(0, 18, 0, 87); keyEyebrow.Size = UDim2.new(1, -36, 0, 16); keyEyebrow.ZIndex = 93
+		local keyTitle = themedText(keyPanel, theme, "ONRUSHA", 25, "Text", true); keyTitle.TextXAlignment = Enum.TextXAlignment.Center; keyTitle.Position = UDim2.new(0, 18, 0, 105); keyTitle.Size = UDim2.new(1, -36, 0, 31); keyTitle.ZIndex = 93
+		local keySubtitle = themedText(keyPanel, theme, "Enter your key to continue.", 16, "SecondaryText", false); keySubtitle.TextXAlignment = Enum.TextXAlignment.Center; keySubtitle.Position = UDim2.new(0, 18, 0, 139); keySubtitle.Size = UDim2.new(1, -36, 0, 22); keySubtitle.ZIndex = 93
+		local keyStatusShell = make("Frame", { Name = "KeyStatusShell", AnchorPoint = Vector2.new(0.5, 0), Position = UDim2.new(0.5, 0, 0, 162), Size = UDim2.fromOffset(178, 25), BackgroundTransparency = 0.08, BorderSizePixel = 0, ZIndex = 92 }, keyPanel); theme:Bind(keyStatusShell, { BackgroundColor3 = "Card" }); corner(keyStatusShell, 12)
+		local keyStatusStroke = make("UIStroke", { Thickness = 1, Transparency = 0.6 }, keyStatusShell); theme:Bind(keyStatusStroke, { Color = "Border" })
+		local keyStatusDot = make("Frame", { Name = "KeyStatusDot", Position = UDim2.fromOffset(11, 10), Size = UDim2.fromOffset(5, 5), BackgroundColor3 = theme:Get().Muted, BorderSizePixel = 0, ZIndex = 94 }, keyStatusShell); corner(keyStatusDot, 10)
+		local keyStatus = themedText(keyPanel, theme, "Waiting for key", 13, "SecondaryText", true); keyStatus.TextXAlignment = Enum.TextXAlignment.Center; keyStatus.Position = UDim2.new(0, 18, 0, 166); keyStatus.Size = UDim2.new(1, -36, 0, 18); keyStatus.ZIndex = 93
+		local keyInputShell = make("Frame", { Position = UDim2.new(0, 28, 0, 197), Size = UDim2.new(1, -56, 0, 53), BorderSizePixel = 0, ZIndex = 92 }, keyPanel); theme:Bind(keyInputShell, { BackgroundColor3 = "Card" }); corner(keyInputShell, 12)
+		local keyInputStroke = make("UIStroke", { Thickness = 1.2, Transparency = 0.2 }, keyInputShell); theme:Bind(keyInputStroke, { Color = "Border" })
+		local keyInput = make("TextBox", { Name = "KeyInput", Position = UDim2.fromOffset(15, 0), Size = UDim2.new(1, -30, 1, 0), BackgroundTransparency = 1, BorderSizePixel = 0, Text = "", PlaceholderText = "Enter your access key", ClearTextOnFocus = false, TextTruncate = Enum.TextTruncate.AtEnd, Font = Enum.Font.GothamMedium, TextSize = 17, TextXAlignment = Enum.TextXAlignment.Center, TextYAlignment = Enum.TextYAlignment.Center, ZIndex = 93 }, keyInputShell); theme:Bind(keyInput, { TextColor3 = "Text", PlaceholderColor3 = "SecondaryText" })
+		local verifyButton = make("TextButton", { Name = "VerifyKey", Position = UDim2.new(0, 28, 0, 264), Size = UDim2.new(1, -56, 0, 49), BackgroundTransparency = 0, BorderSizePixel = 0, AutoButtonColor = false, Text = "UNLOCK ONRUSHA", Font = Enum.Font.GothamBold, TextSize = 16, ZIndex = 92 }, keyPanel); theme:Bind(verifyButton, { BackgroundColor3 = "Accent", TextColor3 = "Background" }); corner(verifyButton, 12)
+		local verifyGradient = make("UIGradient", { Rotation = 0 }, verifyButton); theme:Bind(verifyGradient, { Color = function(palette) return ColorSequence.new(palette.Accent, palette.Hover) end })
+		local keyDivider = make("Frame", { Position = UDim2.new(0, 28, 0, 329), Size = UDim2.new(1, -56, 0, 1), BorderSizePixel = 0, ZIndex = 92 }, keyPanel); theme:Bind(keyDivider, { BackgroundColor3 = "Border" })
+		local discordCaption = themedText(keyPanel, theme, "JOIN THE COMMUNITY FOR A KEY", 13, "SecondaryText", true); discordCaption.TextXAlignment = Enum.TextXAlignment.Center; discordCaption.Position = UDim2.new(0, 28, 0, 340); discordCaption.Size = UDim2.new(1, -56, 0, 16); discordCaption.ZIndex = 93
+		local discordButton = make("TextButton", { Name = "DiscordButton", Position = UDim2.new(0, 28, 0, 361), Size = UDim2.new(1, -56, 0, 41), BackgroundTransparency = 0, BorderSizePixel = 0, AutoButtonColor = false, Text = "COPY DISCORD INVITE", Font = Enum.Font.GothamMedium, TextSize = 13, ZIndex = 92 }, keyPanel); theme:Bind(discordButton, { BackgroundColor3 = "Card", TextColor3 = "Text" }); corner(discordButton, 11)
+		local discordStroke = make("UIStroke", { Thickness = 1.1, Transparency = 0.25 }, discordButton); theme:Bind(discordStroke, { Color = "Border" })
+		local discordLink = make("TextBox", { Name = "DiscordLink", Position = UDim2.new(0, 28, 0, 405), Size = UDim2.new(1, -56, 0, 27), BackgroundTransparency = 0.24, BorderSizePixel = 0, Text = discordUrl, ClearTextOnFocus = false, TextEditable = true, TextTruncate = Enum.TextTruncate.AtEnd, Font = Enum.Font.Gotham, TextSize = 12, TextXAlignment = Enum.TextXAlignment.Center, TextYAlignment = Enum.TextYAlignment.Center, ZIndex = 93 }, keyPanel); theme:Bind(discordLink, { BackgroundColor3 = "Card", TextColor3 = "Text" }); corner(discordLink, 7); local discordLinkStroke = make("UIStroke", { Thickness = 1, Transparency = 0.58 }, discordLink); theme:Bind(discordLinkStroke, { Color = "Accent" })
+		local keyFooter = themedText(keyPanel, theme, "ONRUSHA  /  CLIENT INTERFACE  /  v" .. ui.Version, 11, "Muted", true); keyFooter.TextXAlignment = Enum.TextXAlignment.Center; keyFooter.Position = UDim2.new(0, 28, 0, 437); keyFooter.Size = UDim2.new(1, -56, 0, 16); keyFooter.ZIndex = 93
+
+		local function tryClipboard(value)
+			local ok = pcall(function()
+				local env = (type(getfenv) == "function") and getfenv(0) or _G
+				local clipboard = env and env.setclipboard
+				if type(clipboard) ~= "function" and env and type(env.getgenv) == "function" then
+					local globals = env.getgenv()
+					clipboard = globals and globals.setclipboard
+				end
+				if type(clipboard) ~= "function" then error("Clipboard API unavailable") end
+				clipboard(value)
+			end)
+			return ok
+		end
+		local unlockInProgress = false
+
+		local function getLicenseEnvironments()
+			local environments = {}
+
+			if type(getgenv) == "function" then
+				local ok, env = pcall(getgenv)
+				if ok and type(env) == "table" then
+					table.insert(environments, env)
+				end
+			end
+
+			if type(getfenv) == "function" then
+				local ok, env = pcall(getfenv, 0)
+				if ok and type(env) == "table" then
+					table.insert(environments, env)
+				end
+			end
+
+			table.insert(environments, _G)
+			return environments
+		end
+
+		local function getLicenseHWID()
+			for _, env in ipairs(getLicenseEnvironments()) do
+				local getter = env.gethwid or env.get_hwid or env.getHWID
+
+				if type(getter) == "function" then
+					local ok, value = pcall(getter)
+					if ok and value ~= nil and tostring(value) ~= "" then
+						return tostring(value)
+					end
+				end
+			end
+
+			local player = game:GetService("Players").LocalPlayer
+			if player then
+				return "uid_" .. tostring(player.UserId)
+			end
+
+			return "unknown_client"
+		end
+
+		local function getLicenseRequester()
+			for _, env in ipairs(getLicenseEnvironments()) do
+				if type(env.request) == "function" then
+					return env.request
+				end
+
+				if type(env.http_request) == "function" then
+					return env.http_request
+				end
+
+				if type(env.syn) == "table" and type(env.syn.request) == "function" then
+					return env.syn.request
+				end
+
+				if type(env.http) == "table" and type(env.http.request) == "function" then
+					return env.http.request
+				end
+			end
+
+			return nil
+		end
+
+		local function validateKeyOnline(key)
+			local requester = getLicenseRequester()
+
+			if not requester then
+				return false, "request_api_unavailable"
+			end
+
+			local encodeOK, body = pcall(function()
+				return keyGateConfig.HttpService:JSONEncode({
+					key = key,
+					hwid = getLicenseHWID()
+				})
+			end)
+
+			if not encodeOK then
+				return false, "bad_request"
+			end
+
+			local requestOK, response = pcall(requester, {
+				Url = keyGateConfig.ValidateUrl,
+				Method = "POST",
+				Headers = {
+					["Content-Type"] = "application/json"
+				},
+				Body = body
+			})
+
+			if not requestOK or type(response) ~= "table" then
+				return false, "server_unavailable"
+			end
+
+			local responseBody = response.Body or response.body
+
+			if type(responseBody) ~= "string" then
+				return false, "bad_server_response"
+			end
+
+			local decodeOK, result = pcall(function()
+				return keyGateConfig.HttpService:JSONDecode(responseBody)
+			end)
+
+			if not decodeOK or type(result) ~= "table" then
+				return false, "bad_server_response"
+			end
+
+			if result.valid == true then
+				return true, "valid", tonumber(result.expires_in) or 3600
+			end
+
+			return false, tostring(result.reason or "invalid_key")
+		end
+
+		local function setLicenseStatus(message, success)
+			local color
+
+			if success == true then
+				color = Color3.fromRGB(105, 225, 160)
+			elseif success == false then
+				color = Color3.fromRGB(255, 105, 115)
+			else
+				color = theme:Get().Muted
+			end
+
+			keyStatus.Text = message
+			keyStatus.TextColor3 = color
+			keyStatusDot.BackgroundColor3 = color
+			keyStatusStroke.Color = color
+			keyStatusStroke.Transparency = success == nil and 0.6 or 0.36
+		end
+
+		local function saveLicenseKey(key)
+			for _, env in ipairs(getLicenseEnvironments()) do
+				if type(env.writefile) == "function" then
+					local ok = pcall(env.writefile, "onrusha_key.txt", key)
+					if ok then
+						return true
+					end
+				end
+			end
+
+			return false
+		end
+
+		local function readLicenseKey()
+			if keyGateConfig.SavedKey ~= "" then return keyGateConfig.SavedKey end
+			for _, env in ipairs(getLicenseEnvironments()) do
+				if type(env.readfile) == "function" then
+					local ok, value = pcall(env.readfile, "onrusha_key.txt")
+					if ok and type(value) == "string" and value:gsub("%s", "") ~= "" then
+						return value:gsub("^%s*(.-)%s*$", "%1")
+					end
+				end
+			end
+			return ""
+		end
+
+		local function finishKeyUnlock(key, expiresIn)
+			if ctx._destroyed then
+				return
+			end
+
+			ctx._keyUnlocked = true
+			unlockInProgress = false
+			saveLicenseKey(key)
+
+			setLicenseStatus("Access granted", true)
+			verifyButton.Text = "ACCESS GRANTED"
+			ctx.PlaySound("On")
+
+			tween(ctx, keyPanelScale, 0.2, {
+				Scale = 0.9
+			})
+
+			tween(ctx, keyOverlay, 0.22, {
+				BackgroundTransparency = 1
+			})
+
+			task.delay(0.23, function()
+				if ctx._destroyed then
+					return
+				end
+
+				keyOverlay.Visible = false
+				ui:SetOpen(options.Open ~= false)
+			end)
+
+			local secondsLeft = math.max(1, math.floor(tonumber(expiresIn) or 3600))
+
+			task.delay(secondsLeft, function()
+				if ctx._destroyed or not ctx._keyUnlocked then
+					return
+				end
+
+				ctx._keyUnlocked = false
+				unlockInProgress = false
+				keyGateConfig.SavedKey = ""
+
+				for _, env in ipairs(getLicenseEnvironments()) do
+					local deleteFile = env.delfile or env.deletefile
+
+					if type(deleteFile) == "function" then
+						pcall(deleteFile, "onrusha_key.txt")
+					end
+				end
+
+				keyInput.Text = ""
+				verifyButton.Active = true
+				verifyButton.Text = "UNLOCK ONRUSHA"
+
+				ui:SetOpen(false)
+
+				keyOverlay.Visible = true
+				keyOverlay.BackgroundTransparency = 1
+				keyPanelScale.Scale = math.max(0.6, (ctx._keyTargetScale or 1) * 0.84)
+
+				setLicenseStatus("Key expired — get a new key", false)
+
+				tween(ctx, keyOverlay, 0.22, {
+					BackgroundTransparency = 0.2
+				})
+
+				tween(ctx, keyPanelScale, 0.38, {
+					Scale = ctx._keyTargetScale or 1
+				})
+
+				ctx.PlaySound("Off")
+			end)
+		end
+
+		local function getLicenseErrorMessage(reason)
+			local messages = {
+				invalid_key = "Key not found on website",
+				hwid_mismatch = "Key is linked to another device",
+				already_used = "Key has already been used",
+				expired = "Key expired — get a new key",
+				missing_params = "Missing key or device ID",
+				request_api_unavailable = "HTTP request API unavailable",
+				server_unavailable = "Could not contact license server",
+				bad_server_response = "Invalid response from server",
+				bad_request = "Could not create validation request"
+			}
+
+			return messages[reason] or ("License rejected: " .. tostring(reason))
+		end
+
+		local function attemptKeyUnlock()
+			if unlockInProgress or not ctx._keyGateEnabled or ctx._keyUnlocked then
+				return
+			end
+
+			local entered = tostring(keyInput.Text or ""):gsub("^%s*(.-)%s*$", "%1")
+
+			if entered == "" then
+				setLicenseStatus("Enter your access key", false)
+				return
+			end
+
+			unlockInProgress = true
+			verifyButton.Active = false
+			verifyButton.Text = "CHECKING..."
+			setLicenseStatus("Checking key with server...", nil)
+
+			task.spawn(function()
+				local callOK, valid, reason, expiresIn = pcall(validateKeyOnline, entered)
+
+				if callOK and valid == true then
+					finishKeyUnlock(entered, expiresIn)
+					return
+				end
+
+				if callOK and valid == true then
+					finishKeyUnlock(entered, expiresIn)
+					return
+				end
+
+				unlockInProgress = false
+				verifyButton.Active = true
+				verifyButton.Text = "UNLOCK ONRUSHA"
+				keyInput.Text = ""
+
+				if not callOK then
+					setLicenseStatus("Validation error — check Output", false)
+					warn("[Onrusha KeyGate] Validation error:", valid)
+				else
+					setLicenseStatus(getLicenseErrorMessage(reason), false)
+					warn("[Onrusha KeyGate] Rejected:", reason)
+				end
+
+				ctx.PlaySound("Off")
+
+				local originalPos = keyInputShell.Position
+
+				for _, offset in ipairs({-5, 5, -3, 3, 0}) do
+					if ctx._destroyed then
+						break
+					end
+
+					tween(ctx, keyInputShell, 0.045, {
+						Position = UDim2.new(
+							originalPos.X.Scale,
+							originalPos.X.Offset + offset,
+							originalPos.Y.Scale,
+							originalPos.Y.Offset
+						)
+					})
+
+					task.wait(0.045)
+				end
+			end)
+		end
+		local savedKey = readLicenseKey()
+		if savedKey ~= "" then keyInput.Text = savedKey end
+		cleanup:Add(verifyButton.Activated:Connect(attemptKeyUnlock))
+		cleanup:Add(keyInput.Focused:Connect(function() tween(ctx, keyInputStroke, 0.14, { Color = theme:Get().Accent, Transparency = 0.05 }); tween(ctx, keyInputShell, 0.14, { BackgroundColor3 = theme:Get().Hover }) end))
+		cleanup:Add(keyInput.FocusLost:Connect(function(enterPressed) tween(ctx, keyInputStroke, 0.14, { Color = theme:Get().Border, Transparency = 0.2 }); tween(ctx, keyInputShell, 0.14, { BackgroundColor3 = theme:Get().Card }); if enterPressed then attemptKeyUnlock() end end))
+		cleanup:Add(verifyButton.MouseEnter:Connect(function() tween(ctx, verifyButton, 0.12, { BackgroundColor3 = theme:Get().Hover }); tween(ctx, keyBorder, 0.12, { Transparency = 0.05 }) end))
+		cleanup:Add(verifyButton.MouseLeave:Connect(function() tween(ctx, verifyButton, 0.12, { BackgroundColor3 = theme:Get().Accent }); tween(ctx, keyBorder, 0.12, { Transparency = 0.18 }) end))
+		cleanup:Add(discordButton.MouseEnter:Connect(function() tween(ctx, discordButton, 0.12, { BackgroundColor3 = theme:Get().Hover }); tween(ctx, discordStroke, 0.12, { Color = theme:Get().Accent, Transparency = 0.2 }) end))
+		cleanup:Add(discordButton.MouseLeave:Connect(function() tween(ctx, discordButton, 0.12, { BackgroundColor3 = theme:Get().Card }); tween(ctx, discordStroke, 0.12, { Color = theme:Get().Border, Transparency = 0.25 }) end))
+		cleanup:Add(discordButton.Activated:Connect(function()
+			if tryClipboard(discordUrl) then
+				keyStatus.Text = "Discord invite copied"
+				keyStatus.TextColor3 = Color3.fromRGB(105, 225, 160)
+			else
+				keyStatus.Text = "Link selected below — press Ctrl+C"
+				keyStatus.TextColor3 = theme:Get().SecondaryText
+				discordLink:CaptureFocus()
+				discordLink.SelectionStart = 1
+				discordLink.CursorPosition = #discordUrl + 1
+			end
+			ctx.PlaySound("Notification")
+		end))
+		cleanup:Add(keyInput:GetPropertyChangedSignal("Text"):Connect(function()
+			if not ctx._keyUnlocked then
+				keyStatus.Text = "Waiting for key"
+				keyStatus.TextColor3 = theme:Get().Muted
+				keyStatusDot.BackgroundColor3 = theme:Get().Muted
+				keyStatusStroke.Color = theme:Get().Border
+				keyStatusStroke.Transparency = 0.6
+			end
+		end))
+		local function updateKeyGateLayout()
+			local viewport = workspace.CurrentCamera and workspace.CurrentCamera.ViewportSize or Vector2.new(1280, 720)
+			local targetScale
+			if viewport.Y < 480 and viewport.X >= 600 then
+				keyPanel.Size = UDim2.new(0.88, 0, 0, 472)
+				targetScale = math.clamp((viewport.Y - 14) / 472, 0.68, 1)
+			elseif viewport.X < 480 then
+				keyPanel.Size = UDim2.new(0.92, 0, 0, 472)
+				targetScale = math.clamp((viewport.Y - 24) / 472, 0.70, 1)
+			else
+				keyPanel.Size = UDim2.new(0, math.min(520, viewport.X - 48), 0, 472)
+				targetScale = math.clamp((viewport.Y - 30) / 472, 0.72, 1)
+			end
+			ctx._keyTargetScale = targetScale
+			keyPanelScale.Scale = targetScale
+			keyGlow.Size = UDim2.new(keyPanel.Size.X.Scale, keyPanel.Size.X.Offset + 24, 0, 496)
+		end
+		if workspace.CurrentCamera then cleanup:Add(workspace.CurrentCamera:GetPropertyChangedSignal("ViewportSize"):Connect(updateKeyGateLayout)) end
+		cleanup:Add(UserInputService:GetPropertyChangedSignal("TouchEnabled"):Connect(updateKeyGateLayout))
+		updateKeyGateLayout()
+		if ctx._keyGateEnabled and savedKey ~= "" then task.defer(attemptKeyUnlock) end
+		if ctx._keyGateEnabled then
+			keyOverlay.Visible = true
+			local targetScale = ctx._keyTargetScale or 1
+			keyPanel.Rotation = -1.2
+			keyPanelScale.Scale = math.max(0.6, targetScale * 0.84)
+			tween(ctx, keyPanelScale, 0.38, { Scale = targetScale })
+			if ctx._settings.AnimationsEnabled and not ctx._settings.ReducedMotion then TweenService:Create(keyPanel, TweenInfo.new(0.38, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), { Rotation = 0 }):Play() else keyPanel.Rotation = 0 end
+		end
 	end
-	ctx.PlaySound("Notification")
-end))
-cleanup:Add(keyInput:GetPropertyChangedSignal("Text"):Connect(function()
-	if not ctx._keyUnlocked then
-		keyStatus.Text = "Waiting for key"
-		keyStatus.TextColor3 = theme:Get().Muted
-		keyStatusDot.BackgroundColor3 = theme:Get().Muted
-		keyStatusStroke.Color = theme:Get().Border
-		keyStatusStroke.Transparency = 0.6
-	end
-end))
-local function updateKeyGateLayout()
-	local viewport = workspace.CurrentCamera and workspace.CurrentCamera.ViewportSize or Vector2.new(1280, 720)
-	local targetScale
-	if viewport.Y < 480 and viewport.X >= 600 then
-		keyPanel.Size = UDim2.new(0.88, 0, 0, 472)
-		targetScale = math.clamp((viewport.Y - 14) / 472, 0.68, 1)
-	elseif viewport.X < 480 then
-		keyPanel.Size = UDim2.new(0.92, 0, 0, 472)
-		targetScale = math.clamp((viewport.Y - 24) / 472, 0.70, 1)
-	else
-		keyPanel.Size = UDim2.new(0, math.min(520, viewport.X - 48), 0, 472)
-		targetScale = math.clamp((viewport.Y - 30) / 472, 0.72, 1)
-	end
-	ctx._keyTargetScale = targetScale
-	keyPanelScale.Scale = targetScale
-	keyGlow.Size = UDim2.new(keyPanel.Size.X.Scale, keyPanel.Size.X.Offset + 24, 0, 496)
-end
-if workspace.CurrentCamera then cleanup:Add(workspace.CurrentCamera:GetPropertyChangedSignal("ViewportSize"):Connect(updateKeyGateLayout)) end
-cleanup:Add(UserInputService:GetPropertyChangedSignal("TouchEnabled"):Connect(updateKeyGateLayout))
-updateKeyGateLayout()
-if ctx._keyGateEnabled and savedKey ~= "" then task.defer(attemptKeyUnlock) end
-if ctx._keyGateEnabled then
-	keyOverlay.Visible = true
-	local targetScale = ctx._keyTargetScale or 1
-	keyPanel.Rotation = -1.2
-	keyPanelScale.Scale = math.max(0.6, targetScale * 0.84)
-	tween(ctx, keyPanelScale, 0.38, { Scale = targetScale })
-	if ctx._settings.AnimationsEnabled and not ctx._settings.ReducedMotion then TweenService:Create(keyPanel, TweenInfo.new(0.38, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), { Rotation = 0 }):Play() else keyPanel.Rotation = 0 end
-end
-    end
 end
 
 -- ===== INTERNAL MODULE: Core/Window =====
@@ -1960,6 +1960,40 @@ __onrusha_modules["Core/Window"] = function()
 		local liveMonitorButtonStroke = make("UIStroke", { Thickness = 1, Transparency = 0.48 }, liveMonitorButton); ctx.Theme:Bind(liveMonitorButtonStroke, { Color = "Border" })
 		local collapse = make("TextButton", { Name = "HideMenu", Text = "-", Font = Enum.Font.GothamBold, TextSize = 20, Size = UDim2.fromOffset(25, 29), Position = UDim2.new(1, -57, 0, 7), BorderSizePixel = 0, BackgroundTransparency = 1, AutoButtonColor = false }, topbar); ctx.Theme:Bind(collapse, { TextColor3 = "SecondaryText" })
 		local close = make("TextButton", { Name = "Close", Text = "x", Font = Enum.Font.GothamBold, TextSize = 22, Size = UDim2.fromOffset(25, 29), Position = UDim2.new(1, -2, 0, 7), AnchorPoint = Vector2.new(1, 0), BorderSizePixel = 0, BackgroundTransparency = 1, AutoButtonColor = false }, topbar); ctx.Theme:Bind(close, { TextColor3 = "SecondaryText" })
+		local closeConfirm = (function()
+			local overlay = make("Frame", { Name = "CloseConfirmOverlay", Size = UDim2.fromScale(1, 1), Position = UDim2.fromScale(0, 0), BackgroundTransparency = 0.2, BorderSizePixel = 0, Visible = false, Active = true, ZIndex = 70 }, window)
+			ctx.Theme:Bind(overlay, { BackgroundColor3 = "Background" })
+			local overlaycorner = corner(overlay, 12)
+			local panel = make("Frame", { Name = "CloseConfirmPanel", AnchorPoint = Vector2.new(0.5, 0.5), Position = UDim2.fromScale(0.5, 0.5), Size = UDim2.fromOffset(360, 182), BorderSizePixel = 0, ClipsDescendants = true, ZIndex = 71 }, overlay)
+			ctx.Theme:Bind(panel, { BackgroundColor3 = "Card" }); corner(panel, 12)
+			local panelStroke = make("UIStroke", { Thickness = 1, Transparency = 0.2 }, panel); ctx.Theme:Bind(panelStroke, { Color = "Border" })
+			local accentLine = make("Frame", { Name = "ConfirmAccent", Position = UDim2.fromOffset(14, 0), Size = UDim2.new(1, -28, 0, 2), BorderSizePixel = 0, ZIndex = 72 }, panel); ctx.Theme:Bind(accentLine, { BackgroundColor3 = "Accent" }); corner(accentLine, 2)
+			local title = themedText(panel, ctx.Theme, "Close Onrusha?", 17, "Text", true)
+			title.Position = UDim2.fromOffset(20, 19); title.Size = UDim2.new(1, -40, 0, 26); title.ZIndex = 73
+			local message = themedText(panel, ctx.Theme, "Active toggles will be turned off. To open Onrusha again, run the script once more.", 12, "SecondaryText", false)
+			message.Position = UDim2.fromOffset(20, 51); message.Size = UDim2.new(1, -40, 0, 43); message.TextWrapped = true; message.TextYAlignment = Enum.TextYAlignment.Top; message.ZIndex = 73
+			local noButton = make("TextButton", { Name = "CloseConfirmNo", Position = UDim2.new(0, 20, 1, -51), Size = UDim2.new(0.5, -27, 0, 32), BorderSizePixel = 0, AutoButtonColor = false, BackgroundTransparency = 0, Text = "NO, KEEP OPEN", Font = Enum.Font.GothamBold, TextSize = 11, ZIndex = 73 }, panel)
+			ctx.Theme:Bind(noButton, { BackgroundColor3 = "Hover", TextColor3 = "Text" }); corner(noButton, 8)
+			local noStroke = make("UIStroke", { Thickness = 1, Transparency = 0.38 }, noButton); ctx.Theme:Bind(noStroke, { Color = "Border" })
+			local yesButton = make("TextButton", { Name = "CloseConfirmYes", Position = UDim2.new(0.5, 7, 1, -51), Size = UDim2.new(0.5, -27, 0, 32), BorderSizePixel = 0, AutoButtonColor = false, BackgroundTransparency = 0, Text = "YES, CLOSE", Font = Enum.Font.GothamBold, TextSize = 11, ZIndex = 73 }, panel)
+			ctx.Theme:Bind(yesButton, { BackgroundColor3 = "Accent", TextColor3 = "Background" }); corner(yesButton, 8)
+			local scale = make("UIScale", { Scale = 0.96 }, panel)
+			local dialog = { Overlay = overlay, Yes = yesButton, No = noButton }
+			function dialog.Show()
+				overlay.Visible = true
+				if ctx._settings.AnimationsEnabled and not ctx._settings.ReducedMotion then
+					scale.Scale = 0.96
+					tween(ctx, scale, 0.16, { Scale = 1 })
+				else
+					scale.Scale = 1
+				end
+			end
+			function dialog.Hide()
+				overlay.Visible = false
+				scale.Scale = 0.96
+			end
+			return dialog
+		end)()
 		local pageDivider = make("Frame", { Name = "HeaderRule", Position = UDim2.new(0, 16, 0, 55), Size = UDim2.new(1, -32, 0, 1), BorderSizePixel = 0 }, main); ctx.Theme:Bind(pageDivider, { BackgroundColor3 = "Border" })
 		local pageDividerGradient = make("UIGradient", { Rotation = 0 }, pageDivider)
 		ctx.Theme:Bind(pageDividerGradient, { Color = function(palette) return ColorSequence.new({ ColorSequenceKeypoint.new(0, palette.Border), ColorSequenceKeypoint.new(0.22, palette.Accent), ColorSequenceKeypoint.new(0.48, palette.Border), ColorSequenceKeypoint.new(1, palette.Border) }) end, Transparency = function() return NumberSequence.new({ NumberSequenceKeypoint.new(0, 0.22), NumberSequenceKeypoint.new(0.22, 0.04), NumberSequenceKeypoint.new(0.52, 0.26), NumberSequenceKeypoint.new(1, 0.46) }) end })
@@ -1988,9 +2022,9 @@ __onrusha_modules["Core/Window"] = function()
 							if label.Parent and (ctx._settings.CompactMode or ctx._compactMobile) then label.Visible = false; label.TextTransparency = 0 end
 						end)
 					else
-					label.Visible = false
-					label.TextTransparency = 0
-				end
+						label.Visible = false
+						label.TextTransparency = 0
+					end
 				end
 			end
 			local function setDecorationVisible(object, visible, restTransparency)
@@ -2017,10 +2051,10 @@ __onrusha_modules["Core/Window"] = function()
 							end
 						end)
 					else
-					object.Visible = false
-					object.BackgroundTransparency = restTransparency
+						object.Visible = false
+						object.BackgroundTransparency = restTransparency
 						if object:IsA("TextLabel") then object.TextTransparency = 0 end
-				end
+					end
 				end
 			end
 			local sidebarWidth = mobile and 58 or 76
@@ -2322,9 +2356,9 @@ __onrusha_modules["Core/Window"] = function()
 					local scaleTween = TweenService:Create(uiScale, TweenInfo.new((firstPresentation and 0.42 or 0.32) / math.max(0.2, ctx._settings.AnimationSpeed or 1), Enum.EasingStyle.Quint, Enum.EasingDirection.Out), { Scale = effectiveScale })
 					local moveTween = TweenService:Create(window, TweenInfo.new((firstPresentation and 0.42 or 0.32) / math.max(0.2, ctx._settings.AnimationSpeed or 1), Enum.EasingStyle.Quint, Enum.EasingDirection.Out), { Position = destination, Rotation = 0 })
 					ctx._activeTweens[uiScale] = scaleTween; ctx._activeTweens[window] = moveTween
-				scaleTween.Completed:Connect(function() if ctx._activeTweens[uiScale] == scaleTween then ctx._activeTweens[uiScale] = nil end end)
+					scaleTween.Completed:Connect(function() if ctx._activeTweens[uiScale] == scaleTween then ctx._activeTweens[uiScale] = nil end end)
 					moveTween.Completed:Connect(function() if ctx._activeTweens[window] == moveTween then ctx._activeTweens[window] = nil end end)
-				scaleTween:Play(); moveTween:Play()
+					scaleTween:Play(); moveTween:Play()
 				else
 					uiScale.Scale = effectiveScale; window.Position = destination; window.Rotation = 0
 				end
@@ -3061,7 +3095,25 @@ __onrusha_modules["Core/Window"] = function()
 		function ui.DeleteConfig(first, second) return ctx.Configs:Delete(first == ui and second or first) end
 		function ui.ListConfigs() return ctx.Configs:List() end
 		function ui.Destroy()
-			if ctx._destroyed then return end
+			if ctx._destroyed or ctx._destroying then return end
+			ctx._destroying = true
+			-- Выключаем активные переключатели до уничтожения компонентов, чтобы их OnChanged остановили пользовательские циклы.
+			for _, component in pairs(ctx._components) do
+				if component and not component._destroyed and type(component.Get) == "function" and type(component.Set) == "function" then
+					local kind = component.Type
+					if kind == "Toggle" or kind == "Checkbox" then
+						if component:Get() == true then pcall(function() component:Set(false) end) end
+					elseif kind == "SliderToggle" then
+						local state = component:Get()
+						if type(state) == "table" and state.Enabled == true then
+							pcall(function() component:Set({ Enabled = false, Value = state.Value }) end)
+						end
+					elseif kind == "MultiToggle" then
+						local state = component:Get()
+						if type(state) == "table" and next(state) ~= nil then pcall(function() component:Set({}) end) end
+					end
+				end
+			end
 			local saved = ctx._savedMouse
 			if saved then
 				UserInputService.MouseBehavior = saved.Behavior
@@ -3273,8 +3325,13 @@ __onrusha_modules["Core/Window"] = function()
 		cleanup:Add(searchBox:GetPropertyChangedSignal("Text"):Connect(function() ui:Search(searchBox.Text) end))
 		cleanup:Add(searchBox.Focused:Connect(function() tween(ctx, searchStroke, 0.16, { Color = theme:Get().Accent, Transparency = 0.05 }); tween(ctx, searchFrame, 0.16, { BackgroundColor3 = theme:Get().Hover }) end))
 		cleanup:Add(searchBox.FocusLost:Connect(function() tween(ctx, searchStroke, 0.16, { Color = theme:Get().Border, Transparency = 0.28 }); tween(ctx, searchFrame, 0.16, { BackgroundColor3 = theme:Get().Card }) end))
-		cleanup:Add(close.Activated:Connect(function() ui:SetOpen(false) end))
+		cleanup:Add(close.Activated:Connect(function() closeConfirm.Show() end))
 		cleanup:Add(collapse.Activated:Connect(function() ui:SetOpen(false) end))
+		cleanup:Add(closeConfirm.No.Activated:Connect(function() closeConfirm.Hide() end))
+		cleanup:Add(closeConfirm.Yes.Activated:Connect(function()
+			closeConfirm.Hide()
+			ui:Destroy()
+		end))
 		local function updateViewport(animateLayout)
 			local camera = workspace.CurrentCamera
 			if not camera then return end
@@ -3360,7 +3417,7 @@ __onrusha_modules["Core/Window"] = function()
 		createKeyGate({
 			options = options,
 			ctx = ctx,
-            screenGui = screenGui,
+			screenGui = screenGui,
 			ui = ui,
 			theme = theme,
 			cleanup = cleanup,
