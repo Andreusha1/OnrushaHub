@@ -1,5 +1,5 @@
 --[=[
-Onrusha v1.8.0 — single-file bundle
+Onrusha v1.8.0 — single-file bundle (Settings Viewport Fix)
 Built for environments that allow loading this source as a Luau chunk.
 The UI must run on the Roblox client because it uses Players.LocalPlayer.
 ]=]
@@ -970,7 +970,13 @@ __onrusha_modules["Core/KeyGate"] = function()
 		local keyStatusShell = make("Frame", { Name = "KeyStatusShell", AnchorPoint = Vector2.new(0.5, 0), Position = UDim2.new(0.5, 0, 0, 162), Size = UDim2.fromOffset(178, 25), BackgroundTransparency = 0.08, BorderSizePixel = 0, ZIndex = 92 }, keyPanel); theme:Bind(keyStatusShell, { BackgroundColor3 = "Card" }); corner(keyStatusShell, 12)
 		local keyStatusStroke = make("UIStroke", { Thickness = 1, Transparency = 0.6 }, keyStatusShell); theme:Bind(keyStatusStroke, { Color = "Border" })
 		local keyStatusDot = make("Frame", { Name = "KeyStatusDot", Position = UDim2.fromOffset(11, 10), Size = UDim2.fromOffset(5, 5), BackgroundColor3 = theme:Get().Muted, BorderSizePixel = 0, ZIndex = 94 }, keyStatusShell); corner(keyStatusDot, 10)
-		local keyStatus = themedText(keyPanel, theme, "Waiting for key", 13, "SecondaryText", true); keyStatus.TextXAlignment = Enum.TextXAlignment.Center; keyStatus.Position = UDim2.new(0, 18, 0, 166); keyStatus.Size = UDim2.new(1, -36, 0, 18); keyStatus.ZIndex = 93
+		local keyStatus = themedText(keyPanel, theme, "Waiting for key", 13, "SecondaryText", true)
+		keyStatus.TextXAlignment = Enum.TextXAlignment.Center
+		keyStatus.AnchorPoint = Vector2.new(0.5, 0.5)
+		keyStatus.Position = UDim2.new(0.5, 0, 0.5, 0)
+		keyStatus.Size = UDim2.new(1, -36, 0, 18)
+		keyStatus.ZIndex = 93
+		keyStatus.Parent = keyStatusShell
 		local keyInputShell = make("Frame", { Position = UDim2.new(0, 28, 0, 197), Size = UDim2.new(1, -56, 0, 53), BorderSizePixel = 0, ZIndex = 92 }, keyPanel); theme:Bind(keyInputShell, { BackgroundColor3 = "Card" }); corner(keyInputShell, 12)
 		local keyInputStroke = make("UIStroke", { Thickness = 1.2, Transparency = 0.2 }, keyInputShell); theme:Bind(keyInputStroke, { Color = "Border" })
 		local keyInput = make("TextBox", { Name = "KeyInput", Position = UDim2.fromOffset(15, 0), Size = UDim2.new(1, -30, 1, 0), BackgroundTransparency = 1, BorderSizePixel = 0, Text = "", PlaceholderText = "Enter your access key", ClearTextOnFocus = false, TextTruncate = Enum.TextTruncate.AtEnd, Font = Enum.Font.GothamMedium, TextSize = 17, TextXAlignment = Enum.TextXAlignment.Center, TextYAlignment = Enum.TextYAlignment.Center, ZIndex = 93 }, keyInputShell); theme:Bind(keyInput, { TextColor3 = "Text", PlaceholderColor3 = "SecondaryText" })
@@ -978,9 +984,16 @@ __onrusha_modules["Core/KeyGate"] = function()
 		local verifyGradient = make("UIGradient", { Rotation = 0 }, verifyButton); theme:Bind(verifyGradient, { Color = function(palette) return ColorSequence.new(palette.Accent, palette.Hover) end })
 		local keyDivider = make("Frame", { Position = UDim2.new(0, 28, 0, 329), Size = UDim2.new(1, -56, 0, 1), BorderSizePixel = 0, ZIndex = 92 }, keyPanel); theme:Bind(keyDivider, { BackgroundColor3 = "Border" })
 		local discordCaption = themedText(keyPanel, theme, "JOIN THE COMMUNITY FOR A KEY", 13, "SecondaryText", true); discordCaption.TextXAlignment = Enum.TextXAlignment.Center; discordCaption.Position = UDim2.new(0, 28, 0, 340); discordCaption.Size = UDim2.new(1, -56, 0, 16); discordCaption.ZIndex = 93
-		local discordButton = make("TextButton", { Name = "DiscordButton", Position = UDim2.new(0, 28, 0, 361), Size = UDim2.new(1, -56, 0, 41), BackgroundTransparency = 0, BorderSizePixel = 0, AutoButtonColor = false, Text = "COPY DISCORD INVITE", Font = Enum.Font.GothamMedium, TextSize = 13, ZIndex = 92 }, keyPanel); theme:Bind(discordButton, { BackgroundColor3 = "Card", TextColor3 = "Text" }); corner(discordButton, 11)
+		local discordButton = make("TextButton", { Name = "DiscordButton", Position = UDim2.new(0, 28, 0, 361), Size = UDim2.new(1, -56, 0, 41), BackgroundTransparency = 0, BorderSizePixel = 0, AutoButtonColor = false, Text = "COPY DISCORD INVITE", Font = Enum.Font.GothamMedium, TextScaled = true, ZIndex = 92 }, keyPanel); theme:Bind(discordButton, { BackgroundColor3 = "Card", TextColor3 = "Text" }); corner(discordButton, 11)
+		
 		local discordStroke = make("UIStroke", { Thickness = 1.1, Transparency = 0.25 }, discordButton); theme:Bind(discordStroke, { Color = "Border" })
-		local discordLink = make("TextBox", { Name = "DiscordLink", Position = UDim2.new(0, 28, 0, 405), Size = UDim2.new(1, -56, 0, 27), BackgroundTransparency = 0.24, BorderSizePixel = 0, Text = discordUrl, ClearTextOnFocus = false, TextEditable = true, TextTruncate = Enum.TextTruncate.AtEnd, Font = Enum.Font.Gotham, TextSize = 12, TextXAlignment = Enum.TextXAlignment.Center, TextYAlignment = Enum.TextYAlignment.Center, ZIndex = 93 }, keyPanel); theme:Bind(discordLink, { BackgroundColor3 = "Card", TextColor3 = "Text" }); corner(discordLink, 7); local discordLinkStroke = make("UIStroke", { Thickness = 1, Transparency = 0.58 }, discordLink); theme:Bind(discordLinkStroke, { Color = "Accent" })
+		local discordLink = make("TextBox", { Name = "DiscordLink", Position = UDim2.new(0, 28, 0, 405), Size = UDim2.new(1, -56, 0, 27), BackgroundTransparency = 0.24, BorderSizePixel = 0, Text = discordUrl, ClearTextOnFocus = false, TextEditable = true, TextTruncate = Enum.TextTruncate.AtEnd, Font = Enum.Font.Gotham, TextScaled = true, TextXAlignment = Enum.TextXAlignment.Center, TextYAlignment = Enum.TextYAlignment.Center, ZIndex = 93 }, keyPanel); theme:Bind(discordLink, { BackgroundColor3 = "Card", TextColor3 = "Text" }); corner(discordLink, 7)
+		local discordmaxsize = Instance.new("UITextSizeConstraint")
+		discordmaxsize.MaxTextSize = 15
+		discordmaxsize.Parent = discordLink
+		local discordbuttonmax = discordmaxsize:Clone()
+		discordbuttonmax.Parent = discordButton
+		discordbuttonmax.MaxTextSize = 13
 		local keyFooter = themedText(keyPanel, theme, "ONRUSHA  /  CLIENT INTERFACE  /  v" .. ui.Version, 11, "Muted", true); keyFooter.TextXAlignment = Enum.TextXAlignment.Center; keyFooter.Position = UDim2.new(0, 28, 0, 437); keyFooter.Size = UDim2.new(1, -56, 0, 16); keyFooter.ZIndex = 93
 
 		local function tryClipboard(value)
@@ -3559,7 +3572,7 @@ __onrusha_modules["Components/Controls"] = function()
 
 		local card = make("Frame", {
 			Name = "Component_" .. id:gsub("[^%w_%-]", "_"), BackgroundTransparency = 0,
-			BorderSizePixel = 0, Size = UDim2.new(1, 0, 0, 1), AutomaticSize = Enum.AutomaticSize.Y,
+			BorderSizePixel = 0, Size = UDim2.new(1, scope._isSettingsScope and -10 or 0, 0, 1), AutomaticSize = Enum.AutomaticSize.Y,
 			LayoutOrder = order, ClipsDescendants = false,
 		}, parent)
 		ctx.Theme:Bind(card, { BackgroundColor3 = "Card" })
@@ -3734,21 +3747,169 @@ __onrusha_modules["Components/Controls"] = function()
 		function component:CreateSettings(settingsOptions)
 			if self._settingsScope then return self._settingsScope end
 			settingsOptions = normalizeOptions(settingsOptions)
-			local panel = make("Frame", { Name = "NestedSettings", BackgroundTransparency = 0, BorderSizePixel = 0, Size = UDim2.new(1, 0, 0, 0), AutomaticSize = Enum.AutomaticSize.None, ClipsDescendants = true, Visible = false, LayoutOrder = 2 }, card)
+
+			-- Панель настроек отделена от прокручиваемого списка.
+			-- Благодаря этому заголовок всегда остаётся сверху, а длинный список не выходит за рамки.
+			local panel = make("Frame", {
+				Name = "NestedSettings",
+				BackgroundTransparency = 0,
+				BorderSizePixel = 0,
+				Size = UDim2.new(1, 0, 0, 0),
+				AutomaticSize = Enum.AutomaticSize.None,
+				ClipsDescendants = true,
+				Visible = false,
+				LayoutOrder = 2,
+				ZIndex = 3,
+			}, card)
 			ctx.Theme:Bind(panel, { BackgroundColor3 = "Sidebar" })
-			corner(panel, 7)
-			local panelPadding = make("UIPadding", { PaddingTop = UDim.new(0, 8), PaddingBottom = UDim.new(0, 8), PaddingLeft = UDim.new(0, 8), PaddingRight = UDim.new(0, 8) }, panel)
-			local layout = make("UIListLayout", { Padding = UDim.new(0, 6), SortOrder = Enum.SortOrder.LayoutOrder }, panel)
-			local function updatePanelSize()
-				local targetHeight = layout.AbsoluteContentSize.Y + panelPadding.PaddingTop.Offset + panelPadding.PaddingBottom.Offset
-				if panel.Visible then play(ctx, panel, 0.2, { Size = UDim2.new(1, 0, 0, targetHeight) }) end
+			corner(panel, 8)
+			local panelStroke = stroke(panel, ctx, "Border")
+			panelStroke.Transparency = 0.24
+
+			local headerHeight = 31
+			local header = make("Frame", {
+				Name = "SettingsHeader",
+				BackgroundTransparency = 1,
+				Position = UDim2.fromOffset(10, 0),
+				Size = UDim2.new(1, -20, 0, headerHeight),
+				ZIndex = 4,
+			}, panel)
+			local headerTitle = textLabel(header, ctx, tostring(settingsOptions.Name or "FUNCTION SETTINGS"), 10, "Muted", true)
+			headerTitle.Name = "SettingsHeaderTitle"
+			headerTitle.Position = UDim2.fromOffset(1, 0)
+			headerTitle.Size = UDim2.new(1, -76, 1, 0)
+			headerTitle.TextXAlignment = Enum.TextXAlignment.Left
+			headerTitle.ZIndex = 5
+			local itemCount = textLabel(header, ctx, "0 ITEMS", 9, "Accent", true)
+			itemCount.Name = "SettingsItemCount"
+			itemCount.AnchorPoint = Vector2.new(1, 0)
+			itemCount.Position = UDim2.new(1, 0, 0, 0)
+			itemCount.Size = UDim2.fromOffset(72, headerHeight)
+			itemCount.TextXAlignment = Enum.TextXAlignment.Right
+			itemCount.ZIndex = 5
+			local headerLine = make("Frame", {
+				Name = "SettingsHeaderLine",
+				BorderSizePixel = 0,
+				Position = UDim2.new(0, 10, 0, headerHeight - 1),
+				Size = UDim2.new(1, -20, 0, 1),
+				ZIndex = 4,
+			}, panel)
+			ctx.Theme:Bind(headerLine, { BackgroundColor3 = "Border" })
+
+			local scroll = make("ScrollingFrame", {
+				Name = "SettingsScroll",
+				BackgroundTransparency = 1,
+				BorderSizePixel = 0,
+				Position = UDim2.fromOffset(5, headerHeight + 3),
+				Size = UDim2.new(1, -10, 0, 0),
+				CanvasPosition = Vector2.zero,
+				CanvasSize = UDim2.fromOffset(0, 0),
+				AutomaticCanvasSize = Enum.AutomaticSize.None,
+				ScrollingDirection = Enum.ScrollingDirection.Y,
+				ScrollingEnabled = true,
+				ScrollBarThickness = 4,
+				ScrollBarImageTransparency = 0.24,
+				ElasticBehavior = Enum.ElasticBehavior.WhenScrollable,
+				ClipsDescendants = true,
+				Active = true,
+				ZIndex = 4,
+			}, panel)
+			ctx.Theme:Bind(scroll, { ScrollBarImageColor3 = "Accent" })
+			local panelPadding = make("UIPadding", {
+				PaddingTop = UDim.new(0, 5),
+				PaddingBottom = UDim.new(0, 8),
+				PaddingLeft = UDim.new(0, 5),
+				PaddingRight = UDim.new(0, 5),
+			}, scroll)
+			local layout = make("UIListLayout", {
+				Padding = UDim.new(0, 6),
+				SortOrder = Enum.SortOrder.LayoutOrder,
+			}, scroll)
+
+			local nested = { _ctx = ctx, _name = self.Name .. "/Settings", _parent = scroll, _components = {}, _isSettingsScope = true }
+			Controls.Attach(nested, ctx, function() return scroll end)
+			local function getContainingScroll()
+				return card:FindFirstAncestorWhichIsA("ScrollingFrame")
 			end
-			local layoutConnection = layout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(updatePanelSize)
+			local function getPanelMaxHeight()
+				-- Ограничиваем панель реальной высотой области, в которой находится компонент.
+				-- Это работает и в обычной вкладке, и внутри другой панели настроек.
+				local availableHeight = 0
+				local parentScroll = getContainingScroll()
+				if parentScroll then availableHeight = parentScroll.AbsoluteSize.Y end
+				if ctx.PageHost then
+					local pageHeight = ctx.PageHost.AbsoluteSize.Y
+					if pageHeight > 0 then
+						availableHeight = availableHeight > 0 and math.min(availableHeight, pageHeight) or pageHeight
+					end
+				end
+				if availableHeight <= 0 then
+					availableHeight = (ctx.WindowFrame and ctx.WindowFrame.AbsoluteSize.Y or 605) * 0.7
+				end
+				-- Оставляем видимой часть родительского списка и не даём панели стать экраном поверх окна.
+				return math.max(74, math.min(330, math.floor(availableHeight * 0.58)))
+			end
+			local function updateItemCount()
+				local count = 0
+				for _, child in ipairs(scroll:GetChildren()) do
+					if child:IsA("Frame") and string.sub(child.Name, 1, 10) == "Component_" then count += 1 end
+				end
+				itemCount.Text = tostring(count) .. (count == 1 and " ITEM" or " ITEMS")
+			end
+			local function updatePanelSize()
+				if not panel.Parent or not scroll.Parent then return end
+				local contentHeight = math.ceil(layout.AbsoluteContentSize.Y)
+				local canvasHeight = contentHeight + panelPadding.PaddingTop.Offset + panelPadding.PaddingBottom.Offset + 2
+				scroll.CanvasSize = UDim2.fromOffset(0, canvasHeight)
+				updateItemCount()
+
+				local maxHeight = getPanelMaxHeight()
+				local availableScrollHeight = math.max(36, maxHeight - headerHeight - 8)
+				local visibleScrollHeight = math.min(math.max(36, canvasHeight), availableScrollHeight)
+				local targetHeight = headerHeight + visibleScrollHeight + 8
+				scroll.Size = UDim2.new(1, -10, 0, visibleScrollHeight)
+				if panel.Visible then
+					play(ctx, panel, 0.18, { Size = UDim2.new(1, 0, 0, targetHeight) })
+				end
+			end
+			local function revealPanelIfNeeded()
+				if not panel.Parent or not panel.Visible then return end
+				local parentScroll = getContainingScroll()
+				if not parentScroll or not parentScroll.Parent then return end
+				local viewportTop = parentScroll.AbsolutePosition.Y + 7
+				local viewportBottom = parentScroll.AbsolutePosition.Y + parentScroll.AbsoluteSize.Y - 7
+				local panelTop = card.AbsolutePosition.Y
+				local panelBottom = panel.AbsolutePosition.Y + panel.AbsoluteSize.Y
+				local delta = 0
+				if panelTop < viewportTop then
+					delta = panelTop - viewportTop
+				elseif panelBottom > viewportBottom then
+					delta = panelBottom - viewportBottom
+				end
+				if math.abs(delta) > 1 then
+					local current = parentScroll.CanvasPosition
+					parentScroll.CanvasPosition = Vector2.new(current.X, math.max(0, current.Y + delta))
+				end
+			end
+			local function scheduleReveal()
+				task.defer(revealPanelIfNeeded)
+				task.delay(0.22, revealPanelIfNeeded)
+				task.delay(0.38, revealPanelIfNeeded)
+			end
+			local layoutConnection = layout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
+				updatePanelSize()
+				if panel.Visible then scheduleReveal() end
+			end)
 			self._maid:Add(layoutConnection)
-			local nested = { _ctx = ctx, _name = self.Name .. "/Settings", _parent = panel, _components = {} }
-			Controls.Attach(nested, ctx, function() return panel end)
+			self._maid:Add(ctx.WindowFrame:GetPropertyChangedSignal("AbsoluteSize"):Connect(updatePanelSize))
+			if ctx.PageHost then self._maid:Add(ctx.PageHost:GetPropertyChangedSignal("AbsoluteSize"):Connect(updatePanelSize)) end
+			local parentScrollForResize = getContainingScroll()
+			if parentScrollForResize then self._maid:Add(parentScrollForResize:GetPropertyChangedSignal("AbsoluteSize"):Connect(updatePanelSize)) end
 			self._settingsPanel = panel
+			self._settingsScroll = scroll
 			self._settingsScope = nested
+			updatePanelSize()
+
 			if not self._settingsButton then
 				self._settingsButton = make("TextButton", { Name = "SettingsButton", BackgroundTransparency = 1, Text = "v", Font = Enum.Font.GothamMedium, TextSize = 16, Size = UDim2.fromOffset(20, 24), Position = UDim2.new(1, -22, 0, 0), Visible = false, AutoButtonColor = false }, self.Row)
 				ctx.Theme:Bind(self._settingsButton, { TextColor3 = "SecondaryText" })
@@ -3760,16 +3921,27 @@ __onrusha_modules["Components/Controls"] = function()
 				if panel.Visible then
 					play(ctx, panel, 0.16, { Size = UDim2.new(1, 0, 0, 0) })
 					play(ctx, self._settingsButton, 0.16, { Rotation = 0 })
-					task.delay(0.17, function() if panel.Parent and panel.Size.Y.Offset == 0 then panel.Visible = false end end)
+					task.delay(0.17, function()
+						if panel.Parent and panel.Size.Y.Offset == 0 then panel.Visible = false end
+					end)
 				else
-					panel.Visible = true
+					updatePanelSize()
 					panel.Size = UDim2.new(1, 0, 0, 0)
-					task.defer(updatePanelSize)
+					panel.Visible = true
+					-- Обновляем размеры после включения, затем прокручиваем родительский список,
+					-- только если панель иначе оказалась бы за нижней/верхней границей области просмотра.
+					task.defer(function()
+						updatePanelSize()
+						scheduleReveal()
+					end)
+					scheduleReveal()
 					play(ctx, self._settingsButton, 0.16, { Rotation = 180 })
 				end
-			end) )
+			end))
 			self._maid:Add(function()
-				for _, nestedComponent in pairs(nested._components) do if nestedComponent.Destroy then nestedComponent:Destroy() end end
+				for _, nestedComponent in pairs(nested._components) do
+					if nestedComponent.Destroy then nestedComponent:Destroy() end
+				end
 				nested._components = {}
 			end)
 			return nested
