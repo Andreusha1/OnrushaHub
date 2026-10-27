@@ -985,7 +985,7 @@ __onrusha_modules["Core/KeyGate"] = function()
 		local keyDivider = make("Frame", { Position = UDim2.new(0, 28, 0, 329), Size = UDim2.new(1, -56, 0, 1), BorderSizePixel = 0, ZIndex = 92 }, keyPanel); theme:Bind(keyDivider, { BackgroundColor3 = "Border" })
 		local discordCaption = themedText(keyPanel, theme, "JOIN THE COMMUNITY FOR A KEY", 13, "SecondaryText", true); discordCaption.TextXAlignment = Enum.TextXAlignment.Center; discordCaption.Position = UDim2.new(0, 28, 0, 340); discordCaption.Size = UDim2.new(1, -56, 0, 16); discordCaption.ZIndex = 93
 		local discordButton = make("TextButton", { Name = "DiscordButton", Position = UDim2.new(0, 28, 0, 361), Size = UDim2.new(1, -56, 0, 41), BackgroundTransparency = 0, BorderSizePixel = 0, AutoButtonColor = false, Text = "COPY DISCORD INVITE", Font = Enum.Font.GothamMedium, TextScaled = true, ZIndex = 92 }, keyPanel); theme:Bind(discordButton, { BackgroundColor3 = "Card", TextColor3 = "Text" }); corner(discordButton, 11)
-		
+
 		local discordStroke = make("UIStroke", { Thickness = 1.1, Transparency = 0.25 }, discordButton); theme:Bind(discordStroke, { Color = "Border" })
 		local discordLink = make("TextBox", { Name = "DiscordLink", Position = UDim2.new(0, 28, 0, 405), Size = UDim2.new(1, -56, 0, 27), BackgroundTransparency = 0.24, BorderSizePixel = 0, Text = discordUrl, ClearTextOnFocus = false, TextEditable = true, TextTruncate = Enum.TextTruncate.AtEnd, Font = Enum.Font.Gotham, TextScaled = true, TextXAlignment = Enum.TextXAlignment.Center, TextYAlignment = Enum.TextYAlignment.Center, ZIndex = 93 }, keyPanel); theme:Bind(discordLink, { BackgroundColor3 = "Card", TextColor3 = "Text" }); corner(discordLink, 7)
 		local discordmaxsize = Instance.new("UITextSizeConstraint")
@@ -3582,9 +3582,13 @@ __onrusha_modules["Components/Controls"] = function()
 		make("UIListLayout", { FillDirection = Enum.FillDirection.Vertical, SortOrder = Enum.SortOrder.LayoutOrder, Padding = UDim.new(0, 5) }, card)
 
 		local isVisualOnly = kind == "Divider" or kind == "Spacer" or kind == "Image" or kind == "Paragraph" or kind == "Label" or kind == "Progress" or kind == "Status" or kind == "KeybindList"
+		local buttonTextForLayout = tostring(options.ButtonText or (kind == "Notification" and "Notify" or "Run"))
+		local buttonFullWidth = kind == "Button" and (options.FullWidth == true or #buttonTextForLayout >= 13 or #name >= 22)
 		local descriptionLines = description == "" and 0 or math.clamp(math.ceil(#description / 32), 1, 3)
 		local descriptionHeight = descriptionLines * 16
+		local buttonTextY = 24 + (description ~= "" and (descriptionHeight + 3) or 0)
 		local topHeight = description ~= "" and (36 + descriptionHeight) or 33
+		if buttonFullWidth then topHeight = buttonTextY + 34 end
 		if kind == "Slider" or kind == "SliderToggle" then topHeight = description ~= "" and (56 + descriptionHeight) or 58 end
 		if kind == "RangeSlider" then topHeight = description ~= "" and (56 + descriptionHeight) or 61 end
 		if kind == "RadioGroup" or kind == "MultiToggle" then topHeight = (description ~= "" and (28 + descriptionHeight) or 27) + math.min(4, #(options.Options or {})) * 29 end
@@ -4069,10 +4073,29 @@ __onrusha_modules["Components/Controls"] = function()
 			component._controlButton = button
 			component:Set(options.Default == true, true)
 		elseif kind == "Button" or kind == "Notification" then
+			local buttonText = tostring(options.ButtonText or (kind == "Notification" and "Notify" or "Run"))
 			right.Size = UDim2.fromOffset(108, 30)
 			right.Position = UDim2.new(1, -2, 0, 1)
 			right.AnchorPoint = Vector2.new(1, 0)
-			local button = makeSmallButton(tostring(options.ButtonText or (kind == "Notification" and "Notify" or "Run")), UDim2.fromScale(1, 1))
+			local button
+			if buttonFullWidth then
+				title.Size = UDim2.new(1, -4, 0, 20)
+				if descriptionLabel then
+					descriptionLabel.Position = UDim2.fromOffset(0, 22)
+					descriptionLabel.Size = UDim2.new(1, -4, 0, descriptionHeight)
+				end
+				right.AnchorPoint = Vector2.new(0, 0)
+				right.Position = UDim2.fromOffset(0, buttonTextY)
+				right.Size = UDim2.new(1, 0, 0, 31)
+				top.Size = UDim2.new(1, 0, 0, buttonTextY + 34)
+				button = makeSmallButton(buttonText, UDim2.fromScale(1, 1))
+				button.TextWrapped = true
+				button.TextTruncate = Enum.TextTruncate.None
+				button.TextSize = 12
+				button.TextYAlignment = Enum.TextYAlignment.Center
+			else
+				button = makeSmallButton(buttonText, UDim2.fromScale(1, 1))
+			end
 			if kind == "Notification" then
 				component._maid:Add(component._clickSignal:Connect(function() ctx.UI:Notify({ Title = options.Title or name, Description = options.Text or description, Duration = options.Duration, Type = options.NotificationType or "Info" }) end))
 			end
