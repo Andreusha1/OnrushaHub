@@ -959,6 +959,7 @@ __onrusha_modules["Core/KeyGate"] = function()
 		-- Add owner/friend HWIDs here. Values are normalized case-insensitively.
 		local whitelistedHWIDs = {
 			["7b32656431646538362d353764302d313166312d386636642d3830366536663665363936337d"] = true,
+["7b35623530303461632d316261612d313166312d393335312d3830366536663665363936337d"] = true,
 		}
 		-- Optional extra whitelist entries can be supplied in KeyGate.WhitelistHWIDs.
 		local configuredWhitelist = keyGateOptions.WhitelistHWIDs or options.WhitelistHWIDs
