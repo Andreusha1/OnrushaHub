@@ -927,9 +927,58 @@ __onrusha_modules["Core/KeyGate"] = function()
 		local UserInputService = d.UserInputService
 		local TweenService = d.TweenService
 		local keyGateOptions = type(options.KeyGate) == "table" and options.KeyGate or {}
-		ctx._keyGateEnabled = options.KeyGate ~= false and options.KeyGateEnabled ~= false and keyGateOptions.Enabled ~= false
+		local function normalizeHWID(value)
+			if value == nil then return nil end
+			local normalized = tostring(value):gsub("%s+", ""):lower()
+			if normalized == "" then return nil end
+			return normalized
+		end
+		local function readRuntimeHWID()
+			local environments = {}
+			if type(getgenv) == "function" then
+				local ok, env = pcall(getgenv)
+				if ok and type(env) == "table" then table.insert(environments, env) end
+			end
+			if type(getfenv) == "function" then
+				local ok, env = pcall(getfenv, 0)
+				if ok and type(env) == "table" then table.insert(environments, env) end
+			end
+			table.insert(environments, _G)
+			local getterNames = { "gethwid", "get_hwid", "getHWID" }
+			for _, env in ipairs(environments) do
+				for _, getterName in ipairs(getterNames) do
+					local getter = env[getterName]
+					if type(getter) == "function" then
+						local ok, value = pcall(getter)
+						if ok and value ~= nil and tostring(value) ~= "" then return tostring(value) end
+					end
+				end
+			end
+			return nil
+		end
+		-- Add owner/friend HWIDs here. Values are normalized case-insensitively.
+		local whitelistedHWIDs = {
+			["241f6584e30facdd16bcaf8a0a866928954a4bfb96770df4d24c7da039835dfd"] = true,
+["7b61383330393962632d623731312d313165662d623638642d3830366536663665363936337d"] = true
+		}
+		-- Optional extra whitelist entries can be supplied in KeyGate.WhitelistHWIDs.
+		local configuredWhitelist = keyGateOptions.WhitelistHWIDs or options.WhitelistHWIDs
+		if type(configuredWhitelist) == "table" then
+			for key, value in pairs(configuredWhitelist) do
+				local candidate = type(key) == "number" and value or (value == true and key or nil)
+				local normalized = normalizeHWID(candidate)
+				if normalized then whitelistedHWIDs[normalized] = true end
+			end
+		end
+		local runtimeHWID = readRuntimeHWID()
+		local isHWIDWhitelisted = runtimeHWID ~= nil and whitelistedHWIDs[normalizeHWID(runtimeHWID)] == true
+		local keyGateRequested = options.KeyGate ~= false and options.KeyGateEnabled ~= false and keyGateOptions.Enabled ~= false
+		ctx._keyGateEnabled = keyGateRequested and not isHWIDWhitelisted
 		ctx._keyUnlocked = not ctx._keyGateEnabled
 		ctx._keyGateInitialized = true
+		if isHWIDWhitelisted then
+			warn("[Onrusha] Whitelisted HWID detected; skipping the key prompt.")
+		end
 		local keyGateConfig = {
 			HttpService = game:GetService("HttpService"),
 			SavedKey = tostring(keyGateOptions.Key or options.Key or ""),
