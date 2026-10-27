@@ -1,5 +1,5 @@
 --[=[
-Onrusha v1.8.0 — single-file bundle (Settings Viewport Fix)
+Onrusha v1.8.1 — stable multi-group Settings Viewport Fix
 Built for environments that allow loading this source as a Luau chunk.
 The UI must run on the Roblox client because it uses Players.LocalPlayer.
 ]=]
@@ -2153,7 +2153,7 @@ __onrusha_modules["Core/Window"] = function()
 
 		local ui = {}
 		ctx.UI = ui
-		ui._ctx = ctx; ui.Theme = theme; ui.Version = "2.3.0"
+		ui._ctx = ctx; ui.Theme = theme; ui.Version = "2.3.1"
 		ui._settings = ctx._settings; ui._components = ctx._components; ui._tabs = ctx._tabs
 		local mobileOpenButton = make("TextButton", { Name = "MobileOpenButton", AnchorPoint = Vector2.new(1, 1), Position = UDim2.new(1, -16, 1, -104), Size = UDim2.fromOffset(46, 46), BackgroundTransparency = 0.04, BorderSizePixel = 0, AutoButtonColor = false, Text = "O", Font = Enum.Font.GothamBlack, TextSize = 21, Visible = false, ZIndex = 80, Selectable = true }, screenGui)
 		ctx.Theme:Bind(mobileOpenButton, { BackgroundColor3 = "Accent", TextColor3 = "Background" })
@@ -3798,11 +3798,98 @@ __onrusha_modules["Components/Controls"] = function()
 			return self
 		end
 		function component:CreateSettings(settingsOptions)
-			if self._settingsScope then return self._settingsScope end
 			settingsOptions = normalizeOptions(settingsOptions)
+			local sectionName = tostring(settingsOptions.Name or "FUNCTION SETTINGS")
 
-			-- Панель настроек отделена от прокручиваемого списка.
-			-- Благодаря этому заголовок всегда остаётся сверху, а длинный список не выходит за рамки.
+			-- Subsequent calls create independent groups inside the same scrollable panel.
+			-- This lets controls such as KILL AURA and FRIENDS have separate headings
+			-- without creating overlapping panels or replacing the first settings scope.
+			if self._settingsPanel and self._settingsPanel.Parent and self._settingsScroll and self._settingsScroll.Parent then
+				self._settingsGroupMap = self._settingsGroupMap or {}
+				local existingScope = self._settingsGroupMap[sectionName]
+				if existingScope then return existingScope end
+
+				local scroll = self._settingsScroll
+				local group = make("Frame", {
+					Name = "SettingsGroup_" .. sectionName:gsub("[^%w_%-]", "_"),
+					BackgroundTransparency = 1,
+					BorderSizePixel = 0,
+					Size = UDim2.new(1, -10, 0, 0),
+					AutomaticSize = Enum.AutomaticSize.Y,
+					LayoutOrder = getLayoutOrder(ctx),
+					ClipsDescendants = false,
+					ZIndex = 4,
+				}, scroll)
+				local groupTitle = textLabel(group, ctx, sectionName, 10, "Muted", true)
+				groupTitle.Name = "SettingsGroupTitle"
+				groupTitle.Position = UDim2.fromOffset(1, 0)
+				groupTitle.Size = UDim2.new(1, -4, 0, 22)
+				groupTitle.TextXAlignment = Enum.TextXAlignment.Left
+				groupTitle.ZIndex = 5
+				local groupLine = make("Frame", {
+					Name = "SettingsGroupLine",
+					BorderSizePixel = 0,
+					Position = UDim2.fromOffset(0, 24),
+					Size = UDim2.new(1, 0, 0, 1),
+					ZIndex = 4,
+				}, group)
+				ctx.Theme:Bind(groupLine, { BackgroundColor3 = "Border" })
+
+				local groupBody = make("Frame", {
+					Name = "SettingsGroupContent",
+					BackgroundTransparency = 1,
+					BorderSizePixel = 0,
+					Position = UDim2.fromOffset(0, 29),
+					Size = UDim2.new(1, 0, 0, 0),
+					AutomaticSize = Enum.AutomaticSize.None,
+					ClipsDescendants = false,
+					ZIndex = 4,
+				}, group)
+				local groupPadding = make("UIPadding", {
+					PaddingTop = UDim.new(0, 2),
+					PaddingBottom = UDim.new(0, 5),
+					PaddingLeft = UDim.new(0, 0),
+					PaddingRight = UDim.new(0, 0),
+				}, groupBody)
+				local groupLayout = make("UIListLayout", {
+					FillDirection = Enum.FillDirection.Vertical,
+					SortOrder = Enum.SortOrder.LayoutOrder,
+					Padding = UDim.new(0, 6),
+				}, groupBody)
+				local function updateGroupHeight()
+					if not groupBody.Parent then return end
+					local contentHeight = math.ceil(groupLayout.AbsoluteContentSize.Y)
+					groupBody.Size = UDim2.new(1, 0, 0, contentHeight + groupPadding.PaddingTop.Offset + groupPadding.PaddingBottom.Offset)
+				end
+				local groupedScope = {
+					_ctx = ctx,
+					_name = self.Name .. "/Settings/" .. sectionName,
+					_parent = groupBody,
+					_components = {},
+					_isSettingsScope = true,
+					_settingsGroup = group,
+				}
+				Controls.Attach(groupedScope, ctx, function() return groupBody end)
+				self._settingsScopes = self._settingsScopes or {}
+				table.insert(self._settingsScopes, groupedScope)
+				self._settingsGroupMap[sectionName] = groupedScope
+				self._maid:Add(groupLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
+					updateGroupHeight()
+					if self._updateSettingsPanelSize then task.defer(self._updateSettingsPanelSize) end
+				end))
+				self._maid:Add(function()
+					for _, nestedComponent in ipairs(groupedScope._components) do
+						if nestedComponent and nestedComponent.Destroy then nestedComponent:Destroy() end
+					end
+					table.clear(groupedScope._components)
+					if group.Parent then group:Destroy() end
+				end)
+				updateGroupHeight()
+				if self._updateSettingsItemCount then self._updateSettingsItemCount() end
+				if self._updateSettingsPanelSize then task.defer(self._updateSettingsPanelSize) end
+				return groupedScope
+			end
+
 			local panel = make("Frame", {
 				Name = "NestedSettings",
 				BackgroundTransparency = 0,
@@ -3827,7 +3914,7 @@ __onrusha_modules["Components/Controls"] = function()
 				Size = UDim2.new(1, -20, 0, headerHeight),
 				ZIndex = 4,
 			}, panel)
-			local headerTitle = textLabel(header, ctx, tostring(settingsOptions.Name or "FUNCTION SETTINGS"), 10, "Muted", true)
+			local headerTitle = textLabel(header, ctx, sectionName, 10, "Muted", true)
 			headerTitle.Name = "SettingsHeaderTitle"
 			headerTitle.Position = UDim2.fromOffset(1, 0)
 			headerTitle.Size = UDim2.new(1, -76, 1, 0)
@@ -3860,8 +3947,8 @@ __onrusha_modules["Components/Controls"] = function()
 				AutomaticCanvasSize = Enum.AutomaticSize.None,
 				ScrollingDirection = Enum.ScrollingDirection.Y,
 				ScrollingEnabled = true,
-				ScrollBarThickness = 4,
-				ScrollBarImageTransparency = 0.24,
+				ScrollBarThickness = 5,
+				ScrollBarImageTransparency = 0.18,
 				ElasticBehavior = Enum.ElasticBehavior.WhenScrollable,
 				ClipsDescendants = true,
 				Active = true,
@@ -3870,7 +3957,7 @@ __onrusha_modules["Components/Controls"] = function()
 			ctx.Theme:Bind(scroll, { ScrollBarImageColor3 = "Accent" })
 			local panelPadding = make("UIPadding", {
 				PaddingTop = UDim.new(0, 5),
-				PaddingBottom = UDim.new(0, 8),
+				PaddingBottom = UDim.new(0, 10),
 				PaddingLeft = UDim.new(0, 5),
 				PaddingRight = UDim.new(0, 5),
 			}, scroll)
@@ -3879,14 +3966,13 @@ __onrusha_modules["Components/Controls"] = function()
 				SortOrder = Enum.SortOrder.LayoutOrder,
 			}, scroll)
 
-			local nested = { _ctx = ctx, _name = self.Name .. "/Settings", _parent = scroll, _components = {}, _isSettingsScope = true }
+			local nested = { _ctx = ctx, _name = self.Name .. "/Settings/" .. sectionName, _parent = scroll, _components = {}, _isSettingsScope = true }
 			Controls.Attach(nested, ctx, function() return scroll end)
+			local settingsScopes = { nested }
 			local function getContainingScroll()
 				return card:FindFirstAncestorWhichIsA("ScrollingFrame")
 			end
 			local function getPanelMaxHeight()
-				-- Ограничиваем панель реальной высотой области, в которой находится компонент.
-				-- Это работает и в обычной вкладке, и внутри другой панели настроек.
 				local availableHeight = 0
 				local parentScroll = getContainingScroll()
 				if parentScroll then availableHeight = parentScroll.AbsoluteSize.Y end
@@ -3896,33 +3982,35 @@ __onrusha_modules["Components/Controls"] = function()
 						availableHeight = availableHeight > 0 and math.min(availableHeight, pageHeight) or pageHeight
 					end
 				end
-				if availableHeight <= 0 then
-					availableHeight = (ctx.WindowFrame and ctx.WindowFrame.AbsoluteSize.Y or 605) * 0.7
-				end
-				-- Оставляем видимой часть родительского списка и не даём панели стать экраном поверх окна.
-				return math.max(74, math.min(330, math.floor(availableHeight * 0.58)))
+				if availableHeight <= 0 then availableHeight = (ctx.WindowFrame and ctx.WindowFrame.AbsoluteSize.Y or 605) * 0.7 end
+				return math.max(74, math.min(460, math.floor(availableHeight * 0.76)))
 			end
 			local function updateItemCount()
 				local count = 0
-				for _, child in ipairs(scroll:GetChildren()) do
-					if child:IsA("Frame") and string.sub(child.Name, 1, 10) == "Component_" then count += 1 end
+				for _, currentScope in ipairs(settingsScopes) do
+					for _, settingsComponent in ipairs(currentScope._components or {}) do
+						if settingsComponent and not settingsComponent._destroyed then count += 1 end
+					end
 				end
 				itemCount.Text = tostring(count) .. (count == 1 and " ITEM" or " ITEMS")
 			end
 			local function updatePanelSize()
 				if not panel.Parent or not scroll.Parent then return end
 				local contentHeight = math.ceil(layout.AbsoluteContentSize.Y)
-				local canvasHeight = contentHeight + panelPadding.PaddingTop.Offset + panelPadding.PaddingBottom.Offset + 2
-				scroll.CanvasSize = UDim2.fromOffset(0, canvasHeight)
+				local canvasHeight = contentHeight + panelPadding.PaddingTop.Offset + panelPadding.PaddingBottom.Offset + 4
+				scroll.CanvasSize = UDim2.fromOffset(0, math.max(0, canvasHeight))
 				updateItemCount()
-
 				local maxHeight = getPanelMaxHeight()
 				local availableScrollHeight = math.max(36, maxHeight - headerHeight - 8)
 				local visibleScrollHeight = math.min(math.max(36, canvasHeight), availableScrollHeight)
 				local targetHeight = headerHeight + visibleScrollHeight + 8
 				scroll.Size = UDim2.new(1, -10, 0, visibleScrollHeight)
 				if panel.Visible then
-					play(ctx, panel, 0.18, { Size = UDim2.new(1, 0, 0, targetHeight) })
+					if math.abs(panel.Size.Y.Offset - targetHeight) > 3 then
+						play(ctx, panel, 0.16, { Size = UDim2.new(1, 0, 0, targetHeight) })
+					end
+				else
+					panel.Size = UDim2.new(1, 0, 0, 0)
 				end
 			end
 			local function revealPanelIfNeeded()
@@ -3934,33 +4022,45 @@ __onrusha_modules["Components/Controls"] = function()
 				local panelTop = card.AbsolutePosition.Y
 				local panelBottom = panel.AbsolutePosition.Y + panel.AbsoluteSize.Y
 				local delta = 0
-				if panelTop < viewportTop then
-					delta = panelTop - viewportTop
-				elseif panelBottom > viewportBottom then
-					delta = panelBottom - viewportBottom
-				end
+				if panelTop < viewportTop then delta = panelTop - viewportTop
+				elseif panelBottom > viewportBottom then delta = panelBottom - viewportBottom end
 				if math.abs(delta) > 1 then
 					local current = parentScroll.CanvasPosition
-					parentScroll.CanvasPosition = Vector2.new(current.X, math.max(0, current.Y + delta))
+					local maxY = math.max(0, parentScroll.CanvasSize.Y.Offset - parentScroll.AbsoluteSize.Y)
+					parentScroll.CanvasPosition = Vector2.new(current.X, math.clamp(current.Y + delta, 0, maxY))
 				end
 			end
 			local function scheduleReveal()
 				task.defer(revealPanelIfNeeded)
-				task.delay(0.22, revealPanelIfNeeded)
-				task.delay(0.38, revealPanelIfNeeded)
+				task.delay(0.2, revealPanelIfNeeded)
+				task.delay(0.36, revealPanelIfNeeded)
 			end
 			local layoutConnection = layout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
 				updatePanelSize()
 				if panel.Visible then scheduleReveal() end
 			end)
 			self._maid:Add(layoutConnection)
-			self._maid:Add(ctx.WindowFrame:GetPropertyChangedSignal("AbsoluteSize"):Connect(updatePanelSize))
-			if ctx.PageHost then self._maid:Add(ctx.PageHost:GetPropertyChangedSignal("AbsoluteSize"):Connect(updatePanelSize)) end
+			self._maid:Add(ctx.WindowFrame:GetPropertyChangedSignal("AbsoluteSize"):Connect(function()
+				updatePanelSize()
+				if panel.Visible then scheduleReveal() end
+			end))
+			if ctx.PageHost then self._maid:Add(ctx.PageHost:GetPropertyChangedSignal("AbsoluteSize"):Connect(function()
+				updatePanelSize()
+				if panel.Visible then scheduleReveal() end
+			end)) end
 			local parentScrollForResize = getContainingScroll()
-			if parentScrollForResize then self._maid:Add(parentScrollForResize:GetPropertyChangedSignal("AbsoluteSize"):Connect(updatePanelSize)) end
+			if parentScrollForResize then self._maid:Add(parentScrollForResize:GetPropertyChangedSignal("AbsoluteSize"):Connect(function()
+				updatePanelSize()
+				if panel.Visible then scheduleReveal() end
+			end)) end
 			self._settingsPanel = panel
 			self._settingsScroll = scroll
 			self._settingsScope = nested
+			self._settingsScopes = settingsScopes
+			self._settingsGroupMap = { [sectionName] = nested }
+			self._updateSettingsItemCount = updateItemCount
+			self._updateSettingsPanelSize = updatePanelSize
+			self._revealSettingsPanel = scheduleReveal
 			updatePanelSize()
 
 			if not self._settingsButton then
@@ -3975,27 +4075,24 @@ __onrusha_modules["Components/Controls"] = function()
 					play(ctx, panel, 0.16, { Size = UDim2.new(1, 0, 0, 0) })
 					play(ctx, self._settingsButton, 0.16, { Rotation = 0 })
 					task.delay(0.17, function()
-						if panel.Parent and panel.Size.Y.Offset == 0 then panel.Visible = false end
+						if panel.Parent and panel.Size.Y.Offset <= 3 then panel.Visible = false end
 					end)
 				else
-					updatePanelSize()
 					panel.Size = UDim2.new(1, 0, 0, 0)
 					panel.Visible = true
-					-- Обновляем размеры после включения, затем прокручиваем родительский список,
-					-- только если панель иначе оказалась бы за нижней/верхней границей области просмотра.
-					task.defer(function()
-						updatePanelSize()
-						scheduleReveal()
-					end)
+					updatePanelSize()
 					scheduleReveal()
 					play(ctx, self._settingsButton, 0.16, { Rotation = 180 })
 				end
 			end))
 			self._maid:Add(function()
-				for _, nestedComponent in pairs(nested._components) do
-					if nestedComponent.Destroy then nestedComponent:Destroy() end
+				for _, currentScope in ipairs(settingsScopes) do
+					for _, nestedComponent in ipairs(currentScope._components or {}) do
+						if nestedComponent and nestedComponent.Destroy then nestedComponent:Destroy() end
+					end
+					if currentScope._components then table.clear(currentScope._components) end
 				end
-				nested._components = {}
+				table.clear(settingsScopes)
 			end)
 			return nested
 		end
