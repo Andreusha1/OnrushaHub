@@ -1,5 +1,5 @@
 --[=[
-Onrusha v2.3.9 — white keybind labels, removed profile popup and first-person UI cursor access
+Onrusha v2.3.12 — temporary third-person camera while the menu is open, with original view restored on close
 Built for environments that allow loading this source as a Luau chunk.
 The UI must run on the Roblox client because it uses Players.LocalPlayer.
 ]=]
@@ -2699,9 +2699,9 @@ __onrusha_modules["Core/Window"] = function()
 			ui:Notify({ Title = ok and "Configuration imported" or "Import failed", Description = ok and "The configuration has been applied." or tostring(err), Type = ok and "Success" or "Error" })
 		end)
 		local about = settingsTab:SectionCreate({ Name = "About", Side = "Left" })
-		about:LabelCreate({ Id = "system.version", Name = "Onrusha UI Framework | 2.3.9" })
+		about:LabelCreate({ Id = "system.version", Name = "Onrusha UI Framework | 2.3.12" })
 		about:ParagraphCreate({ Id = "system.info", Name = "Designed for Roblox Studio", Text = "A modular, responsive UI framework for games you develop. Visual effects and client settings never replace server-side validation." })
-		about:ParagraphCreate({ Id = "system.changelog", Name = "Changelog - 2.3.9", Text = table.concat({ "+ Keybind SET labels and tooltip text are now pure white on dark themes", "+ Removed the profile hover popup and its event/animation handlers", "+ Added render-priority cursor access so first-person users can move and click across the menu", "+ Kept optional right-mouse camera rotation while the menu is open" }, "\n") })
+		about:ParagraphCreate({ Id = "system.changelog", Name = "Changelog - 2.3.12", Text = table.concat({ "+ CameraMode and zoom limits are saved only when the menu opens in first person", "+ First-person camera is temporarily switched to Classic so the cursor can interact with the UI", "+ Original first-person mode and zoom distance are restored when the menu closes", "+ Third-person camera settings are left unchanged", "+ Removed custom right-mouse camera locking and manual first-person mouse restoration" }, "\n") })
 	end
 
 	function Window.new(options, modules)
@@ -2980,7 +2980,7 @@ __onrusha_modules["Core/Window"] = function()
 
 		local ui = {}
 		ctx.UI = ui
-		ui._ctx = ctx; ui.Theme = theme; ui.Version = "2.3.9"
+		ui._ctx = ctx; ui.Theme = theme; ui.Version = "2.3.12"
 		ui._settings = ctx._settings; ui._components = ctx._components; ui._tabs = ctx._tabs
 		local interfaceStyleRules = {
 			Classic = { Window = 5, Card = 5, Control = 4 }, Rounded = { Window = 18, Card = 12, Control = 8 },
@@ -3300,6 +3300,100 @@ __onrusha_modules["Core/Window"] = function()
 		end
 
 		local mouseAccessStepName = "OnrushaMouseAccess_" .. tostring(ctx):gsub("%W", "")
+		local function isFirstPersonCamera()
+			local camera = workspace.CurrentCamera
+			if player.CameraMode == Enum.CameraMode.LockFirstPerson then return true end
+			if not camera then return false end
+			local ok, distance = pcall(function() return (camera.CFrame.Position - camera.Focus.Position).Magnitude end)
+			return ok and distance <= 1.35
+		end
+		local function enterMenuCameraMode(savedOverride)
+			if ctx._savedCamera then return true end
+			if not savedOverride and not isFirstPersonCamera() then return false end
+			local savedCamera = savedOverride
+			if not savedCamera then
+				local camera = workspace.CurrentCamera
+				local distance = 0.5
+				if camera then
+					pcall(function() distance = (camera.CFrame.Position - camera.Focus.Position).Magnitude end)
+				end
+				savedCamera = {
+					Mode = player.CameraMode,
+					MinZoom = player.CameraMinZoomDistance,
+					MaxZoom = player.CameraMaxZoomDistance,
+					Distance = distance,
+				}
+			end
+			ctx._savedCamera = savedCamera
+			ctx._cameraRestorePending = nil
+			local ok = pcall(function()
+				player.CameraMode = Enum.CameraMode.Classic
+				player.CameraMaxZoomDistance = math.max(savedCamera.MaxZoom, 8)
+				player.CameraMinZoomDistance = 5
+			end)
+			if not ok then
+				ctx._savedCamera = nil
+				return false
+			end
+			return true
+		end
+		local function restoreMenuCameraMode()
+			local savedCamera = ctx._savedCamera
+			if not savedCamera then return end
+			ctx._savedCamera = nil
+			ctx._cameraRestoreToken = (ctx._cameraRestoreToken or 0) + 1
+			local originalMin, originalMax = savedCamera.MinZoom, savedCamera.MaxZoom
+			if savedCamera.Mode == Enum.CameraMode.Classic and type(savedCamera.Distance) == "number" then
+				local restoreDistance = math.clamp(savedCamera.Distance, math.min(originalMin, originalMax), originalMax)
+				pcall(function()
+					player.CameraMode = savedCamera.Mode
+					player.CameraMaxZoomDistance = math.max(originalMax, restoreDistance)
+					player.CameraMinZoomDistance = restoreDistance
+					player.CameraMaxZoomDistance = restoreDistance
+				end)
+				local pendingRestore = {
+					Mode = savedCamera.Mode,
+					MinZoom = originalMin,
+					MaxZoom = originalMax,
+					Distance = restoreDistance,
+				}
+				ctx._cameraRestorePending = pendingRestore
+				task.spawn(function()
+					RunService.RenderStepped:Wait()
+					if ctx._cameraRestorePending ~= pendingRestore then return end
+					ctx._cameraRestorePending = nil
+					pcall(function()
+						player.CameraMaxZoomDistance = originalMax
+						player.CameraMinZoomDistance = originalMin
+					end)
+				end)
+			else
+				pcall(function()
+					player.CameraMode = savedCamera.Mode
+					player.CameraMaxZoomDistance = math.max(originalMin, originalMax)
+					player.CameraMinZoomDistance = originalMin
+					player.CameraMaxZoomDistance = originalMax
+				end)
+			end
+		end
+		local function stopMenuMouseAccess()
+			if ctx._mouseUnlockConnection then
+				ctx._mouseUnlockConnection:Disconnect()
+				ctx._mouseUnlockConnection = nil
+			end
+			local savedMouse = ctx._savedMouse
+			ctx._savedMouse = nil
+			if not savedMouse or savedMouse.FirstPerson then return end
+			local function restoreMouse()
+				if ui.IsOpen or ctx._destroyed then return end
+				pcall(function()
+					UserInputService.MouseBehavior = savedMouse.Behavior or Enum.MouseBehavior.Default
+					UserInputService.MouseIconEnabled = savedMouse.Icon ~= false
+				end)
+			end
+			restoreMouse()
+			task.defer(restoreMouse)
+		end
 		local function startMenuMouseAccess()
 			if ctx._mouseUnlockConnection then
 				ctx._mouseUnlockConnection:Disconnect()
@@ -3307,13 +3401,8 @@ __onrusha_modules["Core/Window"] = function()
 			end
 			RunService:BindToRenderStep(mouseAccessStepName, Enum.RenderPriority.Camera.Value + 1, function()
 				if ctx._destroyed or not ui.IsOpen then return end
-				if ctx._cameraRightDrag then
-					if UserInputService.MouseBehavior ~= Enum.MouseBehavior.LockCenter then UserInputService.MouseBehavior = Enum.MouseBehavior.LockCenter end
-					if UserInputService.MouseIconEnabled then UserInputService.MouseIconEnabled = false end
-				else
-					if UserInputService.MouseBehavior ~= Enum.MouseBehavior.Default then UserInputService.MouseBehavior = Enum.MouseBehavior.Default end
-					if not UserInputService.MouseIconEnabled then UserInputService.MouseIconEnabled = true end
-				end
+				if UserInputService.MouseBehavior ~= Enum.MouseBehavior.Default then UserInputService.MouseBehavior = Enum.MouseBehavior.Default end
+				if not UserInputService.MouseIconEnabled then UserInputService.MouseIconEnabled = true end
 			end)
 			ctx._mouseUnlockConnection = {
 				Disconnect = function()
@@ -3321,6 +3410,10 @@ __onrusha_modules["Core/Window"] = function()
 				end,
 			}
 		end
+		cleanup:Add(function()
+			restoreMenuCameraMode()
+			stopMenuMouseAccess()
+		end)
 
 		function ui.SetOpen(first, second)
 			local value
@@ -3351,10 +3444,11 @@ __onrusha_modules["Core/Window"] = function()
 					tween(ctx, ctx._blur, 0.24, { Size = math.clamp(ctx._settings.BlurStrength or 10, 0, 24) })
 				end
 				if not ctx._savedMouse then
-					ctx._savedMouse = { Behavior = UserInputService.MouseBehavior, Icon = UserInputService.MouseIconEnabled }
+					local pendingCamera = ctx._cameraRestorePending
+					local wasFirstPerson = pendingCamera ~= nil or isFirstPersonCamera()
+					ctx._savedMouse = { Behavior = UserInputService.MouseBehavior, Icon = UserInputService.MouseIconEnabled, FirstPerson = wasFirstPerson }
+					if wasFirstPerson then enterMenuCameraMode(pendingCamera) end
 				end
-				if ctx._mouseUnlockConnection then ctx._mouseUnlockConnection:Disconnect(); ctx._mouseUnlockConnection = nil end
-				ctx._cameraRightDrag = false
 				UserInputService.MouseBehavior = Enum.MouseBehavior.Default
 				UserInputService.MouseIconEnabled = true
 				startMenuMouseAccess()
@@ -3402,8 +3496,8 @@ __onrusha_modules["Core/Window"] = function()
 				if ctx.StopWindowParticles then ctx.StopWindowParticles() end
 				if ctx.ClearTransientEffects then ctx.ClearTransientEffects() end
 				if ctx._blur and ctx._blur.Parent then tween(ctx, ctx._blur, 0.2, { Size = 0 }) end
-				if ctx._mouseUnlockConnection then ctx._mouseUnlockConnection:Disconnect(); ctx._mouseUnlockConnection = nil end
-				ctx._cameraRightDrag = false
+				restoreMenuCameraMode()
+				stopMenuMouseAccess()
 				local current = window.Position
 				ctx._restPosition = current
 				local destination = UDim2.fromScale(0.5, 0.5)
@@ -3415,24 +3509,6 @@ __onrusha_modules["Core/Window"] = function()
 					window.Position = ctx._restPosition or UDim2.fromScale(0.5, 0.5)
 					window.Rotation = 0
 					window.BackgroundTransparency = ctx._backgroundTransparency
-					local savedMouse = ctx._savedMouse
-					if savedMouse then
-						ctx._savedMouse = nil
-						if savedMouse.Behavior == Enum.MouseBehavior.LockCenter then
-							-- Let Roblox's camera controller re-apply first-person lock on its own next update.
-							UserInputService.MouseBehavior = Enum.MouseBehavior.Default
-							UserInputService.MouseIconEnabled = savedMouse.Icon
-							task.defer(function()
-								if not ctx._destroyed and not ui.IsOpen then
-									UserInputService.MouseBehavior = Enum.MouseBehavior.Default
-									UserInputService.MouseIconEnabled = savedMouse.Icon
-								end
-							end)
-						else
-							UserInputService.MouseBehavior = savedMouse.Behavior
-							UserInputService.MouseIconEnabled = savedMouse.Icon
-						end
-					end
 					updateMobileOpenButton()
 				end
 				if ctx._settings.AnimationsEnabled and not ctx._settings.ReducedMotion then
@@ -4196,18 +4272,9 @@ __onrusha_modules["Core/Window"] = function()
 					end
 				end
 			end
-			if ctx._mouseUnlockConnection then ctx._mouseUnlockConnection:Disconnect(); ctx._mouseUnlockConnection = nil end
-			local saved = ctx._savedMouse
-			if saved then
-				ctx._savedMouse = nil
-				if saved.Behavior == Enum.MouseBehavior.LockCenter then
-					UserInputService.MouseBehavior = Enum.MouseBehavior.Default
-					UserInputService.MouseIconEnabled = saved.Icon
-				else
-					UserInputService.MouseBehavior = saved.Behavior
-					UserInputService.MouseIconEnabled = saved.Icon
-				end
-			end
+			ui.IsOpen = false
+			restoreMenuCameraMode()
+			stopMenuMouseAccess()
 			ctx._destroyed = true
 			for _, tab in ipairs(table.clone(ctx._tabs)) do pcall(function() tab:Destroy() end) end
 			ctx._cleanup:Destroy()
@@ -4367,13 +4434,6 @@ __onrusha_modules["Core/Window"] = function()
 			end
 		end))
 		cleanup:Add(UserInputService.InputEnded:Connect(function(input)
-			if input.UserInputType == Enum.UserInputType.MouseButton2 and ctx._cameraRightDrag then
-				ctx._cameraRightDrag = false
-				if ui.IsOpen and not ctx._destroyed then
-					UserInputService.MouseBehavior = Enum.MouseBehavior.Default
-					UserInputService.MouseIconEnabled = true
-				end
-			end
 			if input == dragInput or input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then dragging = false; dragInput = nil; lastTrailPoint = nil end
 			if input.UserInputType == Enum.UserInputType.Keyboard then
 				for _, component in ipairs(ctx._keybinds) do
@@ -4386,16 +4446,6 @@ __onrusha_modules["Core/Window"] = function()
 		end))
 		cleanup:Add(UserInputService.InputBegan:Connect(function(input, gameProcessed)
 			if ctx._destroyed then return end
-			if input.UserInputType == Enum.UserInputType.MouseButton2 and ui.IsOpen and not ctx._listeningKeybind and not ctx._listeningHotkeyComponent then
-				local camera = workspace.CurrentCamera
-				local firstPerson = player.CameraMode == Enum.CameraMode.LockFirstPerson or (camera ~= nil and (camera.CFrame.Position - camera.Focus.Position).Magnitude <= 1.35)
-				if firstPerson then
-					ctx._cameraRightDrag = true
-					UserInputService.MouseBehavior = Enum.MouseBehavior.LockCenter
-					UserInputService.MouseIconEnabled = false
-				end
-				return
-			end
 			local focused = UserInputService:GetFocusedTextBox()
 			if input.UserInputType == Enum.UserInputType.MouseButton1 then
 				local point = input.Position
@@ -6207,7 +6257,7 @@ __onrusha_modules["init"] = function()
 
 	local Onrusha = {
 		Name = "Onrusha",
-		Version = "2.3.9",
+		Version = "2.3.12",
 	}
 
 	function Onrusha.Create(first, second)
