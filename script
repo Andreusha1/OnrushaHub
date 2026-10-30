@@ -2009,9 +2009,11 @@ __onrusha_modules["Core/Window"] = function()
 		overlaySection.Frame.LayoutOrder = 10000
 		overlaySection:ParagraphCreate({ Id = "system.overlay.intro", Name = "Onrusha HUD", Text = "A compact glass status bar. Drag it anywhere; release near an edge or corner to snap it neatly into place." })
 
-		local hudRoot = make("CanvasGroup", { Name = "OnrushaHUD", AnchorPoint = Vector2.new(0.5, 0), Position = UDim2.new(0.5, 0, 0, 14), Size = UDim2.fromOffset(462, 76), BackgroundTransparency = 1, GroupTransparency = 1, BorderSizePixel = 0, Visible = false, ClipsDescendants = false, Active = true, ZIndex = 80 }, ctx.ScreenGui)
-		local hudParticleLayer = make("Frame", { Name = "HUDOrbitParticles", AnchorPoint = Vector2.new(0, 0), Position = UDim2.fromOffset(-16, -16), Size = UDim2.new(1, 32, 1, 32), BackgroundTransparency = 1, BorderSizePixel = 0, ClipsDescendants = false, ZIndex = 81 }, hudRoot)
-		local hudGlass = make("Frame", { Name = "GlassSurface", Size = UDim2.fromScale(1, 1), BackgroundTransparency = 0.47, BorderSizePixel = 0, ClipsDescendants = true, ZIndex = 82 }, hudRoot)
+		local hudRoot = make("CanvasGroup", { Name = "OnrushaHUD", AnchorPoint = Vector2.new(0.5, 0), Position = UDim2.new(0.5, 0, 0, 14), Size = UDim2.fromScale(0.24,0.054), BackgroundTransparency = 1, GroupTransparency = 1, BorderSizePixel = 0, Visible = false, ClipsDescendants = false, Active = true, ZIndex = 80 }, ctx.ScreenGui)
+		local hudParticleLayer = make("Frame", { Name = "HUDOrbitParticles", AnchorPoint = Vector2.new(0, 0), Position = UDim2.fromOffset(-16, -16), Size = UDim2.new(0.862, 32,0.404, 32), BackgroundTransparency = 1, BorderSizePixel = 0, ClipsDescendants = false, ZIndex = 81 }, hudRoot)
+		hudParticleLayer.AnchorPoint = Vector2.new(0.5, 0.5); hudParticleLayer.Position = UDim2.fromScale(0.5, 0.5)
+		local hudGlass = make("Frame", { Name = "GlassSurface", Size = UDim2.fromScale(0.952, 0.75), BackgroundTransparency = 0.47, BorderSizePixel = 0, ClipsDescendants = true, ZIndex = 82 }, hudRoot)
+		hudGlass.AnchorPoint = Vector2.new(0.5, 0.5); hudGlass.Position = UDim2.fromScale(0.5, 0.5)
 		ctx.Theme:Bind(hudGlass, { BackgroundColor3 = "Background" }); corner(hudGlass, 22)
 		local hudStroke = make("UIStroke", { Thickness = 1.15, Transparency = 0.28 }, hudGlass); ctx.Theme:Bind(hudStroke, { Color = "Border" })
 		local hudGradient = make("UIGradient", { Rotation = 18 }, hudGlass)
@@ -2257,7 +2259,7 @@ __onrusha_modules["Core/Window"] = function()
 			local glow = make("Frame", { Name = "Glow", AnchorPoint = Vector2.new(0.5, 0.5), Position = UDim2.fromScale(0.5, 0.5), Size = UDim2.fromOffset(14, 14), BackgroundTransparency = 0.88, BorderSizePixel = 0, ZIndex = 81 }, orbit)
 			ctx.Theme:Bind(glow, { BackgroundColor3 = "Accent" }); corner(glow, 100)
 			local orbitStroke = make("UIStroke", { Thickness = 0.8, Transparency = 0.58 }, orbit); ctx.Theme:Bind(orbitStroke, { Color = "Text" })
-			table.insert(hudParticles, { Node = orbit, Phase = (index / 9) * math.pi * 2, Speed = 0.34 + index * 0.018, Radius = index % 2 == 0 and 1 or 0.88 })
+			table.insert(hudParticles, { Node = orbit, Phase = (index / 9) * math.pi * 2, Speed = 0.34 + index * 0.018,Radius = index % 2 == 0 and 0.85 or 0.75})
 		end
 		ctx.UpdateHUDParticles = function(enabled)
 			ctx._settings.HUDParticlesEnabled = enabled == true
@@ -2371,7 +2373,8 @@ __onrusha_modules["Core/Window"] = function()
 		ctx.UpdateHUDVisibility()
 		ctx.UpdateHUDParticles(ctx._settings.HUDParticlesEnabled ~= false)
 
-		hudActiveFunctions = make("Frame", { Name = "HUDActiveFunctions", AnchorPoint = Vector2.new(0.5, 0.5), Position = ctx._settings.HUDActivePosition or UDim2.new(0.5, 0, 0.18, 0), Size = UDim2.fromOffset(252, 46), BackgroundTransparency = 0.12, BorderSizePixel = 0, Visible = false, Active = true, ClipsDescendants = true, ZIndex = 91 }, ctx.ScreenGui)
+		hudActiveFunctions = make("Frame", { Name = "HUDActiveFunctions", AnchorPoint = Vector2.new(0.5, 0.5), Position = ctx._settings.HUDActivePosition or UDim2.new(0.5, 0, 0.18, 0), Size = UDim2.fromOffset(252, 46), BackgroundTransparency = 0.12, BorderSizePixel = 0, Active = true, ClipsDescendants = true, ZIndex = 91 }, ctx.ScreenGui)
+		hudActiveFunctions:Destroy()
 		activeFunctionsUIScale = make("UIScale", { Scale = 1 }, hudActiveFunctions)
 		ctx.Theme:Bind(hudActiveFunctions, { BackgroundColor3 = "Background" }); corner(hudActiveFunctions, 12)
 		local activeFunctionsGradient = make("UIGradient", { Rotation = 0 }, hudActiveFunctions)
@@ -6270,6 +6273,8 @@ __onrusha_modules["init"] = function()
 
 	return Onrusha
 end
+
+--Test function destroy
 
 -- Public entry point: returns the Onrusha API table.
 return __require("init")
