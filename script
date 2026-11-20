@@ -1624,7 +1624,7 @@ __onrusha_modules["Core/Window"] = function()
 		if existing then return existing end
 		ctx._tabCounter += 1
 		local tabIconAssets = {
-			settings = "rbxassetid://1204397029",
+			settings = "rbxassetid://124448359781423",
 			binds = "rbxassetid://5147695474", plugins = "rbxassetid://5147695474", bindings = "rbxassetid://5147695474", bindsandplugins = "rbxassetid://5147695474",
 			aliases = "rbxassetid://5147488658", editaliases = "rbxassetid://5147488658",
 			keybinds = "rbxassetid://129697930", editkeybinds = "rbxassetid://129697930",
@@ -1768,6 +1768,7 @@ __onrusha_modules["Core/Window"] = function()
 
 		local function select()
 			if ctx._destroyed then return end
+			print(string.format("[Onrusha][TAB] Selected tab: %s", tostring(tab.Name)))
 			ctx._activeTab = tab
 			if tab._leftScroll then tab._leftScroll.ScrollingEnabled = true; tab._leftScroll.Active = true end
 			if tab._rightScroll then tab._rightScroll.ScrollingEnabled = true; tab._rightScroll.Active = true end
@@ -3441,7 +3442,7 @@ __onrusha_modules["Core/Window"] = function()
 
 		local ui = {}
 		ctx.UI = ui
-		ui._ctx = ctx; ui.Theme = theme; ui.Version = "2.5.30"
+		ui._ctx = ctx; ui.Theme = theme; ui.Version = "2.5.32"
 		ui._settings = ctx._settings; ui._components = ctx._components; ui._tabs = ctx._tabs
 		local interfaceStyleRules = {
 			Classic = { Window = 5, Card = 5, Control = 4 }, Rounded = { Window = 18, Card = 12, Control = 8 },
@@ -6155,7 +6156,8 @@ __onrusha_modules["Components/Controls"] = function()
 		local showHotkeyUI = isHotkeyable and keyboardBindingsAvailable
 		local buttonTextForLayout = tostring(options.ButtonText or (kind == "Notification" and "Notify" or "Run"))
 		local buttonFullWidth = kind == "Button" and (options.FullWidth == true or #buttonTextForLayout >= 13 or #name >= 22)
-		local descriptionLines = description == "" and 0 or math.clamp(math.ceil(#description / 32), 1, 3)
+		local descriptionCharWidth = (kind == "ImageToggle" or kind == "ImageDropdown") and 22 or 28
+		local descriptionLines = description == "" and 0 or math.clamp(math.ceil(#description / descriptionCharWidth), 1, 4)
 		local descriptionHeight = descriptionLines * 16
 		local buttonTextY = 24 + (description ~= "" and (descriptionHeight + 3) or 0)
 		local topHeight = description ~= "" and (36 + descriptionHeight) or 33
@@ -6198,11 +6200,36 @@ __onrusha_modules["Components/Controls"] = function()
 			desc.Size = UDim2.new(1, -4, 0, descriptionHeight)
 		end
 
+		local initialValue = options.Default
+		if kind == "Toggle" or kind == "Checkbox" or kind == "ImageToggle" then
+			initialValue = initialValue == true
+		elseif kind == "Dropdown" or kind == "RadioGroup" or kind == "ImageDropdown" then
+			if initialValue == nil and options.Options and options.Options[1] then
+				local first = options.Options[1]
+				initialValue = type(first) == "table" and (first.Value or first.Name) or first
+			end
+		elseif kind == "MultiDropdown" or kind == "MultiToggle" then
+			initialValue = type(initialValue) == "table" and table.clone(initialValue) or {}
+		elseif kind == "ColorPicker" or kind == "ColorGradient" then
+			initialValue = typeof(initialValue) == "Color3" and initialValue or Color3.fromRGB(255, 135, 75)
+		elseif kind == "Input" then
+			initialValue = tostring(initialValue == nil and "" or initialValue)
+		elseif kind == "NumberInput" or kind == "Slider" or kind == "Progress" then
+			initialValue = tonumber(initialValue) or tonumber(options.Min) or 0
+		elseif kind == "SliderToggle" then
+			initialValue = { Enabled = options.DefaultEnabled == true, Value = tonumber(options.DefaultValue) or tonumber(options.Min) or 0 }
+		elseif kind == "RangeSlider" then
+			initialValue = { Min = tonumber(options.DefaultMin) or tonumber(options.Min) or 0, Max = tonumber(options.DefaultMax) or tonumber(options.Max) or 100 }
+		elseif kind == "Status" then
+			initialValue = tostring(initialValue or "Idle")
+		elseif kind == "Keybind" or kind == "Hotkey" or kind == "Bind" then
+			initialValue = typeof(initialValue) == "EnumItem" and initialValue or Enum.KeyCode.Unknown
+		end
 		local component = {
 			Id = id, Name = name, Description = description, Type = kind, Frame = card, Row = top,
 			_keyboardOnly = (kind == "Keybind" or kind == "Hotkey" or kind == "Bind") and not keyboardBindingsAvailable,
 			_ctx = ctx, _scope = scope, _callbacks = Signal.new(), _clickSignal = Signal.new(),
-			_value = nil, _destroyed = false, _configurable = options.Configurable ~= false,
+			_value = initialValue, _destroyed = false, _configurable = options.Configurable ~= false,
 			_options = options, _maid = ctx.Cleanup.new(), _layoutOrder = order,
 			DescriptionLabel = descriptionLabel, _descriptionHeight = descriptionHeight, _baseTopHeight = topHeight, _showHotkeyUI = showHotkeyUI,
 		}
@@ -6234,12 +6261,29 @@ __onrusha_modules["Components/Controls"] = function()
 		end))
 
 		function component:Get() return self._value end
+		local function debugValue(value)
+			local ok, encoded = pcall(function() return game:GetService("HttpService"):JSONEncode(value) end)
+			if ok then return encoded end
+			return tostring(value)
+		end
 		function component:OnChanged(callback)
-			self._callbacks:Connect(callback)
+			assert(type(callback) == "function", "OnChanged callback must be a function")
+			self._callbacks:Connect(function(...)
+				local args = table.pack(...)
+				print(string.format("[Onrusha][CHANGE] Tab=%s | Component=%s | Type=%s | Value=%s", tostring(self._tabName or (scope._tab and scope._tab.Name) or scope._name or "?"), tostring(self.Name or self.Id), tostring(self.Type or kind), debugValue(args[1])))
+				local ok, err = xpcall(function() callback(table.unpack(args, 1, args.n)) end, debug.traceback)
+				if not ok then warn(string.format("[Onrusha][CALLBACK ERROR] %s (%s):\n%s", tostring(self.Name or self.Id), tostring(kind), tostring(err))) end
+			end)
 			return self
 		end
 		function component:OnClick(callback)
-			self._clickSignal:Connect(callback)
+			assert(type(callback) == "function", "OnClick callback must be a function")
+			self._clickSignal:Connect(function(...)
+				print(string.format("[Onrusha][CLICK] Tab=%s | Component=%s | Type=%s", tostring(self._tabName or (scope._tab and scope._tab.Name) or scope._name or "?"), tostring(self.Name or self.Id), tostring(self.Type or kind)))
+				local args = table.pack(...)
+				local ok, err = xpcall(function() callback(table.unpack(args, 1, args.n)) end, debug.traceback)
+				if not ok then warn(string.format("[Onrusha][CALLBACK ERROR] %s (%s):\n%s", tostring(self.Name or self.Id), tostring(kind), tostring(err))) end
+			end)
 			return self
 		end
 		function component:SetVisible(visible)
@@ -6351,6 +6395,7 @@ __onrusha_modules["Components/Controls"] = function()
 			self._value = nextValue
 			if self._render then pcall(self._render, nextValue) end
 			if not silent and old ~= nextValue then
+				print(string.format("[Onrusha][SET] Tab=%s | Component=%s | Type=%s | Old=%s | New=%s", tostring(self._tabName or (scope._tab and scope._tab.Name) or scope._name or "?"), tostring(self.Name or self.Id), tostring(kind), debugValue(old), debugValue(nextValue)))
 				if kind == "SliderToggle" then self._callbacks:Fire(nextValue.Enabled, nextValue.Value) else self._callbacks:Fire(nextValue) end
 			end
 			return self
@@ -6652,7 +6697,7 @@ __onrusha_modules["Components/Controls"] = function()
 			end
 			local settingsGear = self._settingsButton:FindFirstChild("SettingsGear")
 			if not settingsGear then
-				settingsGear = make("ImageLabel", { Name = "SettingsGear", AnchorPoint = Vector2.new(0.5, 0.5), Position = UDim2.fromScale(0.5, 0.5), Size = UDim2.fromOffset(12, 12), BackgroundTransparency = 1, BorderSizePixel = 0, Image = "rbxassetid://104502745253902", ImageColor3 = ctx.Theme:Get().SecondaryText, ScaleType = Enum.ScaleType.Fit, ZIndex = 17 }, self._settingsButton)
+				settingsGear = make("ImageLabel", { Name = "SettingsGear", AnchorPoint = Vector2.new(0.5, 0.5), Position = UDim2.fromScale(0.5, 0.5), Size = UDim2.fromOffset(12, 12), BackgroundTransparency = 1, BorderSizePixel = 0, Image = "rbxassetid://124448359781423", ImageColor3 = ctx.Theme:Get().SecondaryText, ScaleType = Enum.ScaleType.Fit, ZIndex = 17 }, self._settingsButton)
 				ctx.Theme:Bind(settingsGear, { ImageColor3 = "SecondaryText" })
 				self._maid:Add(self._settingsButton.MouseEnter:Connect(function() play(ctx, settingsGear, 0.12, { ImageColor3 = ctx.Theme:Get().Accent }) end))
 				self._maid:Add(self._settingsButton.MouseLeave:Connect(function() play(ctx, settingsGear, 0.12, { ImageColor3 = ctx.Theme:Get().SecondaryText }) end))
@@ -6767,13 +6812,13 @@ __onrusha_modules["Components/Controls"] = function()
 			right.Size = UDim2.fromOffset(72, 72)
 			right.Position = UDim2.new(1, 0, 0, 0)
 			right.AnchorPoint = Vector2.new(1, 0)
-			local imageButton = make("ImageButton", { Name = "ImageToggleButton", Size = UDim2.fromScale(1, 1), BackgroundTransparency = 0, BorderSizePixel = 0, AutoButtonColor = false, Image = "", ScaleType = Enum.ScaleType.Crop }, right)
+			local imageButton = make("ImageButton", { Name = "ImageToggleButton", Size = UDim2.fromScale(1, 1), BackgroundTransparency = 0, BorderSizePixel = 0, AutoButtonColor = false, Active = true, Selectable = true, Image = "", ScaleType = Enum.ScaleType.Crop, ZIndex = 5 }, right)
 			ctx.Theme:Bind(imageButton, { BackgroundColor3 = "Hover" }); corner(imageButton, 10); stroke(imageButton, ctx)
 			local fallback = textLabel(imageButton, ctx, tostring(options.FallbackText or "IMAGE\nUNAVAILABLE"), 10, "SecondaryText", true)
 			fallback.Size = UDim2.fromScale(1, 1); fallback.TextXAlignment = Enum.TextXAlignment.Center; fallback.TextYAlignment = Enum.TextYAlignment.Center; fallback.TextWrapped = true
-			local overlay = make("Frame", { Name = "ImageToggleState", AnchorPoint = Vector2.new(1, 1), Position = UDim2.new(1, -5, 1, -5), Size = UDim2.fromOffset(17, 17), BorderSizePixel = 0 }, imageButton)
+			local overlay = make("Frame", { Name = "ImageToggleState", AnchorPoint = Vector2.new(1, 1), Position = UDim2.new(1, -5, 1, -5), Size = UDim2.fromOffset(17, 17), BorderSizePixel = 0, Active = false, Selectable = false, ZIndex = 6 }, imageButton)
 			ctx.Theme:Bind(overlay, { BackgroundColor3 = "Muted" }); corner(overlay, 20)
-			local check = textLabel(overlay, ctx, "✓", 11, "Background", true); check.Size = UDim2.fromScale(1, 1); check.TextXAlignment = Enum.TextXAlignment.Center
+			local check = textLabel(overlay, ctx, "✓", 11, "Background", true); check.Size = UDim2.fromScale(1, 1); check.TextXAlignment = Enum.TextXAlignment.Center; check.Active = false; check.ZIndex = 7
 			local asset = normalizeImageAsset(options.Image or options.AssetId or "")
 			imageButton.Image = asset
 			fallback.Visible = asset == ""
@@ -6804,7 +6849,7 @@ __onrusha_modules["Components/Controls"] = function()
 			if descriptionLabel then descriptionLabel.Size = UDim2.new(1, -94, 0, descriptionHeight) end
 			right.Size = UDim2.fromOffset(72, 72)
 			right.Position = UDim2.new(1, 0, 0, 0); right.AnchorPoint = Vector2.new(1, 0)
-			local imageButton = make("ImageButton", { Name = "ImageDropdownButton", Size = UDim2.fromScale(1, 1), BackgroundTransparency = 0, BorderSizePixel = 0, AutoButtonColor = false, Image = "", ScaleType = Enum.ScaleType.Crop }, right)
+			local imageButton = make("ImageButton", { Name = "ImageDropdownButton", Size = UDim2.fromScale(1, 1), BackgroundTransparency = 0, BorderSizePixel = 0, AutoButtonColor = false, Active = true, Selectable = true, Image = "", ScaleType = Enum.ScaleType.Crop, ZIndex = 5 }, right)
 			ctx.Theme:Bind(imageButton, { BackgroundColor3 = "Hover" }); corner(imageButton, 10); stroke(imageButton, ctx)
 			local fallback = textLabel(imageButton, ctx, tostring(options.FallbackText or "SELECT\nIMAGE"), 10, "SecondaryText", true)
 			fallback.Size = UDim2.fromScale(1, 1); fallback.TextXAlignment = Enum.TextXAlignment.Center; fallback.TextYAlignment = Enum.TextYAlignment.Center; fallback.TextWrapped = true
@@ -6812,7 +6857,7 @@ __onrusha_modules["Components/Controls"] = function()
 			local popup = make("Frame", { Name = "ImageOptions", Size = UDim2.fromOffset(210, 0), Visible = false, ClipsDescendants = true, BorderSizePixel = 0, ZIndex = 40 }, ctx.PageHost)
 			component._popup = popup
 			ctx.Theme:Bind(popup, { BackgroundColor3 = "Sidebar" }); corner(popup, 9); stroke(popup, ctx)
-			local scroll = make("ScrollingFrame", { BackgroundTransparency = 1, Size = UDim2.fromScale(1, 1), CanvasSize = UDim2.new(), AutomaticCanvasSize = Enum.AutomaticSize.None, ScrollBarThickness = 3, BorderSizePixel = 0, ZIndex = 41 }, popup)
+			local scroll = make("ScrollingFrame", { BackgroundTransparency = 1, Size = UDim2.fromScale(1, 1), CanvasSize = UDim2.new(), AutomaticCanvasSize = Enum.AutomaticSize.None, ScrollBarThickness = 3, BorderSizePixel = 0, Active = true, ScrollingEnabled = true, ZIndex = 41 }, popup)
 			make("UIListLayout", { Padding = UDim.new(0, 4), SortOrder = Enum.SortOrder.LayoutOrder }, scroll)
 			make("UIPadding", { PaddingTop = UDim.new(0, 5), PaddingBottom = UDim.new(0, 5), PaddingLeft = UDim.new(0, 5), PaddingRight = UDim.new(0, 5) }, scroll)
 			local optionButtons = {}
@@ -6835,13 +6880,16 @@ __onrusha_modules["Components/Controls"] = function()
 				for index, entry in ipairs(options.Options or {}) do
 					local entryName = type(entry) == "table" and tostring(entry.Name or entry.Value or ("Option " .. index)) or tostring(entry)
 					local entryValue = type(entry) == "table" and (entry.Value or entry.Name) or entry
-					local row = make("TextButton", { Name = "ImageOption", Size = UDim2.new(1, 0, 0, 38), BackgroundTransparency = 0, BorderSizePixel = 0, AutoButtonColor = false, Text = "", ZIndex = 42, LayoutOrder = index }, scroll)
+					local row = make("TextButton", { Name = "ImageOption", Size = UDim2.new(1, 0, 0, 38), BackgroundTransparency = 0, BorderSizePixel = 0, AutoButtonColor = false, Active = true, Selectable = true, Text = "", ZIndex = 42, LayoutOrder = index }, scroll)
 					ctx.Theme:Bind(row, { BackgroundColor3 = "Hover" }); corner(row, 6)
 					local thumb = make("ImageLabel", { Position = UDim2.fromOffset(4, 4), Size = UDim2.fromOffset(30, 30), BackgroundTransparency = 1, Image = type(entry) == "table" and normalizeImageAsset(entry.Image or entry.AssetId) or "", ScaleType = Enum.ScaleType.Crop, ZIndex = 43 }, row); corner(thumb, 5)
 					local label = textLabel(row, ctx, entryName, 12, "Text", true); label.Position = UDim2.fromOffset(42, 0); label.Size = UDim2.new(1, -48, 1, 0); label.ZIndex = 43
-					row.Activated:Connect(function() if ctx.PlaySound then ctx.PlaySound("Click") end; component:Set(entryValue); popup.Visible = false; popup.Size = UDim2.fromOffset(210, 0); play(ctx, arrow, 0.12, { Rotation = 0 }) end)
+					row.Activated:Connect(function() if component._disabled then return end; print(string.format("[Onrusha][IMAGE DROPDOWN SELECT] %s -> %s", tostring(component.Name), tostring(entryValue))); if ctx.PlaySound then ctx.PlaySound("Click") end; component:Set(entryValue); popup.Visible = false; popup.Size = UDim2.fromOffset(210, 0); play(ctx, arrow, 0.12, { Rotation = 0 }) end)
 					table.insert(optionButtons, row)
 				end
+				task.defer(function()
+					if scroll.Parent then scroll.CanvasSize = UDim2.new(0, 0, 0, imageOptionLayout.AbsoluteContentSize.Y + 12) end
+				end)
 			end
 			local function positionImagePopup()
 				local host, scale = ctx.PageHost, math.max(0.2, ctx.UIScale and ctx.UIScale.Scale or 1)
@@ -7266,6 +7314,8 @@ __onrusha_modules["Components/Controls"] = function()
 						end
 					end)
 					optionButton.Activated:Connect(function()
+						if component._disabled then return end
+						print(string.format("[Onrusha][DROPDOWN SELECT] %s -> %s", tostring(component.Name), tostring(option)))
 						if kind == "MultiDropdown" then
 							local current = component:Get() or {}
 							local wasSelected = hasSelected(current, option)
@@ -7418,7 +7468,7 @@ __onrusha_modules["Components/Controls"] = function()
 				local delta = point - center
 				local radius = delta.Magnitude
 				if radius < 32 or radius > 64 then return end
-				hue = (math.atan2(delta.Y, delta.X) / (math.pi * 2) + 0.25) % 1
+				hue = (math.atan2(delta.X, -delta.Y) / (math.pi * 2) + 0.25) % 1
 				applyColor(Color3.fromHSV(hue, saturation, brightness))
 			end
 			wheel.Active = true
@@ -7443,7 +7493,7 @@ __onrusha_modules["Components/Controls"] = function()
 			corner(hueMarker, 20)
 			make("UIStroke", { Color = Color3.fromRGB(255, 255, 255), Thickness = 2, Transparency = 0 }, hueMarker)
 			local function positionHueMarker()
-				local angle = hue * math.pi * 2 - math.pi / 2
+				local angle = (hue - 0.25) * math.pi * 2 - math.pi / 2
 				hueMarker.Position = UDim2.fromOffset(64 + math.cos(angle) * 50 - 9, 64 + math.sin(angle) * 50 - 9)
 			end
 			local function makeValueTrack(labelText, y, initial)
@@ -7905,6 +7955,7 @@ __onrusha_modules["Components/Controls"] = function()
 		end
 		if component._settingsPanel then component._settingsPanel.LayoutOrder = 2 end
 		if ctx.ApplyInterfaceStyle then ctx.ApplyInterfaceStyle(card) end
+		print(string.format("[Onrusha][CREATE] Tab=%s | Component=%s | Type=%s | Id=%s", tostring(component._tabName or (scope._tab and scope._tab.Name) or scope._name or "?"), tostring(name), tostring(kind), tostring(id)))
 		return component
 	end
 
@@ -7939,7 +7990,7 @@ __onrusha_modules["init"] = function()
 
 	local Onrusha = {
 		Name = "Onrusha",
-		Version = "2.5.19",
+		Version = "2.5.32",
         Config = OnrushaConfig,
 	}
 
