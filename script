@@ -1,5 +1,5 @@
 --[=[
-Onrusha v2.5.25 — dropdown gradient hover and visible horizontal tabs
+Onrusha v2.5.42 — isolated keybind slot to prevent overlap with component controls
 Built for environments that allow loading this source as a Luau chunk.
 The UI must run on the Roblox client because it uses Players.LocalPlayer.
 ]=]
@@ -17,6 +17,25 @@ local OnrushaConfig = {
 local __onrusha_modules = {}
 local __onrusha_cache = {}
 local __onrusha_loading = {}
+
+local ONRUSHA_DEBUG = false
+local function onrushaDebug(...)
+    if ONRUSHA_DEBUG then
+        print(...)
+    end
+end
+
+local function printOnrushaReadyBanner(version)
+    print([=[
+
+   ____  _   _ ____  _   _ ____  _   _    _
+  / __ \| \ | |  _ \| | | / ___|| | | |  / \
+ | |  | |  \| | |_) | | | \___ \| |_| | / _ \
+ | |__| | |\  |  _ <| |_| |___) |  _  |/ ___ \
+  \____/|_| \_|_| \_\___/|____/|_| |_/_/   \
+
+]=] .. "   ONRUSHA  /  UI FRAMEWORK  /  v" .. tostring(version) .. "\n   Successfully initialized. Have a great session!\n")
+end
 
 local function __require(name)
 	local cached = __onrusha_cache[name]
@@ -1122,6 +1141,7 @@ __onrusha_modules["Core/KeyGate"] = function()
 		local keyStatusShell = make("Frame", { Name = "KeyStatusShell", AnchorPoint = Vector2.new(0.5, 0), Position = UDim2.new(0.5, 0, 0, 172), Size = UDim2.fromOffset(178, 25), BackgroundTransparency = 0.08, BorderSizePixel = 0, ZIndex = 92 }, keyPanel); theme:Bind(keyStatusShell, { BackgroundColor3 = "Card" }); corner(keyStatusShell, 12)
 		local keyStatusStroke = make("UIStroke", { Thickness = 1, Transparency = 0.6 }, keyStatusShell); theme:Bind(keyStatusStroke, { Color = "Border" })
 		local keyStatusDot = make("Frame", { Name = "KeyStatusDot", Position = UDim2.fromOffset(11, 10), Size = UDim2.fromOffset(5, 5), BackgroundColor3 = theme:Get().Muted, BorderSizePixel = 0, ZIndex = 94 }, keyStatusShell); corner(keyStatusDot, 10)
+		local keyLockIcon = make("ImageLabel", { Name = "KeyGateLockIcon", Position = UDim2.new(1, -30, 0.5, -10), Size = UDim2.fromOffset(20, 20), BackgroundTransparency = 1, Image = "rbxassetid://135504457058301", ImageColor3 = theme:Get().SecondaryText, ScaleType = Enum.ScaleType.Fit, ZIndex = 95 }, keyStatusShell)
 		local keyStatus = themedText(keyPanel, theme, "Waiting for key", 13, "SecondaryText", true)
 		keyStatus.TextXAlignment = Enum.TextXAlignment.Center
 		keyStatus.AnchorPoint = Vector2.new(0.5, 0.5)
@@ -1131,7 +1151,8 @@ __onrusha_modules["Core/KeyGate"] = function()
 		keyStatus.Parent = keyStatusShell
 		local keyInputShell = make("Frame", { Position = UDim2.new(0, 28, 0, 207), Size = UDim2.new(1, -56, 0, 53), BorderSizePixel = 0, ZIndex = 92 }, keyPanel); theme:Bind(keyInputShell, { BackgroundColor3 = "Card" }); corner(keyInputShell, 12)
 		local keyInputStroke = make("UIStroke", { Thickness = 1.2, Transparency = 0.2 }, keyInputShell); theme:Bind(keyInputStroke, { Color = "Border" })
-		local keyInput = make("TextBox", { Name = "KeyInput", Position = UDim2.fromOffset(15, 0), Size = UDim2.new(1, -30, 1, 0), BackgroundTransparency = 1, BorderSizePixel = 0, Text = "", PlaceholderText = "Enter your access key", ClearTextOnFocus = false, TextTruncate = Enum.TextTruncate.AtEnd, Font = Enum.Font.GothamMedium, TextSize = 17, TextXAlignment = Enum.TextXAlignment.Center, TextYAlignment = Enum.TextYAlignment.Center, ZIndex = 93 }, keyInputShell); theme:Bind(keyInput, { TextColor3 = "Text", PlaceholderColor3 = "SecondaryText" })
+		local keyInputIcon = make("ImageLabel", { Name = "KeyInputIcon", Position = UDim2.fromOffset(14, 17), Size = UDim2.fromOffset(19, 19), BackgroundTransparency = 1, Image = "rbxassetid://116918931002434", ImageColor3 = theme:Get().SecondaryText, ScaleType = Enum.ScaleType.Fit, ZIndex = 94 }, keyInputShell)
+		local keyInput = make("TextBox", { Name = "KeyInput", Position = UDim2.fromOffset(43, 0), Size = UDim2.new(1, -58, 1, 0), BackgroundTransparency = 1, BorderSizePixel = 0, Text = "", PlaceholderText = "Enter your access key", ClearTextOnFocus = false, TextTruncate = Enum.TextTruncate.AtEnd, Font = Enum.Font.GothamMedium, TextSize = 17, TextXAlignment = Enum.TextXAlignment.Center, TextYAlignment = Enum.TextYAlignment.Center, ZIndex = 93 }, keyInputShell); theme:Bind(keyInput, { TextColor3 = "Text", PlaceholderColor3 = "SecondaryText" })
 		local verifyButton = make("TextButton", { Name = "VerifyKey", Position = UDim2.new(0, 28, 0, 274), Size = UDim2.new(1, -56, 0, 49), BackgroundTransparency = 0, BorderSizePixel = 0, AutoButtonColor = false, Text = "UNLOCK ONRUSHA", Font = Enum.Font.GothamBold, TextSize = 16, ZIndex = 92 }, keyPanel); theme:Bind(verifyButton, { BackgroundColor3 = "Accent", TextColor3 = "Background" }); corner(verifyButton, 12)
 		local verifyGradient = make("UIGradient", { Rotation = 0 }, verifyButton); theme:Bind(verifyGradient, { Color = function(palette) return ColorSequence.new(palette.Accent, palette.Hover) end })
 		local keyDivider = make("Frame", { Position = UDim2.new(0, 28, 0, 339), Size = UDim2.new(1, -56, 0, 1), BorderSizePixel = 0, ZIndex = 92 }, keyPanel); theme:Bind(keyDivider, { BackgroundColor3 = "Border" })
@@ -1301,6 +1322,8 @@ __onrusha_modules["Core/KeyGate"] = function()
 			keyStatusDot.BackgroundColor3 = color
 			keyStatusStroke.Color = color
 			keyStatusStroke.Transparency = success == nil and 0.6 or 0.36
+			keyLockIcon.Image = success == true and "rbxassetid://126931549237422" or "rbxassetid://135504457058301"
+			keyLockIcon.ImageColor3 = success == true and Color3.fromRGB(105, 225, 160) or color
 		end
 
 		local function saveLicenseKey(key)
@@ -1611,6 +1634,13 @@ __onrusha_modules["Core/Window"] = function()
 		return tint
 	end
 
+	local function tabAccentFor(ctx, tab)
+		if ctx and ctx._settings and ctx._settings.MulticolorTabAccents == false then
+			return ctx.Theme:Get().Accent
+		end
+		return tab and tab.Tint or (ctx and ctx.Theme:Get().Accent)
+	end
+
 	local function pointInside(guiObject, point)
 		if not guiObject or not guiObject.Parent or not guiObject.Visible then return false end
 		local position, size = guiObject.AbsolutePosition, guiObject.AbsoluteSize
@@ -1768,7 +1798,7 @@ __onrusha_modules["Core/Window"] = function()
 
 		local function select()
 			if ctx._destroyed then return end
-			print(string.format("[Onrusha][TAB] Selected tab: %s", tostring(tab.Name)))
+			onrushaDebug(string.format("[Onrusha][TAB] Selected tab: %s", tostring(tab.Name)))
 			ctx._activeTab = tab
 			if tab._leftScroll then tab._leftScroll.ScrollingEnabled = true; tab._leftScroll.Active = true end
 			if tab._rightScroll then tab._rightScroll.ScrollingEnabled = true; tab._rightScroll.Active = true end
@@ -1784,13 +1814,13 @@ __onrusha_modules["Core/Window"] = function()
 				other.Page.Visible = active
 				if other.NavAccent then
 					other.NavAccent.Visible = active
-					tween(ctx, other.NavAccent, 0.18, { Size = UDim2.new(0, 3, 0, active and 20 or 0), BackgroundColor3 = other.Tint })
+					tween(ctx, other.NavAccent, 0.18, { Size = UDim2.new(0, 3, 0, active and 20 or 0), BackgroundColor3 = tabAccentFor(ctx, other) })
 				end
 				tween(ctx, other.Button, 0.16, { BackgroundTransparency = active and 0.52 or 1, BackgroundColor3 = ctx.Theme:Get().Hover })
 				tween(ctx, other.NavLabel, 0.16, { TextColor3 = active and ctx.Theme:Get().Text or ctx.Theme:Get().SecondaryText })
-				tween(ctx, other.IconLabel, 0.16, { TextColor3 = active and other.Tint or ctx.Theme:Get().SecondaryText })
-				if other.NavImage then tween(ctx, other.NavImage, 0.16, { ImageColor3 = active and other.Tint or ctx.Theme:Get().SecondaryText }) end
-				tween(ctx, other.NavSeparator, 0.18, { BackgroundTransparency = active and 0.08 or 0.42, BackgroundColor3 = active and other.Tint or ctx.Theme:Get().Border })
+				tween(ctx, other.IconLabel, 0.16, { TextColor3 = active and tabAccentFor(ctx, other) or ctx.Theme:Get().SecondaryText })
+				if other.NavImage then tween(ctx, other.NavImage, 0.16, { ImageColor3 = active and tabAccentFor(ctx, other) or ctx.Theme:Get().SecondaryText }) end
+				tween(ctx, other.NavSeparator, 0.18, { BackgroundTransparency = active and 0.08 or 0.42, BackgroundColor3 = active and tabAccentFor(ctx, other) or ctx.Theme:Get().Border })
 				tween(ctx, other.NavStroke, 0.18, { Transparency = active and 0.62 or 0.9 })
 			end
 			ctx.PageTitle.Text = tab.Name
@@ -1894,8 +1924,10 @@ __onrusha_modules["Core/Window"] = function()
 				nav.BackgroundColor3 = ctx.Theme:Get().Card:Lerp(ctx.Theme:Get().Accent, 0.10)
 				tween(ctx, nav, 0.14, { BackgroundTransparency = 0.22, BackgroundColor3 = ctx.Theme:Get().Card:Lerp(ctx.Theme:Get().Accent, 0.10) })
 				tween(ctx, tab.NavStroke, 0.14, { Transparency = 0.66 })
-				tween(ctx, iconText, 0.14, { TextColor3 = tab.Tint })
-				tween(ctx, separator, 0.14, { BackgroundTransparency = 0.2, BackgroundColor3 = tab.Tint })
+				local hoverAccent = tabAccentFor(ctx, tab)
+				tween(ctx, iconText, 0.14, { TextColor3 = hoverAccent })
+				if tab.NavImage then tween(ctx, tab.NavImage, 0.14, { ImageColor3 = hoverAccent }) end
+				tween(ctx, separator, 0.14, { BackgroundTransparency = 0.2, BackgroundColor3 = hoverAccent })
 			end
 		end))
 		ctx._cleanup:Add(nav.MouseLeave:Connect(function()
@@ -1903,6 +1935,8 @@ __onrusha_modules["Core/Window"] = function()
 				tween(ctx, nav, 0.14, { BackgroundTransparency = 1, BackgroundColor3 = ctx.Theme:Get().Card })
 				tween(ctx, tab.NavStroke, 0.14, { Transparency = 0.9 })
 				tween(ctx, separator, 0.14, { BackgroundTransparency = 0.42, BackgroundColor3 = ctx.Theme:Get().Border })
+				tween(ctx, iconText, 0.14, { TextColor3 = ctx.Theme:Get().SecondaryText })
+				if tab.NavImage then tween(ctx, tab.NavImage, 0.14, { ImageColor3 = ctx.Theme:Get().SecondaryText }) end
 			end
 		end))
 		if ctx.ApplyNavigationMode then ctx.ApplyNavigationMode() end
@@ -2015,6 +2049,17 @@ __onrusha_modules["Core/Window"] = function()
 		appearance:DropdownCreate({ Id = "system.navigation-position", Name = "Tab position", Description = "Place the tab bar on the left, above or below the content.", Options = { "Left", "Top", "Bottom" }, Default = ctx._settings.NavigationPosition }):OnChanged(function(value) ctx._settings.NavigationPosition = value; refreshNavigationLayout(true) end)
 		appearance:DropdownCreate({ Id = "system.navigation-display", Name = "Tab appearance", Description = "Choose text and icon visibility for navigation tabs.", Options = { "IconText", "IconsOnly", "Letters" }, Default = ctx._settings.NavigationDisplay }):OnChanged(function(value) ctx._settings.NavigationDisplay = value; refreshNavigationLayout(true) end)
 		appearance:DropdownCreate({ Id = "system.navigation-alignment", Name = "Tab alignment", Description = "Align the tab list to the start, center or end of its navigation area.", Options = { "Start", "Center", "End" }, Default = ctx._settings.NavigationAlignment }):OnChanged(function(value) ctx._settings.NavigationAlignment = value; refreshNavigationLayout(true) end)
+		appearance:ToggleCreate({ Id = "system.multicolor-tab-accents", Name = "Multicolor tab accents", Description = "Use a different accent color for each tab. Turn this off to match the selected tab indicator and icon to the active theme.", Default = ctx._settings.MulticolorTabAccents ~= false }):OnChanged(function(value)
+			ctx._settings.MulticolorTabAccents = value == true
+			for _, tab in ipairs(ctx._tabs) do
+				local active = tab == ctx._activeTab
+				local accentColor = tabAccentFor(ctx, tab)
+				if tab.NavAccent then tab.NavAccent.BackgroundColor3 = accentColor end
+				if tab.IconLabel then tab.IconLabel.TextColor3 = active and accentColor or ctx.Theme:Get().SecondaryText end
+				if tab.NavImage then tab.NavImage.ImageColor3 = active and accentColor or ctx.Theme:Get().SecondaryText end
+				if tab.NavSeparator then tab.NavSeparator.BackgroundColor3 = active and accentColor or ctx.Theme:Get().Border end
+			end
+		end)
 		appearance:DropdownCreate({ Id = "system.seasonal-ui", Name = "Seasonal interface", Description = "Restyle the complete interface with a seasonal palette, accent colors and matching decorations.", Options = { "None", "Spring", "Summer", "Autumn", "Winter", "Halloween" }, Default = ctx._settings.SeasonalUI }):OnChanged(function(value) ui:SetSeason(value) end)
 		appearance:ToggleCreate({ Id = "system.ui-shadow", Name = "UI shadow", Description = "Use Roblox's native UIShadow component behind the main window. Enabled by default; set UIShadow = false or UIShadowEnabled = false in Onrusha.Create to disable it.", Default = ctx._settings.UIShadowEnabled }):OnChanged(function(value) ui:SetUIShadow(value) end)
 		appearance:ToggleCreate({ Id = "system.sounds-enabled", Name = "Interface sounds", Description = "Enable or mute Onrusha hover, click and toggle sounds.", Default = not ctx._settings.MuteSounds }):OnChanged(function(value) ctx._settings.MuteSounds = not value end)
@@ -2964,9 +3009,9 @@ __onrusha_modules["Core/Window"] = function()
 			ui:Notify({ Title = ok and "Configuration imported" or "Import failed", Description = ok and "The configuration has been applied." or tostring(err), Type = ok and "Success" or "Error" })
 		end)
 		local about = settingsTab:SectionCreate({ Name = "About", Side = "Left" })
-		about:LabelCreate({ Id = "system.version", Name = "Onrusha UI Framework | 2.5.19" })
+		about:LabelCreate({ Id = "system.version", Name = "Onrusha UI Framework | 2.5.42" })
 		about:ParagraphCreate({ Id = "system.info", Name = "Designed for Roblox Studio", Text = "A modular, responsive UI framework for games you develop. Visual effects and client settings never replace server-side validation." })
-		about:ParagraphCreate({ Id = "system.changelog", Name = "Changelog - 2.5.22", Text = table.concat({ "+ Dropdown typography is now bold, with a refined shadowed menu, larger option rows and cleaner selected-state styling", "+ Winter snow cap now aligns to the actual window top in the shared ScreenGui coordinate space; removed the extra GuiInset subtraction that made it float above the UI", "+ Dropdown option lists now calculate CanvasSize from UIListLayout and support vertical mouse/touch scrolling", "+ Mouse-wheel routing now gives an open popup ScrollingFrame priority so its parent tab column cannot steal dropdown scrolling", "+ Dropdown popup redesigned with clearer selected markers, hover feedback, improved spacing and a more readable menu", "+ MultiDropdown now correctly stores and toggles selected values as an array", "+ Replaced the unsupported GuiService:GetGuiObjectsAtPosition call with direct visible ScrollingFrame bounds hit-testing; mouse-wheel routing no longer throws on clients", "+ Settings gets an explicit post-build canvas pass, delayed layout passes and native AutomaticCanvasSize.Y so its long controls remain scrollable", "+ Mouse wheel routing uses direct AbsolutePosition and AbsoluteSize bounds checks for visible columns, compatible with CoreGui-hosted UI", "+ Winter cap now subtracts the ScreenGui inset and scales its height, ridge and snow clumps proportionally with the window", "+ Loading intro redesigned as a compact product UI with a proper native UIShadow, deliberate typography, version tag and staged progress", "+ Expanded Gradient theme collection to 21 presets, adding Crimson Silk, Blue Hour, Lavender Sky, Peach Sorbet, Pine Mist, Solar Flare, Electric Orchid and Glacier Bloom", "+ Settings and regular tab scrolling now receive a fresh canvas calculation after responsive reparenting; mouse-wheel input is routed to the hovered active content column", "+ Winter snow cap uses normalized clump positions and widths, so the ridge stays proportionate when UIScale, viewport fit or window size changes", "+ Added 13 Gradient themes with multi-stop surface and accent transitions: Aurora Flow, Ocean Depth, Violet Haze, Solar Ember, Rose Quartz, Mint Lagoon, Cotton Candy, Arctic Prism, Neon Circuit, Golden Hour, Deep Space, Coral Bloom and Emerald Glass", "+ Replaced the generic circular loading badge with a compact brand-led panel, actual hub logo, native UIShadow, restrained typography and a simple progress rail", "+ Restored tab content scrolling: both columns now compute CanvasSize from their UIListLayout, keep mouse/touch scrolling enabled, and clamp the scroll position after content or viewport changes", "+ Rebuilt startup intro as a restrained branded motion card with a clean accent sweep and no oversized orbit elements", "+ Winter snowfall now uses small screen-space flakes with no UI collisions or drag-linked movement; the slim snow ridge remains attached", "+ Halloween pumpkins now pop with a warm flash and flying fragments when clicked; dropdown hover stays on its intended surface color and long option lists scroll to the true final item", "+ Fixed Top/Bottom navigation reflow: refresh preserves compact and text tab widths after every reopen", "+ Removed the recursive AbsoluteContentSizeChanged listener; navigation canvas now updates through explicit debounced layout refreshes", "+ Raised seasonal particle detail layers above their transparent roots so pumpkin and snowflake artwork is visible", "+ Reopens now explicitly refresh the guarded navigation canvas after the window becomes visible", "+ SliderToggle switch, value and SET keybind now occupy separate non-overlapping positions", "+ Winter falling flakes stay in screen coordinates and are hidden while the interface is closed", "+ Replaced the teleport guide dots with larger, higher-contrast dash segments and restricted the guide to Teleport Outline mode", "+ Moved Winter snowfall to independent screen coordinates while keeping the snow ridge attached to the window", "+ Spawned Halloween pumpkins in the content area and excluded navigation tabs from their collision surfaces", "+ Guarded navigation CanvasSize updates to prevent AbsoluteContentSizeChanged re-entrancy and normalize navigation when reopening", "+ Separated SliderToggle switch/value controls from the SET keybind button", "+ Reworked CustomFrame with a polished live-preview header, open/close transitions and one active frame at a time", "+ Replaced the startup splash with an animated Onrusha sequence and the supplied startup sound", "+ A new Create call now destroys the previous Onrusha UI instance before constructing another", "+ Fixed drag input Vector3-to-Vector2 mismatch that interrupted window movement and seasonal impulses", "+ Seasonal particles now spawn at the visible top edge instead of far above the clipped window; snow and pumpkins start moving immediately", "+ Increased winter flake fall speed and initial velocity so snow physics is visibly active", "+ Added six drag modes, including stationary dotted-outline teleport placement", "+ Added liquid-like pumpkin inertia and falling seasonal objects on close", "+ Snow clumps spill only when acceleration carries them beyond roof support; snowflakes land on controls", "+ Autumn particles now vary in size, palette, flutter, gusts and spin", "+ Re-centered icon and letter glyphs after top/bottom navigation layout changes", "+ RangeSlider now matches the standard slider track and accent fill", "+ Added configurable default season, animated Onrusha + Hub startup intro and gradual seasonal object fade", "+ Fixed winter snow callbacks being out of scope for the seasonal physics loop", "+ Replaced drag particles with a dotted white measurement frame, gentle physical tilt and a clean under-window grip", "+ Fixed Top/Bottom tab reflow: mobile and desktop now share one geometry calculation instead of overwriting each other's positions", "+ Rebuild navigation layout every time the window is opened so labels, icons and page content remain aligned after hiding and reopening", "+ Horizontal tabs now keep icon and label in separate slots; compact mode centers icons and hides labels without overlap", "+ Added a slim translucent white rounded drag grip just below the window; it brightens and widens on hover and can be used to move the interface", "+ Slider pointer mapping now converts the pointer through the handle travel range, so maximum is reached exactly at the handle endpoint without dragging beyond the rail", "+ Slider now tracks pointer endpoints precisely, fills the full rail at 100% and interpolates faster without lag", "+ UIShadow remains enabled by default and can only be disabled explicitly with UIShadow = false or UIShadowEnabled = false", "+ Fixed Controls RunService scope so smooth slider interpolation uses a valid RenderStepped connection", "+ Settings gear icon reduced to 12x12 while keeping the 24x24 hit target", "+ Slider rail and handle are larger, shadowed and track endpoint math now fills the full width at 100%", "+ Slider drag uses the active pointer only, with no mouse-location offset and no cross-touch interference", "+ Phone window uses a taller near-full-width layout; mobile opener can be repositioned by touch", "+ Mobile notifications use compact dimensions and a two-toast stack", "+ Tab alignment supports Start, Center and End; horizontal icon/label layout has fixed non-overlapping geometry", "+ Settings uses the supplied settings image and duplicate inner settings separator is hidden", "+ Profile avatar is larger and the green session dot disappears in compact mode", "+ Glass surface tint now follows the active theme and uses a more opaque finish", "+ UIShadow is enabled by default and can be disabled with UIShadow = false or UIShadowEnabled = false", "+ Interface styles now force solid opaque window and sidebar surfaces for every non-Glass style", "+ Toggle reduced to 38x22 with a 14px knob", "+ Slider rail is 14px thick with a 10px handle; pointer tracking uses UserInputService only", "+ OnrushaSurfaceFinish gradients are created only in Glass and destroyed immediately in every non-Glass style; non-Glass style surfaces are opaque", "+ Halloween pumpkins use downward gravity, settle after landing, expire after 10 seconds and respawn", "+ Seasonal particle collision checks only the top surface of controls", "+ Accordion action and settings gear have a separate reserved layout", "+ Color picker shows the selected color in the supplied hue-circle icon", "+ Script avatar is larger and transparent in the sidebar and KeyGate", "+ HUD opener is an OPEN pill that returns to the main interface", "+ Native Roblox UIShadow is used instead of shadow-image decorations", "+ Seasonal decor uses custom physical shapes, capped particles, and a limited winter snow ridge that spills and falls when the window moves", "+ Hover and click sounds are boosted and adjustable in Appearance settings", "+ Sound instances are stored under ScreenGui.OnrushaAudio", "+ Custom Preview has larger desktop defaults and adapts to small screens", "+ RangeSlider uses two matching round handles on the same slider rail", "+ Neon uses layered accent outlines and soft glow surfaces" }, "\n") })
+		about:ParagraphCreate({ Id = "system.changelog", Name = "Changelog - 2.5.42", Text = "Moved the SET control into a dedicated compact slot at the far right of each component row. Reduced its width and shifted it away from Toggle, SliderToggle and action-button controls. The original component layout is otherwise preserved." })
 		if settingsTab._refreshScroll then settingsTab._refreshScroll() end
 		task.defer(function()
 			RunService.Heartbeat:Wait()
@@ -2991,7 +3036,7 @@ __onrusha_modules["Core/Window"] = function()
 		local theme = ThemeManager.new(options.Theme or "Minimal")
 		local ctx = {
 			Cleanup = Cleanup, Theme = theme, _cleanup = cleanup, _activeTweens = {}, _components = {}, _tabs = {}, _tabByName = {}, _tabCounter = 0,
-			_componentCount = 0, _destroyed = false, _activeTab = nil, _settings = { AnimationsEnabled = true, AnimationSpeed = 1, ReducedMotion = false, CompactMode = false, ShowDescriptions = true, RememberLastTab = true, BlurEnabled = options.Blur == true, BlurStrength = math.clamp(tonumber(options.BlurStrength) or 10, 0, 24), WindowParticles = options.WindowParticles ~= false, WindowParticleStyle = options.WindowParticleStyle or "Orbs", WindowParticleSize = math.clamp(tonumber(options.WindowParticleSize) or 5, 2, 10), WindowParticleSpread = math.clamp(tonumber(options.WindowParticleSpread) or 36, 12, 100), WindowParticleLifetime = math.clamp(tonumber(options.WindowParticleLifetime) or 1, 0.4, 2), WindowParticleGlow = options.WindowParticleGlow ~= false, WindowParticleTrails = options.WindowParticleTrails == true, DragEffectEnabled = false, DragOutlineEnabled = options.DragOutlineEnabled ~= false, DragMode = tostring(options.DragMode or OnrushaConfig.Defaults.DragMode or "Teleport Outline"), DragEffectStyle = tostring(options.DragEffectStyle or "Soft Glow"), DragEffectIntensity = math.clamp(math.floor(tonumber(options.DragEffectIntensity) or 2), 1, 4), DragEffectSize = math.clamp(tonumber(options.DragEffectSize) or 24, 8, 48), DragEffectLifetime = math.clamp(tonumber(options.DragEffectLifetime) or 0.42, 0.15, 0.9), DragEffectGlow = options.DragEffectGlow ~= false, DragEffectTrails = options.DragEffectTrails ~= false, DragEffectColor = typeof(options.DragEffectColor) == "Color3" and options.DragEffectColor or nil, LowPerformance = false, HUDEnabled = options.HUDEnabled ~= false, HUDScale = math.clamp(tonumber(options.HUDScale) or 1, 0.7, 1.25), HUDDock = tostring(options.HUDDock or "TopCenter"), HUDParticlesEnabled = options.HUDParticlesEnabled ~= false, HUDActiveFunctionsEnabled = options.HUDActiveFunctionsEnabled ~= false, HUDActivePosition = typeof(options.HUDActivePosition) == "UDim2" and options.HUDActivePosition or UDim2.new(0.5, 0, 0.18, 0), StreamerMode = options.StreamerMode == true, InterfaceStyle = tostring(options.InterfaceStyle or "Rounded"), NavigationMode = tostring(options.NavigationMode or "Sidebar"), NavigationPosition = tostring(options.NavigationPosition or "Left"), NavigationDisplay = tostring(options.NavigationDisplay or "IconText"), NavigationAlignment = tostring(options.NavigationAlignment or "Start"), SeasonalUI = tostring(options.SeasonalUI or OnrushaConfig.Defaults.SeasonalUI or uiEvent), UIShadowEnabled = not (options.UIShadowEnabled == false or options.UIShadow == false or OnrushaConfig.Defaults.UIShadow == false), MuteSounds = options.SoundsEnabled == false or options.MuteSounds == true, SoundVolume = math.clamp(tonumber(options.SoundVolume) or 100, 0, 100), HoverVolume = math.clamp(tonumber(options.HoverVolume) or 100, 0, 100), ClickVolume = math.clamp(tonumber(options.ClickVolume) or 100, 0, 100), WindowSize = { X = 960, Y = 605 }, LastTab = nil },
+			_componentCount = 0, _destroyed = false, _activeTab = nil, _settings = { AnimationsEnabled = true, AnimationSpeed = 1, ReducedMotion = false, CompactMode = false, ShowDescriptions = true, RememberLastTab = true, BlurEnabled = options.Blur == true, BlurStrength = math.clamp(tonumber(options.BlurStrength) or 10, 0, 24), WindowParticles = options.WindowParticles ~= false, WindowParticleStyle = options.WindowParticleStyle or "Orbs", WindowParticleSize = math.clamp(tonumber(options.WindowParticleSize) or 5, 2, 10), WindowParticleSpread = math.clamp(tonumber(options.WindowParticleSpread) or 36, 12, 100), WindowParticleLifetime = math.clamp(tonumber(options.WindowParticleLifetime) or 1, 0.4, 2), WindowParticleGlow = options.WindowParticleGlow ~= false, WindowParticleTrails = options.WindowParticleTrails == true, DragEffectEnabled = false, DragOutlineEnabled = options.DragOutlineEnabled ~= false, DragMode = tostring(options.DragMode or OnrushaConfig.Defaults.DragMode or "Teleport Outline"), DragEffectStyle = tostring(options.DragEffectStyle or "Soft Glow"), DragEffectIntensity = math.clamp(math.floor(tonumber(options.DragEffectIntensity) or 2), 1, 4), DragEffectSize = math.clamp(tonumber(options.DragEffectSize) or 24, 8, 48), DragEffectLifetime = math.clamp(tonumber(options.DragEffectLifetime) or 0.42, 0.15, 0.9), DragEffectGlow = options.DragEffectGlow ~= false, DragEffectTrails = options.DragEffectTrails ~= false, DragEffectColor = typeof(options.DragEffectColor) == "Color3" and options.DragEffectColor or nil, LowPerformance = false, HUDEnabled = options.HUDEnabled ~= false, HUDScale = math.clamp(tonumber(options.HUDScale) or 1, 0.7, 1.25), HUDDock = tostring(options.HUDDock or "TopCenter"), HUDParticlesEnabled = options.HUDParticlesEnabled ~= false, HUDActiveFunctionsEnabled = options.HUDActiveFunctionsEnabled ~= false, HUDActivePosition = typeof(options.HUDActivePosition) == "UDim2" and options.HUDActivePosition or UDim2.new(0.5, 0, 0.18, 0), StreamerMode = options.StreamerMode == true, InterfaceStyle = tostring(options.InterfaceStyle or "Rounded"), NavigationMode = tostring(options.NavigationMode or "Sidebar"), NavigationPosition = tostring(options.NavigationPosition or "Left"), NavigationDisplay = tostring(options.NavigationDisplay or "IconText"), NavigationAlignment = tostring(options.NavigationAlignment or "Start"), MulticolorTabAccents = options.MulticolorTabAccents ~= false, SeasonalUI = tostring(options.SeasonalUI or OnrushaConfig.Defaults.SeasonalUI or "None"), UIShadowEnabled = not (options.UIShadowEnabled == false or options.UIShadow == false or OnrushaConfig.Defaults.UIShadow == false), MuteSounds = options.SoundsEnabled == false or options.MuteSounds == true, SoundVolume = math.clamp(tonumber(options.SoundVolume) or 100, 0, 100), HoverVolume = math.clamp(tonumber(options.HoverVolume) or 100, 0, 100), ClickVolume = math.clamp(tonumber(options.ClickVolume) or 100, 0, 100), WindowSize = { X = 960, Y = 605 }, LastTab = nil },
 			_searchQuery = "", _scale = math.clamp(tonumber(options.Scale) or 0.96, 0.65, 1.02), _toggleKey = options.ToggleKey or Enum.KeyCode.RightShift,
 			_textInputFocused = false, _listeningKeybind = nil, _keybinds = {}, _options = options, _draggable = options.Draggable ~= false, _sessionStartedAt = os.clock(), _keyExpiresAt = nil,
 		}
@@ -3059,18 +3104,18 @@ __onrusha_modules["Core/Window"] = function()
 		local sidebarFill = make("Frame", { Name = "SidebarRightFill", Position = UDim2.new(1, -14, 0, 0), Size = UDim2.new(0, 14, 1, 0), BorderSizePixel = 0, BackgroundTransparency = 0, ZIndex = 2 }, sidebar)
 		ctx.Theme:Bind(sidebarFill, { BackgroundColor3 = "Sidebar" })
 		local divider = make("Frame", { Position = UDim2.new(0.245, 0, 0, 0), Size = UDim2.new(0, 1, 1, 0), BorderSizePixel = 0, ZIndex = 3 }, window); ctx.Theme:Bind(divider, { BackgroundColor3 = "Border" })
-		local brand = make("Frame", { Name = "Brand", BackgroundTransparency = 1, Position = UDim2.fromOffset(12, 10), Size = UDim2.new(1, -24, 0, 62) }, sidebar)
-		local logo = make("Frame", { Name = "ScriptAvatar", Size = UDim2.fromOffset(56, 56), Position = UDim2.fromOffset(0, 1), BackgroundTransparency = 1, BorderSizePixel = 0 }, brand)
+		local brand = make("Frame", { Name = "Brand", BackgroundTransparency = 1, Position = UDim2.fromOffset(12, 8), Size = UDim2.new(1, -24, 0, 74) }, sidebar)
+		local logo = make("Frame", { Name = "ScriptAvatar", Size = UDim2.fromOffset(70, 70), Position = UDim2.fromOffset(-3, 0), BackgroundTransparency = 1, BorderSizePixel = 0, ClipsDescendants = false }, brand)
 		local logoText = themedText(logo, ctx.Theme, "O", 17, "Background", true); logoText.Size = UDim2.fromScale(1, 1); logoText.TextXAlignment = Enum.TextXAlignment.Center
 		logoText.Visible = false
 		local hubImage = tostring(options.HubImage or "rbxassetid://134185886177706")
 		if string.match(hubImage, "^%d+$") then hubImage = "rbxassetid://" .. hubImage end
-		make("ImageLabel", { Name = "HubLogoImage", AnchorPoint = Vector2.new(0.5, 0.5), Position = UDim2.fromScale(0.5, 0.5), BackgroundTransparency = 1, BorderSizePixel = 0, Size = UDim2.fromScale(1, 1), Image = hubImage, ImageColor3 = Color3.new(1, 1, 1), ScaleType = Enum.ScaleType.Fit }, logo)
-		local brandTitle = themedText(brand, ctx.Theme, "Onrusha Hub", 16, "Text", true); brandTitle.Position = UDim2.fromOffset(65, 5); brandTitle.Size = UDim2.new(1, -65, 0, 24)
-		local brandSubtitle = themedText(brand, ctx.Theme, tostring(options.Subtitle or "UI FRAMEWORK"), 11, "SecondaryText", true); brandSubtitle.Position = UDim2.fromOffset(65, 31); brandSubtitle.Size = UDim2.new(1, -65, 0, 15)
-		local navTitle = themedText(sidebar, ctx.Theme, "WORKSPACE", 11, "Muted", true); navTitle.Position = UDim2.new(0, 15, 0, 78); navTitle.Size = UDim2.new(1, -58, 0, 17)
-		local navCount = make("TextLabel", { Name = "WorkspaceCount", Position = UDim2.new(1, -43, 0, 78), Size = UDim2.fromOffset(28, 16), BackgroundTransparency = 0, BorderSizePixel = 0, Text = "01", Font = Enum.Font.GothamBold, TextSize = 10, TextXAlignment = Enum.TextXAlignment.Center, TextYAlignment = Enum.TextYAlignment.Center, ZIndex = 3 }, sidebar); ctx.NavCountLabel = navCount; ctx.Theme:Bind(navCount, { BackgroundColor3 = "Card", TextColor3 = "Accent" }); corner(navCount, 6)
-		local navScroll = make("ScrollingFrame", { Name = "Navigation", BackgroundTransparency = 1, BorderSizePixel = 0, Position = UDim2.new(0, 8, 0, 103), Size = UDim2.new(1, -16, 1, -172), CanvasPosition = Vector2.zero, CanvasSize = UDim2.new(), AutomaticCanvasSize = Enum.AutomaticSize.None, ScrollBarThickness = 4, ScrollBarImageTransparency = 0.28, ScrollingEnabled = true, Active = true, ClipsDescendants = true, ElasticBehavior = Enum.ElasticBehavior.WhenScrollable }, sidebar)
+		local hubLogoImage = make("ImageLabel", { Name = "HubLogoImage", AnchorPoint = Vector2.new(0.5, 0.5), Position = UDim2.fromScale(0.5, 0.5), BackgroundTransparency = 1, BorderSizePixel = 0, Size = UDim2.fromScale(1, 1), Image = hubImage, ImageColor3 = Color3.new(1, 1, 1), ImageTransparency = 0, ScaleType = Enum.ScaleType.Fit }, logo)
+		local brandTitle = themedText(brand, ctx.Theme, "Onrusha Hub", 16, "Text", true); brandTitle.Position = UDim2.fromOffset(76, 13); brandTitle.Size = UDim2.new(1, -76, 0, 24)
+		local brandSubtitle = themedText(brand, ctx.Theme, tostring(options.Subtitle or "UI FRAMEWORK"), 11, "SecondaryText", true); brandSubtitle.Position = UDim2.fromOffset(76, 39); brandSubtitle.Size = UDim2.new(1, -76, 0, 15)
+		local navTitle = themedText(sidebar, ctx.Theme, "WORKSPACE", 11, "Muted", true); navTitle.Position = UDim2.new(0, 15, 0, 88); navTitle.Size = UDim2.new(1, -58, 0, 17)
+		local navCount = make("TextLabel", { Name = "WorkspaceCount", Position = UDim2.new(1, -43, 0, 88), Size = UDim2.fromOffset(28, 16), BackgroundTransparency = 0, BorderSizePixel = 0, Text = "01", Font = Enum.Font.GothamBold, TextSize = 10, TextXAlignment = Enum.TextXAlignment.Center, TextYAlignment = Enum.TextYAlignment.Center, ZIndex = 3 }, sidebar); ctx.NavCountLabel = navCount; ctx.Theme:Bind(navCount, { BackgroundColor3 = "Card", TextColor3 = "Accent" }); corner(navCount, 6)
+		local navScroll = make("ScrollingFrame", { Name = "Navigation", BackgroundTransparency = 1, BorderSizePixel = 0, Position = UDim2.new(0, 8, 0, 113), Size = UDim2.new(1, -16, 1, -182), CanvasPosition = Vector2.zero, CanvasSize = UDim2.new(), AutomaticCanvasSize = Enum.AutomaticSize.None, ScrollBarThickness = 4, ScrollBarImageTransparency = 0.28, ScrollingEnabled = true, Active = true, ClipsDescendants = true, ElasticBehavior = Enum.ElasticBehavior.WhenScrollable }, sidebar)
 		ctx.Theme:Bind(navScroll, { ScrollBarImageColor3 = "Muted" })
 		local navLayout = make("UIListLayout", { SortOrder = Enum.SortOrder.LayoutOrder, Padding = UDim.new(0, 4) }, navScroll)
 		ctx.NavLayout = navLayout
@@ -3121,11 +3166,12 @@ __onrusha_modules["Core/Window"] = function()
 			local visibleCount = 0
 			for _, item in ipairs(self._tabs) do if item.Button and item.Button.Visible then visibleCount += 1 end end
 			local horizontal = self._settings.NavigationPosition == "Top" or self._settings.NavigationPosition == "Bottom"
+			local compactTabs = self._settings.CompactMode or self._settings.NavigationDisplay == "IconsOnly" or self._settings.NavigationDisplay == "Letters"
 			local showText = horizontal and self._settings.NavigationDisplay == "IconText" and not self._settings.CompactMode and not self._mobile and not self._compactMobile
 			local height = visibleCount <= 3 and 48 or visibleCount <= 5 and 43 or visibleCount <= 8 and 37 or 33
 			for _, item in ipairs(self._tabs) do
 				if item.Button then
-					local targetSize = horizontal and UDim2.fromOffset(showText and (self._mobile and 116 or 132) or 46, 38) or UDim2.new(1, 0, 0, height)
+					local targetSize = horizontal and UDim2.fromOffset(showText and (self._mobile and 120 or 138) or (compactTabs and 42 or 46), compactTabs and 32 or 34) or UDim2.new(1, 0, 0, compactTabs and 35 or height)
 					if item.Button.Size ~= targetSize then item.Button.Size = targetSize end
 				end
 			end
@@ -3232,6 +3278,9 @@ __onrusha_modules["Core/Window"] = function()
 			local mobile = ctx._mobile == true
 			local compactMobile = ctx._compactMobile == true
 			local horizontalNavigation = ctx._settings.NavigationPosition == "Top" or ctx._settings.NavigationPosition == "Bottom"
+			local visibleTabCount = 0
+			for _, currentTab in ipairs(ctx._tabs) do if currentTab.Button and currentTab.Button.Visible then visibleTabCount += 1 end end
+			local verticalTabHeight = visibleTabCount <= 3 and 48 or visibleTabCount <= 5 and 43 or visibleTabCount <= 8 and 37 or 33
 			navBrand.Visible = horizontalNavigation and not mobile
 			pageTitle.Position = horizontalNavigation and not mobile and UDim2.fromOffset(124, 0) or UDim2.fromOffset(0, 0)
 			pageSubtitle.Position = horizontalNavigation and not mobile and UDim2.fromOffset(124, 24) or UDim2.fromOffset(0, 24)
@@ -3264,7 +3313,7 @@ __onrusha_modules["Core/Window"] = function()
 					if animateNow then
 						tween(ctx, label, 0.13, { TextTransparency = 1 })
 						task.delay(0.14, function()
-							if label.Parent and (ctx._settings.CompactMode or ctx._compactMobile) then label.Visible = false; label.TextTransparency = 0 end
+							if label.Parent and (ctx._settings.CompactMode or ctx._compactMobile or ctx._settings.NavigationDisplay == "IconsOnly") then label.Visible = false; label.TextTransparency = 0 end
 						end)
 					else
 						label.Visible = false
@@ -3289,7 +3338,7 @@ __onrusha_modules["Core/Window"] = function()
 						if object:IsA("TextLabel") then properties.TextTransparency = 1 end
 						tween(ctx, object, 0.13, properties)
 						task.delay(0.14, function()
-							if object.Parent and (ctx._settings.CompactMode or ctx._compactMobile) then
+							if object.Parent and (ctx._settings.CompactMode or ctx._compactMobile or ctx._settings.NavigationDisplay == "IconsOnly") then
 								object.Visible = false
 								object.BackgroundTransparency = restTransparency
 								if object:IsA("TextLabel") then object.TextTransparency = 0 end
@@ -3317,8 +3366,8 @@ __onrusha_modules["Core/Window"] = function()
 			setLabelVisible(brandSubtitle, not collapsed)
 			setLabelVisible(navTitle, not collapsed)
 			setDecorationVisible(navCount, not collapsed, 0)
-			setProps(logo, 0.24, { Position = collapsed and UDim2.new(0.5, -18, 0, 3) or UDim2.fromOffset(0, 1), Size = UDim2.fromOffset(collapsed and 36 or 56, collapsed and 36 or 56) })
-			setProps(navScroll, 0.26, { Position = collapsed and UDim2.new(0, compactMobile and 4 or 8, 0, 58) or UDim2.new(0, 8, 0, 103), Size = UDim2.new(1, compactMobile and -8 or -16, 1, collapsed and -120 or -172) })
+			setProps(logo, 0.24, { Position = collapsed and UDim2.new(0.5, -20, 0, 3) or UDim2.fromOffset(-3, 0), Size = UDim2.fromOffset(collapsed and 42 or 70, collapsed and 42 or 70) })
+			setProps(navScroll, 0.26, { Position = collapsed and UDim2.new(0, compactMobile and 4 or 8, 0, 58) or UDim2.new(0, 8, 0, 113), Size = UDim2.new(1, compactMobile and -8 or -16, 1, collapsed and -120 or -182) })
 			setProps(profileCard, 0.25, { Size = UDim2.new(1, collapsed and -12 or -16, 0, collapsed and 46 or 60), Position = UDim2.new(0, collapsed and 6 or 8, 1, collapsed and -53 or -67) })
 			setProps(avatar, 0.25, { Size = UDim2.fromOffset(collapsed and 36 or 46, collapsed and 36 or 46), Position = collapsed and UDim2.new(0.5, -18, 0.5, -18) or UDim2.fromOffset(6, 7) })
 			profileStatus.Visible = not collapsed
@@ -3348,8 +3397,8 @@ __onrusha_modules["Core/Window"] = function()
 				navScroll.Visible = true
 				navScroll.Active = true
 				navScroll.ZIndex = 41
-				navScroll.Position = UDim2.fromOffset(6, 4)
-				navScroll.Size = UDim2.new(1, -12, 1, -8)
+				navScroll.Position = UDim2.fromOffset(6, 3)
+				navScroll.Size = UDim2.new(1, -12, 1, -6)
 				navScroll.AnchorPoint = Vector2.zero
 				navScroll.VerticalScrollBarInset = Enum.ScrollBarInset.None
 				for _, item in ipairs(ctx._tabs) do if item.Button then item.Button.ZIndex = 42 end end
@@ -3359,15 +3408,15 @@ __onrusha_modules["Core/Window"] = function()
 				navLayout.FillDirection = Enum.FillDirection.Horizontal
 				navLayout.HorizontalAlignment = alignment
 				navLayout.VerticalAlignment = Enum.VerticalAlignment.Center
-				navLayout.Padding = UDim.new(0, 6)
+				navLayout.Padding = UDim.new(0, 4)
 				navScroll.ScrollingDirection = Enum.ScrollingDirection.X
 				navScroll.AutomaticCanvasSize = Enum.AutomaticSize.None
 				local compactIcons = ctx._settings.NavigationDisplay == "IconsOnly" or ctx._settings.NavigationDisplay == "Letters"
 				local showHorizontalText = not compactIcons and not collapsed
 				for _, item in ipairs(ctx._tabs) do
 					if item.Button then
-						local tabWidth = showHorizontalText and (mobile and 128 or 146) or 46
-						setProps(item.Button, 0.18, { Size = UDim2.fromOffset(tabWidth, 38) })
+						local tabWidth = showHorizontalText and (mobile and 120 or 138) or 42
+						setProps(item.Button, 0.18, { Size = UDim2.fromOffset(tabWidth, 32) })
 						item.Button.ClipsDescendants = true
 						item.NavIconBox.AnchorPoint = showHorizontalText and Vector2.new(0, 0.5) or Vector2.new(0.5, 0.5)
 						item.NavIconBox.Size = UDim2.fromOffset(18, 18)
@@ -3392,19 +3441,19 @@ __onrusha_modules["Core/Window"] = function()
 				local isBottom = ctx._settings.NavigationPosition == "Bottom"
 				-- Anchor the dock to the actual lower edge of the window. This avoids
 				-- scale/viewport drift that previously pushed the tabs out of alignment.
-				local navHeaderTop = isBottom and 8 or 68
-				local navDividerTop = isBottom and 55 or 121
-				local navPageTop = navDividerTop + 9
-				local dockSize = UDim2.new(1, -20, 0, 52)
+				local navHeaderTop = isBottom and 8 or 46
+				local navDividerTop = isBottom and 48 or 88
+				local navPageTop = navDividerTop + 7
+				local dockSize = UDim2.new(1, -20, 0, 36)
 				local dockAnchor = isBottom and Vector2.new(0, 1) or Vector2.zero
-				local dockPosition = isBottom and UDim2.new(0, 10, 1, -14) or UDim2.new(0, 10, 0, 8)
+				local dockPosition = isBottom and UDim2.new(0, 10, 1, -6) or UDim2.new(0, 10, 0, 6)
 			navDock.AnchorPoint = dockAnchor
 			navDock.Position = dockPosition
 			navDock.Size = dockSize
 				setProps(navDock, 0.22, { AnchorPoint = dockAnchor, Position = dockPosition, Size = dockSize })
 				setProps(topbar, 0.22, { Position = UDim2.new(0, 15, 0, navHeaderTop) })
 				setProps(pageDivider, 0.22, { Position = UDim2.new(0, 16, 0, navDividerTop) })
-				local bottomReserve = isBottom and 82 or 12
+				local bottomReserve = isBottom and 48 or 8
 				setProps(pageHost, 0.22, { Position = UDim2.new(0, 15, 0, navPageTop), Size = UDim2.new(1, -30, 1, -(navPageTop + bottomReserve)) })
 			else
 				navDock.Visible = false
@@ -3426,7 +3475,7 @@ __onrusha_modules["Core/Window"] = function()
 						item.IconLabel.AnchorPoint = Vector2.new(0.5, 0.5)
 						item.IconLabel.Position = UDim2.fromScale(0.5, 0.5)
 						item.IconLabel.Size = UDim2.fromScale(1, 1)
-						setProps(item.Button, 0.18, { Size = UDim2.new(1, 0, 0, 39) })
+						setProps(item.Button, 0.18, { Size = UDim2.new(1, 0, 0, collapsed and 35 or verticalTabHeight) })
 					end
 				end
 				local verticalDividerTop = mobile and 78 or 55
@@ -3442,7 +3491,7 @@ __onrusha_modules["Core/Window"] = function()
 
 		local ui = {}
 		ctx.UI = ui
-		ui._ctx = ctx; ui.Theme = theme; ui.Version = "2.5.32"
+		ui._ctx = ctx; ui.Theme = theme; ui.Version = "2.5.42"
 		ui._settings = ctx._settings; ui._components = ctx._components; ui._tabs = ctx._tabs
 		local interfaceStyleRules = {
 			Classic = { Window = 5, Card = 5, Control = 4 }, Rounded = { Window = 18, Card = 12, Control = 8 },
@@ -4220,9 +4269,10 @@ __onrusha_modules["Core/Window"] = function()
 					tween(ctx, tab.Button, 0.16, { BackgroundTransparency = active and 0.52 or 1, BackgroundColor3 = theme:Get().Hover })
 					tween(ctx, tab.NavAccent, 0.16, { Size = UDim2.new(0, 3, 0, active and 20 or 0) })
 					tween(ctx, tab.NavLabel, 0.16, { TextColor3 = active and theme:Get().Text or theme:Get().SecondaryText })
-					tween(ctx, tab.IconLabel, 0.16, { TextColor3 = active and tab.Tint or theme:Get().SecondaryText })
-					tween(ctx, tab.NavAccent, 0.16, { BackgroundColor3 = tab.Tint })
-					tween(ctx, tab.NavSeparator, 0.16, { BackgroundTransparency = active and 0.08 or 0.42, BackgroundColor3 = active and tab.Tint or theme:Get().Border })
+					tween(ctx, tab.IconLabel, 0.16, { TextColor3 = active and tabAccentFor(ctx, tab) or theme:Get().SecondaryText })
+					if tab.NavImage then tween(ctx, tab.NavImage, 0.16, { ImageColor3 = active and tabAccentFor(ctx, tab) or theme:Get().SecondaryText }) end
+					tween(ctx, tab.NavAccent, 0.16, { BackgroundColor3 = tabAccentFor(ctx, tab) })
+					tween(ctx, tab.NavSeparator, 0.16, { BackgroundTransparency = active and 0.08 or 0.42, BackgroundColor3 = active and tabAccentFor(ctx, tab) or theme:Get().Border })
 					tween(ctx, tab.NavStroke, 0.16, { Transparency = active and 0.62 or 0.9 })
 				end
 				if ctx.ApplyInterfaceStyle then ctx.ApplyInterfaceStyle() end
@@ -4616,7 +4666,7 @@ __onrusha_modules["Core/Window"] = function()
 			local stroke = make("UIStroke", { Thickness = 1, Transparency = 0.78 }, card); ctx.Theme:Bind(stroke, { Color = "Border" })
 			local titleLabel = themedText(card, ctx.Theme, title, 9, "SecondaryText", true); titleLabel.Position = UDim2.fromOffset(10, 7); titleLabel.Size = UDim2.new(1, -20, 0, 13); titleLabel.ZIndex = 102
 			local valueLabel = themedText(card, ctx.Theme, "--", 22, "Text", true); valueLabel.Position = UDim2.fromOffset(10, 20); valueLabel.Size = UDim2.new(1, -20, 0, 27); valueLabel.ZIndex = 102
-			local footLabel = themedText(card, ctx.Theme, "sampling...", 8, "Muted", false); footLabel.Position = UDim2.new(0, 10, 1, -14); footLabel.Size = UDim2.new(1, -20, 0, 10); footLabel.ZIndex = 102
+			local footLabel = themedText(card, ctx.Theme, "sampling...", 8, "Muted", false); footLabel.Position = UDim2.new(0, 10, 1, -8); footLabel.Size = UDim2.new(1, -20, 0, 10); footLabel.ZIndex = 102
 			table.insert(monitorCards, { Frame = card, Title = titleLabel, Value = valueLabel, Foot = footLabel, Stroke = stroke })
 			return valueLabel, footLabel, card
 		end
@@ -5827,6 +5877,8 @@ __onrusha_modules["Core/Window"] = function()
 			local height = math.clamp(math.floor(resizeStartSize.Y + delta.Y / effectiveScale + 0.5), 460, maxHeight)
 			ctx._settings.WindowSize = { X = width, Y = height }; ctx._windowBaseSize = Vector2.new(width, height)
 			window.Size = UDim2.fromOffset(width, height); ctx._windowRatio = window.Size
+			-- Keep the horizontal dock and its tab buttons synchronized with the live window size.
+			if ctx.ApplyNavigationMode then ctx.ApplyNavigationMode(false) end
 			local position = resizeStartPosition or window.Position
 			local targetLeft = math.clamp(left, minLeft, math.max(minLeft, viewport.X - bottomRightInset.X - width * effectiveScale - 8))
 			local targetTop = math.clamp(top, minTop, math.max(minTop, viewport.Y - bottomRightInset.Y - height * effectiveScale - 8))
@@ -5838,7 +5890,14 @@ __onrusha_modules["Core/Window"] = function()
 		local function finishWindowResize()
 			if not resizeDragging then return end
 			resizeDragging = false; resizeStartPoint = nil; resizeStartSize = nil; resizeStartPosition = nil; resizeStartAbsolutePosition = nil
-			if ctx.RefreshViewportLayout then ctx.RefreshViewportLayout(true) end
+			if ctx.RefreshViewportLayout then ctx.RefreshViewportLayout(false) end
+			task.spawn(function()
+				RunService.Heartbeat:Wait()
+				RunService.Heartbeat:Wait()
+				if ctx._destroyed then return end
+				if ctx.ApplyNavigationMode then ctx.ApplyNavigationMode(false) end
+				if ctx.UpdateNavigationCanvasSize then ctx.UpdateNavigationCanvasSize() end
+			end)
 			tween(ctx, outerStroke, 0.22, { Color = theme:Get().Border, Transparency = 0.1, Thickness = 1 })
 			for _, line in ipairs(resizeHandle:GetChildren()) do if line:IsA("Frame") then tween(ctx, line, 0.14, { BackgroundColor3 = theme:Get().Muted }) end end
 		end
@@ -5877,106 +5936,113 @@ __onrusha_modules["Core/Window"] = function()
 		if ctx._settings.LastTab and ctx._tabByName[ctx._settings.LastTab] then ctx._tabByName[ctx._settings.LastTab]:Select() end
 		ui:SetScale(ctx._scale)
         ctx.PlayOnrushaLoading = function()
-            if options.LoadingScreen == false or ctx._settings.ReducedMotion then
+            if options.LoadingScreen == false then
+                if not ctx._readyBannerPrinted then
+                    ctx._readyBannerPrinted = true
+                    printOnrushaReadyBanner(ui.Version)
+                end
                 if ctx._keyGateEnabled and not ctx._keyUnlocked then ui.IsOpen = false; window.Visible = false else ui:SetOpen(options.Open ~= false) end
                 return
             end
-            local duration = math.clamp(tonumber(options.LoadingDuration) or 1.55, 1.05, 2.8)
+
+            local duration = math.clamp(tonumber(options.LoadingDuration) or 1.15, 0.65, 2.2)
             local accent = theme:Get().Accent
             local viewport = workspace.CurrentCamera and workspace.CurrentCamera.ViewportSize or Vector2.new(1280, 720)
-            local panelWidth = math.clamp(viewport.X * 0.78, 260, 404)
-            local overlay = make("CanvasGroup", { Name = "OnrushaLoadingIntro", Size = UDim2.fromScale(1, 1), BackgroundColor3 = Color3.fromRGB(5, 7, 11), BackgroundTransparency = 0.42, GroupTransparency = 0, BorderSizePixel = 0, ZIndex = 250, Active = true }, screenGui)
-            local panel = make("Frame", { Name = "IntroPanel", AnchorPoint = Vector2.new(0.5, 0.5), Position = UDim2.fromScale(0.5, 0.505), Size = UDim2.fromOffset(panelWidth - 12, 158), BackgroundColor3 = Color3.fromRGB(19, 22, 29), BackgroundTransparency = 0, BorderSizePixel = 0, ClipsDescendants = false, ZIndex = 251 }, overlay)
-            corner(panel, 11)
-            pcall(function()
-                local shadowItem = Instance.new("UIShadow")
-                shadowItem.Name = "IntroPanelShadow"
-                shadowItem.BlurRadius = UDim.new(0, 30)
-                shadowItem.Color = Color3.fromRGB(0, 0, 0)
-                shadowItem.Offset = UDim2.fromOffset(0, 10)
-                shadowItem.Spread = UDim2.fromOffset(5, 6)
-                shadowItem.Transparency = 0.22
-                shadowItem.ShowBehindParent = true
-                shadowItem.Parent = panel
-            end)
-            local panelStroke = make("UIStroke", { Thickness = 1, Color = Color3.fromRGB(111, 120, 137), Transparency = 0.72 }, panel)
-            make("UIGradient", { Rotation = 90, Color = ColorSequence.new({ ColorSequenceKeypoint.new(0, Color3.fromRGB(24, 28, 37)), ColorSequenceKeypoint.new(1, Color3.fromRGB(15, 18, 24)) }) }, panel)
-            local topAccent = make("Frame", { Name = "IntroTopAccent", Position = UDim2.fromOffset(16, 0), Size = UDim2.new(1, -32, 0, 2), BackgroundColor3 = accent, BorderSizePixel = 0, ZIndex = 252 }, panel)
-            corner(topAccent, 2)
-            make("UIGradient", { Rotation = 0, Color = ColorSequence.new({ ColorSequenceKeypoint.new(0, Color3.fromRGB(79, 88, 102)), ColorSequenceKeypoint.new(0.42, accent), ColorSequenceKeypoint.new(1, Color3.fromRGB(79, 88, 102)) }), Transparency = NumberSequence.new({ NumberSequenceKeypoint.new(0, 0.64), NumberSequenceKeypoint.new(0.52, 0.04), NumberSequenceKeypoint.new(1, 0.64) }) }, topAccent)
-            local logoBox = make("Frame", { Name = "IntroLogoBox", Position = UDim2.fromOffset(19, 20), Size = UDim2.fromOffset(46, 46), BackgroundColor3 = Color3.fromRGB(29, 34, 44), BorderSizePixel = 0, ZIndex = 252 }, panel)
-            corner(logoBox, 9)
-            local logoStroke = make("UIStroke", { Thickness = 1, Color = accent, Transparency = 0.42 }, logoBox)
-            local logoShadowOk = pcall(function()
-                local logoShadow = Instance.new("UIShadow")
-                logoShadow.BlurRadius = UDim.new(0, 10)
-                logoShadow.Color = accent
-                logoShadow.Offset = UDim2.fromOffset(0, 2)
-                logoShadow.Spread = UDim2.fromOffset(0, 1)
-                logoShadow.Transparency = 0.72
-                logoShadow.Parent = logoBox
-            end)
-            local loadingImage = tostring(options.LoadingImage or hubImage or "")
-            if loadingImage ~= "" then
-                make("ImageLabel", { Name = "IntroLogo", AnchorPoint = Vector2.new(0.5, 0.5), Position = UDim2.fromScale(0.5, 0.5), Size = UDim2.fromOffset(34, 34), BackgroundTransparency = 1, Image = loadingImage, ImageColor3 = Color3.new(1, 1, 1), ScaleType = Enum.ScaleType.Fit, ZIndex = 253 }, logoBox)
-            else
-                make("TextLabel", { Name = "IntroLogoFallback", Size = UDim2.fromScale(1, 1), BackgroundTransparency = 1, Text = "O", Font = Enum.Font.GothamBold, TextSize = 25, TextColor3 = Color3.fromRGB(244, 246, 249), ZIndex = 253 }, logoBox)
+            local panelWidth = math.clamp(viewport.X * 0.72, 280, 360)
+            local overlay = make("CanvasGroup", {
+                Name = "OnrushaLoadingIntro", Size = UDim2.fromScale(1, 1),
+                BackgroundColor3 = Color3.fromRGB(5, 7, 11), BackgroundTransparency = 0.32,
+                GroupTransparency = 1, BorderSizePixel = 0, ZIndex = 250, Active = true
+            }, screenGui)
+            local panel = make("Frame", {
+                Name = "IntroPanel", AnchorPoint = Vector2.new(0.5, 0.5),
+                Position = UDim2.fromScale(0.5, 0.5), Size = UDim2.fromOffset(panelWidth, 142),
+                BackgroundColor3 = Color3.fromRGB(22, 25, 32), BackgroundTransparency = 0,
+                BorderSizePixel = 0, ClipsDescendants = true, ZIndex = 251
+            }, overlay)
+            corner(panel, 10)
+            make("UIStroke", { Thickness = 1, Color = Color3.fromRGB(95, 105, 122), Transparency = 0.62 }, panel)
+            local logo = tostring(options.LoadingImage or hubImage or "")
+            if logo ~= "" then
+                make("ImageLabel", {
+                    Name = "LoadingLogo", Position = UDim2.fromOffset(18, 19), Size = UDim2.fromOffset(52, 52),
+                    BackgroundTransparency = 1, Image = logo, ScaleType = Enum.ScaleType.Fit, ZIndex = 253
+                }, panel)
             end
-            local brand = make("TextLabel", { Name = "IntroBrand", Position = UDim2.fromOffset(79, 19), Size = UDim2.new(1, -174, 0, 18), BackgroundTransparency = 1, Text = "ONRUSHA", Font = Enum.Font.GothamBold, TextSize = 13, TextColor3 = Color3.fromRGB(244, 246, 249), TextXAlignment = Enum.TextXAlignment.Left, TextYAlignment = Enum.TextYAlignment.Center, ZIndex = 253 }, panel)
-            local edition = make("TextLabel", { Name = "IntroEdition", Position = UDim2.fromOffset(79, 38), Size = UDim2.new(1, -174, 0, 14), BackgroundTransparency = 1, Text = "UI FRAMEWORK", Font = Enum.Font.GothamMedium, TextSize = 9, TextColor3 = Color3.fromRGB(137, 146, 161), TextXAlignment = Enum.TextXAlignment.Left, TextYAlignment = Enum.TextYAlignment.Center, ZIndex = 253 }, panel)
-            local versionTag = make("TextLabel", { Name = "IntroVersion", AnchorPoint = Vector2.new(1, 0), Position = UDim2.new(1, -18, 0, 23), Size = UDim2.fromOffset(74, 20), BackgroundColor3 = Color3.fromRGB(34, 39, 49), BackgroundTransparency = 0, Text = "v" .. tostring(ui.Version), Font = Enum.Font.GothamSemibold, TextSize = 9, TextColor3 = Color3.fromRGB(173, 181, 194), TextXAlignment = Enum.TextXAlignment.Center, TextYAlignment = Enum.TextYAlignment.Center, ZIndex = 253 }, panel)
-            corner(versionTag, 5)
-            local versionStroke = make("UIStroke", { Thickness = 1, Color = Color3.fromRGB(90, 100, 116), Transparency = 0.7 }, versionTag)
-            local dividerLine = make("Frame", { Position = UDim2.new(0, 19, 0, 78), Size = UDim2.new(1, -38, 0, 1), BackgroundColor3 = Color3.fromRGB(55, 62, 74), BackgroundTransparency = 0.18, BorderSizePixel = 0, ZIndex = 252 }, panel)
-            local heading = make("TextLabel", { Name = "IntroHeading", Position = UDim2.fromOffset(20, 91), Size = UDim2.new(1, -130, 0, 20), BackgroundTransparency = 1, Text = "Preparing your workspace", Font = Enum.Font.GothamSemibold, TextSize = 13, TextColor3 = Color3.fromRGB(232, 235, 240), TextXAlignment = Enum.TextXAlignment.Left, TextYAlignment = Enum.TextYAlignment.Center, ZIndex = 253 }, panel)
-            local status = make("TextLabel", { Name = "IntroStatus", AnchorPoint = Vector2.new(1, 0), Position = UDim2.new(1, -20, 0, 93), Size = UDim2.fromOffset(76, 16), BackgroundTransparency = 1, Text = "STARTING", Font = Enum.Font.GothamBold, TextSize = 8, TextColor3 = accent, TextXAlignment = Enum.TextXAlignment.Right, TextYAlignment = Enum.TextYAlignment.Center, ZIndex = 253 }, panel)
-            local detail = make("TextLabel", { Name = "IntroDetail", Position = UDim2.fromOffset(20, 113), Size = UDim2.new(1, -40, 0, 14), BackgroundTransparency = 1, Text = "Loading components and saved preferences", Font = Enum.Font.Gotham, TextSize = 10, TextColor3 = Color3.fromRGB(145, 153, 166), TextXAlignment = Enum.TextXAlignment.Left, TextYAlignment = Enum.TextYAlignment.Center, ZIndex = 253 }, panel)
-            local progressTrack = make("Frame", { Name = "IntroProgressTrack", Position = UDim2.new(0, 20, 1, -19), Size = UDim2.new(1, -40, 0, 3), BackgroundColor3 = Color3.fromRGB(49, 56, 68), BorderSizePixel = 0, ZIndex = 253 }, panel)
-            corner(progressTrack, 3)
-            local progressFill = make("Frame", { Name = "IntroProgressFill", Size = UDim2.new(0, 0, 1, 0), BackgroundColor3 = accent, BorderSizePixel = 0, ZIndex = 254 }, progressTrack)
-            corner(progressFill, 3)
-            make("UIGradient", { Rotation = 0, Color = ColorSequence.new({ ColorSequenceKeypoint.new(0, accent), ColorSequenceKeypoint.new(1, theme:Get().Info or accent) }) }, progressFill)
-            local introSound
-            if not ctx._settings.MuteSounds then
-                introSound = Instance.new("Sound")
-                introSound.Name = "OnrushaStartupSound"
-                introSound.SoundId = "rbxassetid://140419294351439"
-                introSound.Volume = math.clamp((tonumber(ctx._settings.SoundVolume) or 100) / 100 * 0.42, 0, 1)
-                introSound.Parent = interfaceAudio
-                pcall(function() audioService:PlayLocalSound(introSound) end)
-                task.delay(5, function() if introSound and introSound.Parent then introSound:Destroy() end end)
-            end
-            TweenService:Create(panel, TweenInfo.new(0.34, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), { Position = UDim2.fromScale(0.5, 0.49), Size = UDim2.fromOffset(panelWidth, 158) }):Play()
-            TweenService:Create(panelStroke, TweenInfo.new(0.35, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), { Transparency = 0.72 }):Play()
-            TweenService:Create(logoStroke, TweenInfo.new(0.42, Enum.EasingStyle.Sine, Enum.EasingDirection.Out), { Transparency = 0.42 }):Play()
-            TweenService:Create(versionStroke, TweenInfo.new(0.38, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), { Transparency = 0.7 }):Play()
-            TweenService:Create(progressFill, TweenInfo.new(duration * 0.92, Enum.EasingStyle.Quart, Enum.EasingDirection.Out), { Size = UDim2.new(1, 0, 1, 0) }):Play()
+            local textX = logo ~= "" and 82 or 20
+            local textWidth = panelWidth - textX - 20
+            make("TextLabel", {
+                Name = "LoadingTitle", Position = UDim2.fromOffset(textX, 23),
+                Size = UDim2.new(0, textWidth, 0, 23), BackgroundTransparency = 1,
+                Text = "ONRUSHA", Font = Enum.Font.GothamBold, TextSize = 17,
+                TextColor3 = Color3.fromRGB(245, 247, 250), TextXAlignment = Enum.TextXAlignment.Left,
+                TextYAlignment = Enum.TextYAlignment.Center, ZIndex = 253
+            }, panel)
+            make("TextLabel", {
+                Name = "LoadingSubtitle", Position = UDim2.fromOffset(textX, 48),
+                Size = UDim2.new(0, textWidth, 0, 17), BackgroundTransparency = 1,
+                Text = "UI FRAMEWORK  •  v" .. tostring(ui.Version), Font = Enum.Font.GothamMedium,
+                TextSize = 9, TextColor3 = Color3.fromRGB(151, 160, 174),
+                TextXAlignment = Enum.TextXAlignment.Left, TextYAlignment = Enum.TextYAlignment.Center, ZIndex = 253
+            }, panel)
+            local status = make("TextLabel", {
+                Name = "LoadingStatus", Position = UDim2.fromOffset(20, 91),
+                Size = UDim2.new(1, -40, 0, 17), BackgroundTransparency = 1,
+                Text = "Preparing your workspace...", Font = Enum.Font.GothamMedium,
+                TextSize = 10, TextColor3 = Color3.fromRGB(190, 197, 207),
+                TextXAlignment = Enum.TextXAlignment.Left, TextYAlignment = Enum.TextYAlignment.Center, ZIndex = 253
+            }, panel)
+            local track = make("Frame", {
+                Name = "LoadingTrack", Position = UDim2.new(0, 20, 1, -20),
+                Size = UDim2.new(1, -40, 0, 4), BackgroundColor3 = Color3.fromRGB(54, 60, 72),
+                BorderSizePixel = 0, ClipsDescendants = true, ZIndex = 253
+            }, panel)
+            corner(track, 3)
+            local fill = make("Frame", {
+                Name = "LoadingFill", Size = UDim2.new(0, 0, 1, 0),
+                BackgroundColor3 = accent, BorderSizePixel = 0, ZIndex = 254
+            }, track)
+            corner(fill, 3)
+
+            TweenService:Create(overlay, TweenInfo.new(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), { GroupTransparency = 0 }):Play()
+            TweenService:Create(fill, TweenInfo.new(duration, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), { Size = UDim2.new(1, 0, 1, 0) }):Play()
             local startedAt = os.clock()
-            local phase = 0
             while os.clock() - startedAt < duration do
                 if not overlay.Parent or ctx._destroyed then return end
-                local progress = math.clamp((os.clock() - startedAt) / duration, 0, 1)
-                local nextPhase = progress < 0.34 and 1 or (progress < 0.72 and 2 or 3)
-                if nextPhase ~= phase then
-                    phase = nextPhase
-                    if phase == 1 then status.Text = "STARTING"; detail.Text = "Building the interface" 
-                    elseif phase == 2 then status.Text = "LOADING"; detail.Text = "Applying theme and saved preferences"
-                    else status.Text = "ALMOST READY"; detail.Text = "Finishing layout and effects" end
-                end
-                task.wait(1 / 30)
+                task.wait(0.04)
             end
             if not overlay.Parent or ctx._destroyed then return end
-            status.Text = "READY"
-            detail.Text = "Workspace prepared"
+            status.Text = "Ready"
             task.wait(0.08)
-            TweenService:Create(overlay, TweenInfo.new(0.24, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), { GroupTransparency = 1 }):Play()
-            task.wait(0.26)
+            TweenService:Create(overlay, TweenInfo.new(0.18, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), { GroupTransparency = 1 }):Play()
+            task.wait(0.2)
             if overlay.Parent then overlay:Destroy() end
             if ctx._destroyed then return end
+            if not ctx._readyBannerPrinted then
+                ctx._readyBannerPrinted = true
+                printOnrushaReadyBanner(ui.Version)
+            end
             if ctx._keyGateEnabled and not ctx._keyUnlocked then ui.IsOpen = false; window.Visible = false else ui:SetOpen(options.Open ~= false) end
         end
         Window._activeUI = ui
-        task.spawn(ctx.PlayOnrushaLoading)
+        task.spawn(function()
+            local ok, err = xpcall(ctx.PlayOnrushaLoading, debug.traceback)
+            if not ok then
+                warn("[Onrusha][LoadingIntro] Loading screen failed: " .. tostring(err))
+                local stuckOverlay = screenGui:FindFirstChild("OnrushaLoadingIntro")
+                if stuckOverlay then
+                    pcall(function() stuckOverlay:Destroy() end)
+                end
+                if not ctx._destroyed then
+                    if ctx._keyGateEnabled and not ctx._keyUnlocked then
+                        ui.IsOpen = false
+                        window.Visible = false
+                    else
+                        pcall(function() ui:SetOpen(options.Open ~= false) end)
+                    end
+                end
+            end
+        end)
 		return ui
 	end
 
@@ -6270,7 +6336,7 @@ __onrusha_modules["Components/Controls"] = function()
 			assert(type(callback) == "function", "OnChanged callback must be a function")
 			self._callbacks:Connect(function(...)
 				local args = table.pack(...)
-				print(string.format("[Onrusha][CHANGE] Tab=%s | Component=%s | Type=%s | Value=%s", tostring(self._tabName or (scope._tab and scope._tab.Name) or scope._name or "?"), tostring(self.Name or self.Id), tostring(self.Type or kind), debugValue(args[1])))
+				onrushaDebug(string.format("[Onrusha][CHANGE] Tab=%s | Component=%s | Type=%s | Value=%s", tostring(self._tabName or (scope._tab and scope._tab.Name) or scope._name or "?"), tostring(self.Name or self.Id), tostring(self.Type or kind), debugValue(args[1])))
 				local ok, err = xpcall(function() callback(table.unpack(args, 1, args.n)) end, debug.traceback)
 				if not ok then warn(string.format("[Onrusha][CALLBACK ERROR] %s (%s):\n%s", tostring(self.Name or self.Id), tostring(kind), tostring(err))) end
 			end)
@@ -6279,7 +6345,7 @@ __onrusha_modules["Components/Controls"] = function()
 		function component:OnClick(callback)
 			assert(type(callback) == "function", "OnClick callback must be a function")
 			self._clickSignal:Connect(function(...)
-				print(string.format("[Onrusha][CLICK] Tab=%s | Component=%s | Type=%s", tostring(self._tabName or (scope._tab and scope._tab.Name) or scope._name or "?"), tostring(self.Name or self.Id), tostring(self.Type or kind)))
+				onrushaDebug(string.format("[Onrusha][CLICK] Tab=%s | Component=%s | Type=%s", tostring(self._tabName or (scope._tab and scope._tab.Name) or scope._name or "?"), tostring(self.Name or self.Id), tostring(self.Type or kind)))
 				local args = table.pack(...)
 				local ok, err = xpcall(function() callback(table.unpack(args, 1, args.n)) end, debug.traceback)
 				if not ok then warn(string.format("[Onrusha][CALLBACK ERROR] %s (%s):\n%s", tostring(self.Name or self.Id), tostring(kind), tostring(err))) end
@@ -6395,7 +6461,7 @@ __onrusha_modules["Components/Controls"] = function()
 			self._value = nextValue
 			if self._render then pcall(self._render, nextValue) end
 			if not silent and old ~= nextValue then
-				print(string.format("[Onrusha][SET] Tab=%s | Component=%s | Type=%s | Old=%s | New=%s", tostring(self._tabName or (scope._tab and scope._tab.Name) or scope._name or "?"), tostring(self.Name or self.Id), tostring(kind), debugValue(old), debugValue(nextValue)))
+				onrushaDebug(string.format("[Onrusha][SET] Tab=%s | Component=%s | Type=%s | Old=%s | New=%s", tostring(self._tabName or (scope._tab and scope._tab.Name) or scope._name or "?"), tostring(self.Name or self.Id), tostring(kind), debugValue(old), debugValue(nextValue)))
 				if kind == "SliderToggle" then self._callbacks:Fire(nextValue.Enabled, nextValue.Value) else self._callbacks:Fire(nextValue) end
 			end
 			return self
@@ -6884,7 +6950,7 @@ __onrusha_modules["Components/Controls"] = function()
 					ctx.Theme:Bind(row, { BackgroundColor3 = "Hover" }); corner(row, 6)
 					local thumb = make("ImageLabel", { Position = UDim2.fromOffset(4, 4), Size = UDim2.fromOffset(30, 30), BackgroundTransparency = 1, Image = type(entry) == "table" and normalizeImageAsset(entry.Image or entry.AssetId) or "", ScaleType = Enum.ScaleType.Crop, ZIndex = 43 }, row); corner(thumb, 5)
 					local label = textLabel(row, ctx, entryName, 12, "Text", true); label.Position = UDim2.fromOffset(42, 0); label.Size = UDim2.new(1, -48, 1, 0); label.ZIndex = 43
-					row.Activated:Connect(function() if component._disabled then return end; print(string.format("[Onrusha][IMAGE DROPDOWN SELECT] %s -> %s", tostring(component.Name), tostring(entryValue))); if ctx.PlaySound then ctx.PlaySound("Click") end; component:Set(entryValue); popup.Visible = false; popup.Size = UDim2.fromOffset(210, 0); play(ctx, arrow, 0.12, { Rotation = 0 }) end)
+					row.Activated:Connect(function() if component._disabled then return end; onrushaDebug(string.format("[Onrusha][IMAGE DROPDOWN SELECT] %s -> %s", tostring(component.Name), tostring(entryValue))); if ctx.PlaySound then ctx.PlaySound("Click") end; component:Set(entryValue); popup.Visible = false; popup.Size = UDim2.fromOffset(210, 0); play(ctx, arrow, 0.12, { Rotation = 0 }) end)
 					table.insert(optionButtons, row)
 				end
 				task.defer(function()
@@ -7315,7 +7381,7 @@ __onrusha_modules["Components/Controls"] = function()
 					end)
 					optionButton.Activated:Connect(function()
 						if component._disabled then return end
-						print(string.format("[Onrusha][DROPDOWN SELECT] %s -> %s", tostring(component.Name), tostring(option)))
+						onrushaDebug(string.format("[Onrusha][DROPDOWN SELECT] %s -> %s", tostring(component.Name), tostring(option)))
 						if kind == "MultiDropdown" then
 							local current = component:Get() or {}
 							local wasSelected = hasSelected(current, option)
@@ -7757,11 +7823,17 @@ __onrusha_modules["Components/Controls"] = function()
 			right.Position = UDim2.new(right.Position.X.Scale, right.Position.X.Offset - (kind == "ImageToggle" and 128 or 82), right.Position.Y.Scale, right.Position.Y.Offset)
 		end
 		if showHotkeyUI then
-			local bindButton = make("TextButton", { Name = "FunctionKeybindButton", AnchorPoint = Vector2.new(1, 0.5), Position = UDim2.new(1, -34, 0, 14), Size = UDim2.fromOffset(38, 23), BackgroundTransparency = 0.02, BorderSizePixel = 0, AutoButtonColor = false, Text = "...", Font = Enum.Font.GothamBold, TextSize = 11, TextXAlignment = Enum.TextXAlignment.Center, TextYAlignment = Enum.TextYAlignment.Center, TextColor3 = ctx.Theme:Get().Text, ZIndex = 12, Selectable = true, ClipsDescendants = true }, top)
+			-- Keep the keybind control in its own narrow right-side slot. All regular controls
+			-- reserve the area to its left; the keybind must never sit on top of them.
+			local bindButton = make("TextButton", { Name = "FunctionKeybindButton", AnchorPoint = Vector2.new(1, 0.5), Position = UDim2.new(1, -6, 0, 14), Size = UDim2.fromOffset(52, 26), BackgroundTransparency = 0.02, BorderSizePixel = 0, AutoButtonColor = false, Text = "", Font = Enum.Font.GothamBold, TextSize = 10, TextXAlignment = Enum.TextXAlignment.Center, TextYAlignment = Enum.TextYAlignment.Center, TextColor3 = ctx.Theme:Get().Text, ZIndex = 12, Selectable = true, ClipsDescendants = true }, top)
 			ctx.Theme:Bind(bindButton, {
 				BackgroundColor3 = function(palette) return keybindSurface(palette, false) end,
 				TextColor3 = function(palette) return readableTextColor(keybindSurface(palette, false), palette) end,
-			}); corner(bindButton, 8)
+			}); corner(bindButton, 9)
+			local bindKeyboardIcon = make("ImageLabel", { Name = "BindKeyboardIcon", Position = UDim2.fromOffset(4, 6), Size = UDim2.fromOffset(14, 14), BackgroundTransparency = 1, Image = "rbxassetid://121978468376124", ImageColor3 = ctx.Theme:Get().SecondaryText, ScaleType = Enum.ScaleType.Fit, ZIndex = 13 }, bindButton)
+			local bindSetLabel = make("TextLabel", { Name = "BindSetLabel", Position = UDim2.fromOffset(19, 0), Size = UDim2.new(1, -21, 1, 0), BackgroundTransparency = 1, Text = "SET", Font = Enum.Font.GothamBold, TextSize = 10, TextXAlignment = Enum.TextXAlignment.Center, TextYAlignment = Enum.TextYAlignment.Center, ZIndex = 13 }, bindButton)
+			ctx.Theme:Bind(bindSetLabel, { TextColor3 = function(palette) return readableTextColor(keybindSurface(palette, false), palette) end })
+			ctx.Theme:Bind(bindKeyboardIcon, { ImageColor3 = "SecondaryText" })
 			local bindFill = make("UIGradient", { Rotation = 90 }, bindButton)
 			ctx.Theme:Bind(bindFill, { Color = function(palette)
 				local surface = keybindSurface(palette, false)
@@ -7872,16 +7944,22 @@ __onrusha_modules["Components/Controls"] = function()
 				local listening = ctx._listeningHotkeyComponent == component
 				local palette = ctx.Theme:Get()
 				local shownKey = listening and "..." or displayKeyName(component._hotkey)
-				bindButton.Text = shownKey
-				bindButton.TextSize = #shownKey >= 6 and 9 or (#shownKey >= 4 and 10 or 12)
+				bindSetLabel.Text = shownKey == "SET" and "SET" or shownKey
+				bindSetLabel.TextSize = #shownKey >= 6 and 7 or (#shownKey >= 4 and 8 or 9)
+				bindKeyboardIcon.Visible = not listening and (not component._hotkey or shownKey == "SET")
+				bindKeyboardIcon.ImageTransparency = listening and 1 or 0
 				if listening then
 					bindButton.BackgroundColor3 = palette.Accent
 					bindButton.TextColor3 = readableTextColor(palette.Accent, palette)
+					bindSetLabel.TextColor3 = readableTextColor(palette.Accent, palette)
+					bindKeyboardIcon.ImageColor3 = readableTextColor(palette.Accent, palette)
 					bindStroke.Color = palette.Accent
 					bindStroke.Transparency = 0.02
 				else
 					bindButton.BackgroundColor3 = keybindSurface(palette, false)
 					bindButton.TextColor3 = readableTextColor(bindButton.BackgroundColor3, palette)
+					bindSetLabel.TextColor3 = readableTextColor(bindButton.BackgroundColor3, palette)
+					bindKeyboardIcon.ImageColor3 = palette.SecondaryText
 					bindStroke.Color = component._hotkey and palette.Accent or palette.Border
 					bindStroke.Transparency = component._hotkey and 0.12 or 0.28
 				end
@@ -7955,7 +8033,7 @@ __onrusha_modules["Components/Controls"] = function()
 		end
 		if component._settingsPanel then component._settingsPanel.LayoutOrder = 2 end
 		if ctx.ApplyInterfaceStyle then ctx.ApplyInterfaceStyle(card) end
-		print(string.format("[Onrusha][CREATE] Tab=%s | Component=%s | Type=%s | Id=%s", tostring(component._tabName or (scope._tab and scope._tab.Name) or scope._name or "?"), tostring(name), tostring(kind), tostring(id)))
+		onrushaDebug(string.format("[Onrusha][CREATE] Tab=%s | Component=%s | Type=%s | Id=%s", tostring(component._tabName or (scope._tab and scope._tab.Name) or scope._name or "?"), tostring(name), tostring(kind), tostring(id)))
 		return component
 	end
 
@@ -7990,7 +8068,7 @@ __onrusha_modules["init"] = function()
 
 	local Onrusha = {
 		Name = "Onrusha",
-		Version = "2.5.32",
+		Version = "2.5.42",
         Config = OnrushaConfig,
 	}
 
