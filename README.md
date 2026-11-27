@@ -1,88 +1,112 @@
-# Onrusha UI Library
+ 
+# Onrusha UI
 
-Onrusha is a Roblox UI library designed to make creating clean and customizable interfaces easier.
+A modern, customizable and responsive UI library for Roblox.
+
+Onrusha provides a collection of UI components, themes, visual effects and configuration tools to help you create clean and professional interfaces.
 
 ## Installation
 
-Load the library using `loadstring`:
+Load the library using:
 
 ```lua
 local library = loadstring(game:HttpGet("https://raw.githubusercontent.com/Andreusha1/OnrushaHub/refs/heads/main/script"))()
 ```
 
-The library must be executed on the client.
-
 ## Creating a Window
 
-Use `library.Create()` to create your interface.
+Create your interface with `library.Create()`:
 
 ```lua
-local Window = library.Create({
-    Name = "My Script",
-    Subtitle = "My first Onrusha UI",
-    Theme = "Midnight",
-    Scale = 0.96,
+local ui = library.Create({
+    Name = "Onrusha Hub",
+    Subtitle = "My Script",
+    Theme = "Matcha",
+    Scale = 1,
     ToggleKey = Enum.KeyCode.RightShift,
     Draggable = true,
+    MobileSupport = true,
     Blur = true,
     Open = true
 })
 ```
 
-## Creating Tabs
+## Tabs and Sections
 
-Use `TabCreate()` to add tabs to your window.
+Organize your interface using tabs and sections.
 
 ```lua
-local Main = Window:TabCreate({
+local mainTab = ui:TabCreate({
     Name = "Main",
-    Icon = "home"
+    Icon = "house"
 })
 
-local Player = Window:TabCreate({
-    Name = "Player",
-    Icon = "user"
-})
-```
-
-You can also create sections to organize components inside a tab.
-
-```lua
-local Section = Main:SectionCreate({
-    Name = "General",
+local section = mainTab:SectionCreate({
+    Name = "Main Settings",
     Side = "Left"
 })
 ```
 
-`Side` can be `"Left"` or `"Right"`.
+Sections support `Left` and `Right` positioning.
 
 ## Components
 
-All components are created using their respective `Create` methods.
+Onrusha includes a variety of components:
+
+| Component | Method |
+|---|---|
+| Toggle | `ToggleCreate()` |
+| Button | `ButtonCreate()` |
+| Slider | `SliderCreate()` |
+| Slider Toggle | `SliderToggleCreate()` |
+| Dropdown | `DropdownCreate()` |
+| Multi Dropdown | `MultiDropdownCreate()` |
+| Color Picker | `ColorPickerCreate()` |
+| Color Gradient | `ColorGradientCreate()` |
+| Input | `InputCreate()` |
+| Number Input | `NumberInputCreate()` |
+| Search | `SearchCreate()` |
+| Keybind | `KeybindCreate()` |
+| Hotkey | `HotkeyCreate()` |
+| Checkbox | `CheckboxCreate()` |
+| Radio Group | `RadioGroupCreate()` |
+| Multi Toggle | `MultiToggleCreate()` |
+| Range Slider | `RangeSliderCreate()` |
+| Progress | `ProgressCreate()` |
+| Label | `LabelCreate()` |
+| Paragraph | `ParagraphCreate()` |
+| Divider | `DividerCreate()` |
+| Image | `ImageCreate()` |
+| Image Toggle | `ImageToggleCreate()` |
+| Image Dropdown | `ImageDropdownCreate()` |
+| Status | `StatusCreate()` |
+| Accordion | `AccordionCreate()` |
+| Keybind List | `KeybindListCreate()` |
+| Spacer | `SpacerCreate()` |
+| Custom | `CustomCreate()` |
+
+## Component Examples
 
 ### Toggle
 
-Creates an on/off switch.
-
 ```lua
-Section:ToggleCreate({
-    Name = "Auto Farm",
-    Description = "Automatically farms resources",
+local toggle = section:ToggleCreate({
+    Name = "Enable Feature",
+    Description = "Enable or disable the feature",
     Default = false
-}):OnChanged(function(value)
-    print("Auto Farm:", value)
+})
+
+toggle:OnChanged(function(value)
+    print("Toggle:", value)
 end)
 ```
 
 ### Button
 
-Creates a clickable button.
-
 ```lua
-Section:ButtonCreate({
-    Name = "Test Button",
-    Description = "Click to run an action",
-    ButtonText = "Execute"
+section:ButtonCreate({
+    Name = "Example Button",
+    ButtonText = "Click Me"
 }):OnClick(function()
     print("Button clicked!")
 end)
@@ -90,269 +114,283 @@ end)
 
 ### Slider
 
-Creates a value slider.
-
 ```lua
-Section:SliderCreate({
+local slider = section:SliderCreate({
     Name = "Walk Speed",
     Min = 16,
     Max = 100,
-    Default = 16,
-    Step = 1,
-    Suffix = " WS"
-}):OnChanged(function(value)
-    print("Walk Speed:", value)
+    Default = 16
+})
+
+slider:OnChanged(function(value)
+    print("Slider:", value)
 end)
 ```
 
 ### Dropdown
 
-Allows the user to select an option.
-
 ```lua
-Section:DropdownCreate({
-    Name = "Select Mode",
-    Options = {"Easy", "Normal", "Hard"},
-    Default = "Normal"
-}):OnChanged(function(value)
+local dropdown = section:DropdownCreate({
+    Name = "Select Option",
+    Options = {"Option 1", "Option 2", "Option 3"},
+    Default = "Option 1"
+})
+
+dropdown:OnChanged(function(value)
     print("Selected:", value)
 end)
 ```
 
 ### Color Picker
 
-Allows the user to choose a color.
-
 ```lua
-Section:ColorPickerCreate({
-    Name = "UI Color",
-    Default = Color3.fromRGB(255, 100, 100)
-}):OnChanged(function(color)
+local colorPicker = section:ColorPickerCreate({
+    Name = "Select Color",
+    Default = Color3.fromRGB(120, 200, 150)
+})
+
+colorPicker:OnChanged(function(color)
     print("Selected color:", color)
 end)
 ```
 
 ### Input
 
-Creates a text input field.
-
 ```lua
-Section:InputCreate({
+local input = section:InputCreate({
     Name = "Player Name",
-    Placeholder = "Enter a name",
-    Default = ""
-}):OnChanged(function(value)
+    Placeholder = "Enter a name..."
+})
+
+input:OnChanged(function(value)
     print("Input:", value)
 end)
 ```
 
-## Available Components
+## Creating Custom Settings
 
-Onrusha includes the following components:
+You can create your own settings page using regular tabs, sections and components.
 
-| Component | Method |
-|---|---|
-| Toggle | `ToggleCreate` |
-| Button | `ButtonCreate` |
-| Slider | `SliderCreate` |
-| Slider Toggle | `SliderToggleCreate` |
-| Dropdown | `DropdownCreate` |
-| Multi Dropdown | `MultiDropdownCreate` |
-| Color Picker | `ColorPickerCreate` |
-| Color Gradient | `ColorGradientCreate` |
-| Input | `InputCreate` |
-| Number Input | `NumberInputCreate` |
-| Search | `SearchCreate` |
-| Keybind | `KeybindCreate` |
-| Hotkey | `HotkeyCreate` |
-| Checkbox | `CheckboxCreate` |
-| Radio Group | `RadioGroupCreate` |
-| Multi Toggle | `MultiToggleCreate` |
-| Range Slider | `RangeSliderCreate` |
-| Progress | `ProgressCreate` |
-| Label | `LabelCreate` |
-| Paragraph | `ParagraphCreate` |
-| Divider | `DividerCreate` |
-| Image | `ImageCreate` |
-| Image Toggle | `ImageToggleCreate` |
-| Image Dropdown | `ImageDropdownCreate` |
-| Status | `StatusCreate` |
-| Accordion | `AccordionCreate` |
-| Keybind List | `KeybindListCreate` |
-| Spacer | `SpacerCreate` |
-| Custom | `CustomCreate` |
+```lua
+local settingsTab = ui:TabCreate({
+    Name = "Settings",
+    Icon = "settings"
+})
+
+local general = settingsTab:SectionCreate({
+    Name = "General",
+    Side = "Left"
+})
+
+local settingsToggle = general:ToggleCreate({
+    Name = "Enable Notifications",
+    Default = true
+})
+
+local settingsSlider = general:SliderCreate({
+    Name = "UI Scale",
+    Min = 0.5,
+    Max = 2,
+    Default = 1
+})
+```
+
+You can connect settings to your own script logic:
+
+```lua
+settingsToggle:OnChanged(function(value)
+    print("Notifications:", value)
+end)
+
+settingsSlider:OnChanged(function(value)
+    print("UI Scale:", value)
+end)
+```
 
 ## Component Methods
 
-Components return an object that can be controlled through additional methods.
+Components provide methods for controlling their behavior:
+
+| Method | Description |
+|---|---|
+| `:OnChanged(callback)` | Detect value changes |
+| `:OnClick(callback)` | Handle button clicks |
+| `:Get()` | Get the current value |
+| `:Set(value)` | Change the component value |
+| `:SetVisible(boolean)` | Show or hide a component |
+| `:SetDisabled(boolean)` | Enable or disable interaction |
+| `:Destroy()` | Remove the component |
+
+Example:
 
 ```lua
-local Toggle = Section:ToggleCreate({
-    Name = "Example",
-    Default = false
-})
+settingsToggle:Set(false)
+
+print(settingsToggle:Get())
+
+settingsToggle:SetVisible(true)
 ```
 
-Available methods:
+## Configurations
 
-- `:OnChanged(function(value))` — Detects value changes.
-- `:OnClick(function())` — Detects clicks.
-- `:Get()` — Returns the current value.
-- `:Set(value)` — Changes the current value.
-- `:SetVisible(boolean)` — Shows or hides the component.
-- `:SetDisabled(boolean)` — Enables or disables interaction.
-- `:Destroy()` — Removes the component.
+Onrusha includes configuration tools for saving, exporting and importing settings.
+
+### Save a Configuration
+
+```lua
+local success, err = ui.Configs:Create("MyConfig")
+
+if success then
+    print("Configuration saved!")
+else
+    warn(err)
+end
+```
+
+### Export a Configuration
+
+```lua
+local json, err = ui.Configs:Export("MyConfig")
+
+if json then
+    print(json)
+end
+```
+
+### Import a Configuration
+
+```lua
+local success, err = ui.Configs:Import(json, "MyConfig")
+
+if success then
+    print("Configuration imported!")
+else
+    warn(err)
+end
+```
+
+**Note:** Configurations created with `Configs:Create()` are stored in memory for the current UI session. For permanent storage, your script needs its own storage system.
 
 ## Themes
 
-You can change the interface theme at any time.
+Onrusha supports customizable themes and interface appearance.
+
+You can change the active theme:
 
 ```lua
-Window:SetTheme("Midnight")
+ui:SetTheme("Matcha")
 ```
 
-Some available themes include:
-
-- Midnight
-- Graphite
-- Ocean
-- Purple
-- Emerald
-- Crimson
-- Rose
-- Amber
-- Light
-- Minimal
-- Dracula
-- Aurora
-- Sakura
-- Matcha
-- Mocha
-- Neon Tokyo
-- Carbon
-- Terminal
-- And many more.
-
-You can also create custom themes using `CreateTheme()`.
-
-## Additional Features
-
-Onrusha also provides several additional functions:
+You can also create custom themes:
 
 ```lua
-Window:SetScale(0.9)
-Window:SetToggleKey(Enum.KeyCode.RightControl)
-Window:SetDraggable(true)
-Window:SetPosition(UDim2.fromScale(0.5, 0.5))
-Window:Center()
-Window:SetUIShadow(true)
-```
-
-### Notifications
-
-```lua
-Window:Notify({
-    Title = "Success",
-    Description = "Your action was completed.",
-    Type = "Success",
-    Duration = 3
+ui:CreateTheme("MyTheme", {
+    -- Custom theme properties
 })
 ```
 
-Available notification types: `Info`, `Success`, `Warning`, `Error`.
+## Shader Presets
 
-### Shader Presets
-
-You can apply built-in visual presets:
+Onrusha includes shader preset tools for managing visual effects.
 
 ```lua
-Window:ApplyShaderPreset("Cinematic")
+local presets = ui:GetShaderPresets()
+
+print(presets)
 ```
 
-Available presets include Clean, Cinematic, Vibrant, Dream, Golden Hour, Cyberpunk, Noir, Soft Pastel and Classic Roblox.
-
-### Configurations
-
-Onrusha includes configuration management:
+Get the shader controller:
 
 ```lua
-Window:CreateConfig("MyConfig")
-Window:SaveConfig("MyConfig")
-Window:LoadConfig("MyConfig")
+local shader = ui:GetShader()
 ```
 
-You can also use:
+Apply a preset:
 
-- `Window:ListConfigs()`
-- `Window:DeleteConfig(name)`
-- `Window:RenameConfig(oldName, newName)`
-- `Window:DuplicateConfig(name, copyName)`
-- `Window:ExportConfig(name)`
-- `Window:ImportConfig(json, name)`
+```lua
+ui:ApplyShaderPreset("PresetName")
+```
+
+## Notifications
+
+Display notifications directly through the library:
+
+```lua
+ui:Notify({
+    Title = "Onrusha",
+    Description = "Settings saved successfully!",
+    Type = "Success"
+})
+```
+
+## Window Controls
+
+You can control the interface programmatically:
+
+```lua
+ui:SetToggleKey(Enum.KeyCode.RightShift)
+ui:SetScale(1.1)
+ui:SetDraggable(true)
+ui:SetAnimationsEnabled(true)
+ui:SetAnimationSpeed(1)
+ui:Center()
+```
 
 ## Complete Example
-
-A simple example combining several components:
 
 ```lua
 local library = loadstring(game:HttpGet("https://raw.githubusercontent.com/Andreusha1/OnrushaHub/refs/heads/main/script"))()
 
-local Window = library.Create({
+local ui = library.Create({
     Name = "My Hub",
     Subtitle = "Powered by Onrusha",
-    Theme = "Graphite",
+    Theme = "Matcha",
+    Scale = 1,
     ToggleKey = Enum.KeyCode.RightShift,
+    Draggable = true,
+    MobileSupport = true,
+    Blur = true,
     Open = true
 })
 
-local Main = Window:TabCreate({
+local mainTab = ui:TabCreate({
     Name = "Main",
-    Icon = "home"
+    Icon = "house"
 })
 
-local Settings = Main:SectionCreate({
-    Name = "Settings",
+local section = mainTab:SectionCreate({
+    Name = "Main Features",
     Side = "Left"
 })
 
-Settings:ToggleCreate({
-    Name = "Example Toggle",
+local toggle = section:ToggleCreate({
+    Name = "Enable Feature",
     Default = false
-}):OnChanged(function(value)
-    print("Toggle:", value)
+})
+
+toggle:OnChanged(function(value)
+    print("Feature enabled:", value)
 end)
 
-Settings:ButtonCreate({
-    Name = "Example Button",
-    ButtonText = "Click Me"
+section:ButtonCreate({
+    Name = "Test Notification",
+    ButtonText = "Notify"
 }):OnClick(function()
-    Window:Notify({
-        Title = "Hello",
-        Description = "Everything is working!",
+    ui:Notify({
+        Title = "My Hub",
+        Description = "Hello from Onrusha!",
         Type = "Success"
     })
-end)
-
-Settings:SliderCreate({
-    Name = "Speed",
-    Min = 1,
-    Max = 100,
-    Default = 16
-}):OnChanged(function(value)
-    print("Speed:", value)
-end)
-
-Settings:DropdownCreate({
-    Name = "Mode",
-    Options = {"Normal", "Fast", "Extreme"},
-    Default = "Normal"
-}):OnChanged(function(value)
-    print("Mode:", value)
 end)
 ```
 
 ---
 
-**Onrusha UI Library**
+## Links
 
-GitHub: https://github.com/Andreusha1/OnrushaHub
+- **GitHub:** https://github.com/Andreusha1/OnrushaHub
+- **Developer:** Andreusha / Onrusha
+- - **Discord:** - https://discord.gg/U3Kmsah8QC
+- **Library:** Onrusha UI
+
+**Onrusha UI — Build your interface your way.**
