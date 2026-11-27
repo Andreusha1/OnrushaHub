@@ -7,7 +7,7 @@ The UI must run on the Roblox client because it uses Players.LocalPlayer.
 local uiEvent = "None"
 local OnrushaConfig = {
     Defaults = {
-        SeasonalUI = "None",
+        SeasonalUI = "Halloween",
         LoadingScreen = true,
         LoadingDuration = 1.65,
         UIShadow = true,
@@ -1624,7 +1624,7 @@ __onrusha_modules["Core/Window"] = function()
 		if existing then return existing end
 		ctx._tabCounter += 1
 		local tabIconAssets = {
-			settings = "rbxassetid://99693638647659",
+			settings = "rbxassetid://1204397029",
 			binds = "rbxassetid://5147695474", plugins = "rbxassetid://5147695474", bindings = "rbxassetid://5147695474", bindsandplugins = "rbxassetid://5147695474",
 			aliases = "rbxassetid://5147488658", editaliases = "rbxassetid://5147488658",
 			keybinds = "rbxassetid://129697930", editkeybinds = "rbxassetid://129697930",
@@ -5878,7 +5878,7 @@ __onrusha_modules["Core/Window"] = function()
 		ui:SetScale(ctx._scale)
         ctx.PlayOnrushaLoading = function()
             if options.LoadingScreen == false or ctx._settings.ReducedMotion then
-                if ctx._keyGateEnabled then ui.IsOpen = false; window.Visible = false else ui:SetOpen(options.Open ~= false) end
+                if ctx._keyGateEnabled and not ctx._keyUnlocked then ui.IsOpen = false; window.Visible = false else ui:SetOpen(options.Open ~= false) end
                 return
             end
             local duration = math.clamp(tonumber(options.LoadingDuration) or 1.55, 1.05, 2.8)
@@ -5973,7 +5973,7 @@ __onrusha_modules["Core/Window"] = function()
             task.wait(0.26)
             if overlay.Parent then overlay:Destroy() end
             if ctx._destroyed then return end
-            if ctx._keyGateEnabled then ui.IsOpen = false; window.Visible = false else ui:SetOpen(options.Open ~= false) end
+            if ctx._keyGateEnabled and not ctx._keyUnlocked then ui.IsOpen = false; window.Visible = false else ui:SetOpen(options.Open ~= false) end
         end
         Window._activeUI = ui
         task.spawn(ctx.PlayOnrushaLoading)
@@ -6697,7 +6697,7 @@ __onrusha_modules["Components/Controls"] = function()
 			end
 			local settingsGear = self._settingsButton:FindFirstChild("SettingsGear")
 			if not settingsGear then
-				settingsGear = make("ImageLabel", { Name = "SettingsGear", AnchorPoint = Vector2.new(0.5, 0.5), Position = UDim2.fromScale(0.5, 0.5), Size = UDim2.fromOffset(12, 12), BackgroundTransparency = 1, BorderSizePixel = 0, Image = "rbxassetid://99693638647659", ImageColor3 = ctx.Theme:Get().SecondaryText, ScaleType = Enum.ScaleType.Fit, ZIndex = 17 }, self._settingsButton)
+				settingsGear = make("ImageLabel", { Name = "SettingsGear", AnchorPoint = Vector2.new(0.5, 0.5), Position = UDim2.fromScale(0.5, 0.5), Size = UDim2.fromOffset(12, 12), BackgroundTransparency = 1, BorderSizePixel = 0, Image = "rbxassetid://1204397029", ImageColor3 = ctx.Theme:Get().SecondaryText, ScaleType = Enum.ScaleType.Fit, ZIndex = 17 }, self._settingsButton)
 				ctx.Theme:Bind(settingsGear, { ImageColor3 = "SecondaryText" })
 				self._maid:Add(self._settingsButton.MouseEnter:Connect(function() play(ctx, settingsGear, 0.12, { ImageColor3 = ctx.Theme:Get().Accent }) end))
 				self._maid:Add(self._settingsButton.MouseLeave:Connect(function() play(ctx, settingsGear, 0.12, { ImageColor3 = ctx.Theme:Get().SecondaryText }) end))
